@@ -1,0 +1,3 @@
+[submodule "app/src/main/jni/serval-dna"]
+	path = app/src/main/jni/serval-dna
+	url = https://github.com/servalproject/serval-dna.git
