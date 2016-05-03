@@ -61,7 +61,6 @@ public class ServalD implements IJniServer
 	private final Context context;
 	private final ServerControl server;
 	private ChannelSelector selector;
-	private KeyringIdentity identity = null;
 
 	private static ServalD instance;
 
@@ -85,17 +84,12 @@ public class ServalD implements IJniServer
 		return instance;
 	}
 
-	public synchronized KeyringIdentity getIdentity() throws ServalDInterfaceException, IOException {
-		if (identity==null){
-			KeyringIdentityList list = server.getRestfulClient().keyringListIdentities(null);
-			identity = list.nextIdentity();
-		}
-		return identity;
+	public KeyringIdentityList getIdentities(String pin) throws ServalDInterfaceException, IOException {
+		return server.getRestfulClient().keyringListIdentities(pin);
 	}
 
-	public synchronized KeyringIdentity setIdentityDetails(KeyringIdentity identity, String did, String name) throws ServalDInterfaceException, IOException {
-		this.identity = server.getRestfulClient().keyringSetDidName(identity.sid, did, name, null);
-		return this.identity;
+	public KeyringIdentity setIdentityDetails(KeyringIdentity identity, String did, String name, String pin) throws ServalDInterfaceException, IOException {
+		return server.getRestfulClient().keyringSetDidName(identity.sid, did, name, pin);
 	}
 
 	public MdpServiceLookup getMdpServiceLookup(AsyncResult<MdpServiceLookup.ServiceResult> results) throws ServalDInterfaceException, IOException {

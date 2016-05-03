@@ -9,12 +9,12 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <!-- Built in wifi control -->
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
 
     <!-- Bluetooth transport -->
-    <uses-permission android:name="android.permission.BLUETOOTH" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
 
     <!--
  Custom phone book integration
@@ -52,7 +52,7 @@
 
 
         <receiver
-            android:name=".networking.WifiNetworkChanges"
+            android:name="org.servalproject.networking.WifiNetworkChanges"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
@@ -64,7 +64,7 @@
             </intent-filter>
         </receiver>
         <receiver
-            android:name=".networking.BluetoothNetworkChanges"
+            android:name="org.servalproject.networking.BluetoothNetworkChanges"
             android:enabled="true"
             android:exported="true">
             <intent-filter>

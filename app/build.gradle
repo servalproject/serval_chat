@@ -11,7 +11,7 @@ def computeVersionCode() {
 }
 
 def readPassword(String fmt) {
-    if (System.console()==null)
+    if (System.console() == null)
         return null;
     return new String(System.console().readPassword(fmt));
 }
@@ -56,18 +56,18 @@ android {
     }
 
     // built in ndk support isn't quite ready for what we need, call the old make based ndk-build
-    sourceSets.main{
+    sourceSets.main {
         java.srcDirs += 'src/main/jni/serval-dna/java'
         jni.srcDirs = [] // prevent autogen of Android.mk
         jniLibs.srcDirs = ['src/main/libs'] // ndk-build output
     }
 
-    task ndkBuild(type: Exec){
+    task ndkBuild(type: Exec) {
         def ndkDir = android.ndkDirectory
         commandLine "$ndkDir/ndk-build", '-C', file('src/main/jni').absolutePath, '-j', Runtime.runtime.availableProcessors()
     }
 
-    task ndkClean(type: Exec){
+    task ndkClean(type: Exec) {
         def ndkDir = android.ndkDirectory
         commandLine "$ndkDir/ndk-build", '-C', file('src/main/jni').absolutePath, 'clean'
     }
@@ -84,5 +84,10 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.1.1'
+    compile 'com.android.support:design:23.1.1'
+    compile 'com.android.support:support-v4:23.1.1'
+    compile 'com.android.support:recyclerview-v7:23.1.1'
 }
+
+
 

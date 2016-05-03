@@ -1,4 +1,4 @@
-package org.servalproject.servalchat.networking;
+package org.servalproject.networking;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

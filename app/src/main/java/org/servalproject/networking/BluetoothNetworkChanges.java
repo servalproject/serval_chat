@@ -1,4 +1,4 @@
-package org.servalproject.servalchat.networking;
+package org.servalproject.networking;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
