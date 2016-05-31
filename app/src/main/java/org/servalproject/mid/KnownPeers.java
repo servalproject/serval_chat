@@ -10,6 +10,7 @@ import org.servalproject.servaldna.ServalDCommand;
 import org.servalproject.servaldna.SubscriberId;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,17 +24,29 @@ public class KnownPeers {
 	private MdpRoutingChanges routingChanges;
 	private final Serval serval;
 	private final Map<SubscriberId, Peer> peers = new HashMap<SubscriberId, Peer>();
-	public final ListObserverSet<Peer> observers;
+	private int reachableCount=0;
+	public final ListObserverSet<Peer> peerListObservers;
+	public final ObserverSet<KnownPeers> observers;
 
 	KnownPeers(Serval serval){
 		this.serval = serval;
-		observers = new ListObserverSet<>(serval.uiHandler);
+		peerListObservers = new ListObserverSet<>(serval.uiHandler);
+		observers = new ObserverSet<>(serval.uiHandler, this);
+	}
+
+	public int getReachableCount(){
+		return reachableCount;
+	}
+
+	public Collection<Peer> getKnownPeers(){
+		return peers.values();
 	}
 
 	private final AsyncResult<ServalDCommand.LookupResult> dnaResults = new AsyncResult<ServalDCommand.LookupResult>() {
 		@Override
 		public void result(ServalDCommand.LookupResult nextResult) {
-			getPeer(nextResult.subscriberId).update(nextResult);
+			Peer p = getPeer(nextResult.subscriberId);
+			p.update(nextResult);
 		}
 	};
 
@@ -49,7 +62,7 @@ public class KnownPeers {
 			p = new Peer(serval.uiHandler, sid);
 			peers.put(sid, p);
 		}
-		observers.onAdd(p);
+		peerListObservers.onAdd(p);
 		return p;
 	}
 
@@ -59,7 +72,16 @@ public class KnownPeers {
 			if (nextResult.isSelf())
 				return;
 			Peer p = getPeer(nextResult.sid);
+			boolean wasReachable = p.isReachable();
 			p.update(nextResult);
+			boolean nowReachable = p.isReachable();
+			if (nowReachable != wasReachable){
+				if (nowReachable)
+					reachableCount++;
+				else
+					reachableCount--;
+				observers.onUpdate();
+			}
 			if (p.isReachable() && p.lookup==null)
 				requestRefresh(p);
 		}

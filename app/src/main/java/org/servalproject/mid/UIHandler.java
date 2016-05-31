@@ -18,16 +18,16 @@ public class UIHandler extends Handler {
         Object c = msg.obj;
         if (c!=null && c instanceof UIMessage<?>){
             UIMessage<?> m = (UIMessage<?>)c;
-            m.handleMessage();
+            m.handleMessage(msg);
             return;
         }
         super.dispatchMessage(msg);
     }
 
-    public <T> void sendMessage(MessageHandler<T> h, T obj){
+    public <T> void sendMessage(MessageHandler<T> h, T obj, int what){
         // TODO reuse UIMessage instances?
         UIMessage<T> m = new UIMessage<>(h, obj);
-        Message msg = obtainMessage(0, m);
+        Message msg = obtainMessage(what, m);
         sendMessage(msg);
     }
 
@@ -38,12 +38,12 @@ public class UIHandler extends Handler {
             this.handler = handler;
             this.obj = obj;
         }
-        void handleMessage(){
-            handler.handleMessage(obj);
+        void handleMessage(Message msg){
+            handler.handleMessage(obj, msg.what);
         }
     }
 
     public interface MessageHandler<T>{
-        void handleMessage(T obj);
+        void handleMessage(T obj, int what);
     }
 }

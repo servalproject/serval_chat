@@ -26,7 +26,7 @@ public class Server extends BroadcastReceiver implements IJniServer, Runnable {
 
 		PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
 		cpuLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Services");
-		observers = new ObserverSet<>(this);
+		observers = new ObserverSet<>(serval.uiHandler, this);
 	}
 
 	/*
@@ -167,5 +167,14 @@ public class Server extends BroadcastReceiver implements IJniServer, Runnable {
 					android.os.Process.sendSignal(serverTid, SIGIO);
 			}
 		}
+	}
+
+	@Override
+	public String toString() {
+		return "Server{" +
+				"serverTid=" + serverTid +
+				", mdpPort=" + mdpPort +
+				", httpPort=" + httpPort +
+				'}';
 	}
 }

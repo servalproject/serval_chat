@@ -13,9 +13,13 @@ import org.servalproject.servaldna.SubscriberId;
 public final class Peer {
 	private static final String TAG ="Peer";
 
+	private static long nextId=0;
+	private final long id;
+
 	Peer(Handler handler, SubscriberId sid){
 		this.sid = sid;
 		observers = new ObserverSet<>(handler, this);
+		id = nextId++;
 	}
 
 	public final ObserverSet<Peer> observers;
@@ -44,5 +48,10 @@ public final class Peer {
 		link = route.isReachable() ? route : null;
 		Log.v(TAG, "Updated route "+route.toString());
 		observers.onUpdate();
+	}
+
+	public long getId() {
+		// return a stable id, for UI list binding.
+		return id;
 	}
 }
