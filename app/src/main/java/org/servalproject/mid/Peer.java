@@ -10,7 +10,7 @@ import org.servalproject.servaldna.SubscriberId;
 /**
  * Created by jeremy on 4/05/16.
  */
-public final class Peer {
+public final class Peer implements Comparable<Peer>{
 	private static final String TAG ="Peer";
 
 	private static long nextId=0;
@@ -53,5 +53,28 @@ public final class Peer {
 	public long getId() {
 		// return a stable id, for UI list binding.
 		return id;
+	}
+
+	@Override
+	public String toString() {
+		return "Peer{" +
+				"sid=" + sid +
+				", lookup=" + lookup +
+				", link=" + link +
+				'}';
+	}
+
+	public String displayName(){
+		String n = getName();
+		if (n==null || "".equals(n))
+			n = getDid();
+		if (n==null || "".equals(n))
+			n = sid.abbreviation();
+		return n;
+	}
+
+	@Override
+	public int compareTo(Peer another) {
+		return this.displayName().compareTo(another.displayName());
 	}
 }

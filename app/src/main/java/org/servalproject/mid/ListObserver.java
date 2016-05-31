@@ -6,4 +6,5 @@ package org.servalproject.mid;
 public interface ListObserver<T> {
     void added(T obj);
     void removed(T obj);
+    void updated(T obj);
 }

@@ -13,6 +13,7 @@ public class ListObserverSet<T> implements UIHandler.MessageHandler<T> {
 
     private static final int ADD=1;
     private static final int REMOVE=2;
+    private static final int UPDATE=3;
 
     private final UIHandler uiHandler;
     ListObserverSet(UIHandler uiHandler){
@@ -37,6 +38,11 @@ public class ListObserverSet<T> implements UIHandler.MessageHandler<T> {
             return;
         uiHandler.sendMessage(this, t, REMOVE);
     }
+    void onUpdate(T t){
+        if (observers.isEmpty())
+            return;
+        uiHandler.sendMessage(this, t, UPDATE);
+    }
 
     @Override
     public void handleMessage(T obj, int what) {
@@ -46,6 +52,7 @@ public class ListObserverSet<T> implements UIHandler.MessageHandler<T> {
             switch (what){
                 case ADD: observer.added(obj); break;
                 case REMOVE: observer.removed(obj); break;
+                case UPDATE: observer.updated(obj); break;
             }
         }
     }

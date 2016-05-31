@@ -10,8 +10,10 @@ import org.servalproject.servaldna.ServalDCommand;
 import org.servalproject.servaldna.SubscriberId;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -47,6 +49,7 @@ public class KnownPeers {
 		public void result(ServalDCommand.LookupResult nextResult) {
 			Peer p = getPeer(nextResult.subscriberId);
 			p.update(nextResult);
+			peerListObservers.onUpdate(p);
 		}
 	};
 
@@ -74,6 +77,7 @@ public class KnownPeers {
 			Peer p = getPeer(nextResult.sid);
 			boolean wasReachable = p.isReachable();
 			p.update(nextResult);
+			peerListObservers.onUpdate(p);
 			boolean nowReachable = p.isReachable();
 			if (nowReachable != wasReachable){
 				if (nowReachable)
