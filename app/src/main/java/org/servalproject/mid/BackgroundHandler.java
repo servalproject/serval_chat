@@ -32,10 +32,7 @@ class BackgroundHandler extends Handler {
 				break;
 
 			case Serval.SERVER_UP:
-				serval.knownPeers.onStart();
-				serval.rhizome.onStart();
-				// TODO trigger other startup here
-				serval.server.onStart();
+				serval.onServerStarted();
 				break;
 
 			case Serval.CPU_LOCK:

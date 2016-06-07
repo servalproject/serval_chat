@@ -11,6 +11,7 @@ import android.os.SystemClock;
 import android.util.Log;
 
 import org.servalproject.servaldna.IJniServer;
+import org.servalproject.servaldna.ServalDClient;
 import org.servalproject.servaldna.ServalDCommand;
 
 /**

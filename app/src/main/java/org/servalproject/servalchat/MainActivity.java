@@ -37,6 +37,8 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public Fragment getItem(int position) {
             switch (position){
+                case 0:
+                    return new IdentityList();
                 case 3:
                     return new PeerList();
             }

@@ -5,4 +5,6 @@
     <string name="feed">Feed</string>
     <string name="requests">Requests</string>
     <string name="blocked">Blocked</string>
+    <string name="no_name">[Name]</string>
+    <string name="no_number">[Number]</string>
 </resources>
