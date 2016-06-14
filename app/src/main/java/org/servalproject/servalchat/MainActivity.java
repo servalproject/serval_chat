@@ -1,72 +1,79 @@
 package org.servalproject.servalchat;
 
-import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v7.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String TAG = "MainActivity";
+    private Navigator navigator;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        PageAdapter adapter = new PageAdapter(getSupportFragmentManager());
-        ViewPager pager = (ViewPager)findViewById(R.id.pager);
-        pager.setAdapter(adapter);
-
-        TabLayout tabs = (TabLayout)findViewById(R.id.sliding_tabs);
-        tabs.setupWithViewPager(pager);
-
+        navigator = Navigator.getNavigator(this);
+        Intent i = getIntent();
+        if (i!=null)
+            navigator.gotoIntent(i);
     }
 
-    private class PageAdapter extends FragmentPagerAdapter{
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        navigator.gotoIntent(intent);
+    }
 
-        public PageAdapter(FragmentManager fm) {
-            super(fm);
-        }
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+    }
 
-        @Override
-        public Fragment getItem(int position) {
-            switch (position){
-                case 0:
-                    return new IdentityList();
-                case 3:
-                    return new PeerList();
-            }
-            Placeholder p = new Placeholder();
-            p.label = getPageTitle(position);
-            return p;
-        }
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+    }
 
-        @Override
-        public int getCount() {
-            return 5;
-        }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        navigator.setActivity(null);
+        navigator = null;
+    }
 
-        @Override
-        public CharSequence getPageTitle(int position) {
-            switch (position){
-                case 0:
-                    return getString(R.string.my_details);
-                case 1:
-                    return getString(R.string.feed);
-                case 2:
-                    return getString(R.string.requests);
-                case 3:
-                    return getString(R.string.peer_list);
-                case 4:
-                    return getString(R.string.blocked);
-            }
-            return super.getPageTitle(position);
-        }
+    @Override
+    public void onBackPressed() {
+        if (!navigator.goBack())
+            super.onBackPressed();
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        // TODO
+        return super.onSupportNavigateUp();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        navigator.onStop();
+    }
+
+    @Override
+    protected void onStart() {
+        navigator.onStart();
+        super.onStart();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        navigator.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        navigator.onResume();
     }
 }

@@ -52,7 +52,18 @@ public class Identities {
     }
 
     public void selectIdentity(Identity id){
+        if (id==null)
+            throw new NullPointerException();
+        if (id == selected)
+            return;
+        if (selected!=null)
+            listObservers.onUpdate(selected);
         selected = id;
+        listObservers.onUpdate(id);
+    }
+
+    public Identity getSelected(){
+        return selected;
     }
 
     public void updateIdentity(final Identity id, final String did, final String name, final String pin){
@@ -61,6 +72,19 @@ public class Identities {
             public void run() {
                 try{
                     addId(serval.getResultClient().keyringSetDidName(id.sid, did, name, pin));
+                } catch (Exception e) {
+                    throw new IllegalStateException(e);
+                }
+            }
+        });
+    }
+
+    public void addIdentity(final String did, final String name, final String pin){
+        serval.runOnThreadPool(new Runnable() {
+            @Override
+            public void run() {
+                try{
+                    addId(serval.getResultClient().keyringAdd(did, name, pin));
                 } catch (Exception e) {
                     throw new IllegalStateException(e);
                 }

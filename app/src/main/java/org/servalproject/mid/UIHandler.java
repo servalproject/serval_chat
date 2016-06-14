@@ -25,10 +25,15 @@ public class UIHandler extends Handler {
     }
 
     public <T> void sendMessage(MessageHandler<T> h, T obj, int what){
-        // TODO reuse UIMessage instances?
-        UIMessage<T> m = new UIMessage<>(h, obj);
-        Message msg = obtainMessage(what, m);
-        sendMessage(msg);
+        if (Thread.currentThread() == this.getLooper().getThread()){
+            // call immediately if already in the right thread
+            h.handleMessage(obj, what);
+        }else {
+            // TODO reuse UIMessage instances?
+            UIMessage<T> m = new UIMessage<>(h, obj);
+            Message msg = obtainMessage(what, m);
+            sendMessage(msg);
+        }
     }
 
     private class UIMessage<T>{

@@ -40,8 +40,13 @@ public class KnownPeers {
 		return reachableCount;
 	}
 
-	public Collection<Peer> getKnownPeers(){
-		return peers.values();
+	public List<Peer> getReachablePeers(){
+		List<Peer> list = new ArrayList<>();
+		for(Peer p:peers.values()){
+			if (p.isReachable())
+				list.add(p);
+		}
+		return list;
 	}
 
 	private final AsyncResult<ServalDCommand.LookupResult> dnaResults = new AsyncResult<ServalDCommand.LookupResult>() {

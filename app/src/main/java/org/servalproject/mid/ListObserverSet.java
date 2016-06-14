@@ -14,31 +14,37 @@ public class ListObserverSet<T> implements UIHandler.MessageHandler<T> {
     private static final int ADD=1;
     private static final int REMOVE=2;
     private static final int UPDATE=3;
+    private int generation=0;
 
     private final UIHandler uiHandler;
     ListObserverSet(UIHandler uiHandler){
         this.uiHandler = uiHandler;
     }
 
-    public void add(ListObserver<T> observer){
+    public int add(ListObserver<T> observer){
         observers.add(observer);
+        return generation;
     }
 
-    public void remove(ListObserver<T> observer){
+    public int remove(ListObserver<T> observer){
         observers.remove(observer);
+        return generation;
     }
 
     void onAdd(T t){
+        generation++;
         if (observers.isEmpty())
             return;
         uiHandler.sendMessage(this, t, ADD);
     }
     void onRemove(T t){
+        generation++;
         if (observers.isEmpty())
             return;
         uiHandler.sendMessage(this, t, REMOVE);
     }
     void onUpdate(T t){
+        generation++;
         if (observers.isEmpty())
             return;
         uiHandler.sendMessage(this, t, UPDATE);

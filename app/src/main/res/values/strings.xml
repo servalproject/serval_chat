@@ -7,4 +7,8 @@
     <string name="blocked">Blocked</string>
     <string name="no_name">[Name]</string>
     <string name="no_number">[Number]</string>
+    <string name="name_label">Name</string>
+    <string name="number_label">Phone Number</string>
+    <string name="email_label">Email Address</string>
+    <string name="identity_update">Update</string>
 </resources>
