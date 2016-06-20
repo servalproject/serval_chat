@@ -9,7 +9,7 @@ public class IdentityDetailsScreen extends Navigation {
     public final Identity id;
 
     public IdentityDetailsScreen(Identity id) {
-        super("IdentityDetails", R.layout.identity_details, Navigation.Identity);
+        super("IdentityDetails", R.string.identity_details, R.layout.identity_details, Navigation.Identity);
         this.id = id;
     }
 

@@ -2,8 +2,6 @@ package org.servalproject.servalchat;
 
 import android.content.Context;
 
-import java.util.List;
-
 /**
  * Created by jeremy on 14/06/16.
  */
@@ -23,17 +21,15 @@ public class Navigation {
         this.name = name;
     }
 
-    public Navigation(String name, int layoutResource){
-        this(name, -1, layoutResource, null, null);
+    public Navigation(String name, int titleResource, int layoutResource){
+        this(name, titleResource, layoutResource, null, null);
     }
 
-    public Navigation(String name, int layoutResource, Navigation parent){
-        this(name, -1, layoutResource, parent, null);
+    public Navigation(String name, int titleResource, int layoutResource, Navigation parent){
+        this(name, titleResource, layoutResource, parent, null);
     }
 
     public CharSequence getTitle(Context context){
-        if (titleResource<=0)
-            return name;
         return context.getString(titleResource);
     }
 
@@ -56,7 +52,7 @@ public class Navigation {
         return result;
     }
 
-    public static final Navigation Home = new Navigation("Home", R.layout.activity_main);
+    public static final Navigation Home = new Navigation("Home", R.string.app_name, R.layout.home_tabs);
     public static final Navigation Identity = new Navigation("Identity", R.string.my_details, R.layout.identity_list, null, Home);
     public static final Navigation PeerList = new Navigation("PeerList", R.string.peer_list, R.layout.peer_list, null, Home);
 

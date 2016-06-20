@@ -30,16 +30,19 @@ public class HomeTabStrip extends LinearLayout implements IContainerView {
 
     @Override
     public void removeView(Navigation n) {
-        // Noop
+        // Noop, handled by viewpager
     }
 
     @Override
     public IContainerView addView(LayoutInflater inflater, Navigation n) {
-        int i = adapter.screens.indexOf(n);
-        if (i<0)
-            throw new IllegalStateException();
-        if (pager.getCurrentItem()!=i)
-            pager.setCurrentItem(i);
-        return null;
+        for(int i=0;i<adapter.screens.length;i++){
+            Navigation screen = adapter.screens[i];
+            if (screen.equals(n)){
+                if (pager.getCurrentItem()!=i)
+                    pager.setCurrentItem(i);
+                return null;
+            }
+        }
+        throw new IllegalStateException();
     }
 }

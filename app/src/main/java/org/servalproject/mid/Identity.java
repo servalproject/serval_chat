@@ -13,23 +13,31 @@ import org.servalproject.servaldna.keyring.KeyringIdentity;
 public class Identity {
     public final SubscriberId sid;
     public final ObserverSet<Identity> observers;
-    private KeyringIdentity id;
+    private KeyringIdentity identity;
+
+    private static long nextId=0;
+    private final long id;
 
     public Identity(Handler handler, SubscriberId sid){
         this.sid = sid;
         observers = new ObserverSet<>(handler, this);
+        id = nextId++;
     }
 
     public void update(KeyringIdentity id){
-        this.id = id;
+        this.identity = id;
         observers.onUpdate();
     }
 
     public String getName(Context c) {
-        return id==null || id.name==null ? c.getString(R.string.no_name) : id.name;
+        return identity==null || identity.name==null ? c.getString(R.string.no_name) : identity.name;
     }
 
     public String getDid(Context c) {
-        return id==null || id.did == null ? c.getString(R.string.no_number) : id.did;
+        return identity==null || identity.did == null ? c.getString(R.string.no_number) : identity.did;
+    }
+
+    public long getId() {
+        return id;
     }
 }

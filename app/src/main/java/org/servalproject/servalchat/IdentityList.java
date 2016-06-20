@@ -6,7 +6,6 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,21 +14,23 @@ import android.widget.TextView;
 import org.servalproject.mid.Identity;
 import org.servalproject.mid.Serval;
 
+import java.util.List;
+
 /**
  * Created by jeremy on 1/06/16.
  */
-public class IdentityList extends RecyclerView
-        implements ObservedListAdapter.Binder<Identity,IdentityList.IdentityHolder> {
+public class IdentityList extends ObservedRecyclerView<Identity, IdentityList.IdentityHolder> {
     private Serval serval;
-    private Navigator navigator;
-    private ObservedListAdapter<Identity, IdentityHolder> adapter;
     private static final String TAG = "IdentityList";
+    private Navigator navigator;
+    private final List<Identity> identities;
 
     public IdentityList(Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
+        super(Serval.getInstance().identities.listObservers, context, attrs);
         serval = Serval.getInstance();
+        identities = serval.identities.getIdentities();
         navigator = Navigator.getNavigator();
-        adapter = new ObservedListAdapter<>(serval.identities.listObservers, this, serval.identities.getIdentities());
+        listAdapter.setHasStableIds(true);
     }
 
     @Override
@@ -37,19 +38,6 @@ public class IdentityList extends RecyclerView
         super.onFinishInflate();
         setHasFixedSize(true);
         setLayoutManager(new LinearLayoutManager(getContext()));
-        setAdapter(adapter);
-    }
-
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        navigator.attachLifecycle(adapter);
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        navigator.detachLifecycle(adapter);
-        super.onDetachedFromWindow();
     }
 
     @Override
@@ -66,8 +54,18 @@ public class IdentityList extends RecyclerView
     }
 
     @Override
+    protected Identity get(int position) {
+        return identities.get(position);
+    }
+
+    @Override
+    protected int getCount() {
+        return identities.size();
+    }
+
+    @Override
     public long getId(Identity item){
-        return 0;
+        return item.getId();
     }
 
     public class IdentityHolder extends RecyclerView.ViewHolder implements View.OnClickListener {

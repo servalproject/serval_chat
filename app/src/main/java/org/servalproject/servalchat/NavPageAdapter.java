@@ -15,33 +15,37 @@ public class NavPageAdapter extends PagerAdapter {
 
     private final Context context;
     private final Navigator navigator;
-    final List<Navigation> screens;
-    private int position=1;
+    final Navigation[] screens;
+    private int position = -1;
+    private final View[] views;
 
     public NavPageAdapter(Context context, Navigator navigator, Navigation... screens) {
         this.context = context;
         this.navigator = navigator;
-        this.screens = Arrays.asList(screens);
+        this.screens = screens;
+        this.views = new View[screens.length];
     }
 
     @Override
     public int getCount() {
-        return screens.size();
+        return screens.length;
     }
 
     @Override
     public Object instantiateItem(ViewGroup container, int position) {
-        Navigation screen = screens.get(position);
-        View view = navigator.inflate(screen);
+        Navigation screen = screens[position];
+        View view = views[position] = navigator.inflate(screen);
         container.addView(view);
-        Navigator.navigated(view, screen);
+        navigator.onAttach(view);
         return view;
     }
 
     @Override
     public void destroyItem(ViewGroup container, int position, Object object) {
         View view = ((View) object);
+        navigator.onDetach(view);
         container.removeView(view);
+        views[position] = null;
     }
 
     @Override
@@ -51,16 +55,20 @@ public class NavPageAdapter extends PagerAdapter {
 
     @Override
     public CharSequence getPageTitle(int position) {
-        return screens.get(position).getTitle(context);
+        return screens[position].getTitle(context);
     }
 
     @Override
     public void setPrimaryItem(ViewGroup container, int position, Object object) {
         super.setPrimaryItem(container, position, object);
-        if (position!=this.position) {
-            this.position = position;
-            Navigation screen = screens.get(position);
-            navigator.gotoView(screen);
-        }
+        if (position == this.position)
+            return;
+
+        if (this.position != -1)
+            navigator.onDeactivate(views[this.position]);
+
+        this.position = position;
+        navigator.onActivate(views[position], screens[position]);
+        navigator.gotoView(screens[position]);
     }
 }
