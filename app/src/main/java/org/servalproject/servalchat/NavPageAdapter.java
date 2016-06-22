@@ -2,16 +2,14 @@ package org.servalproject.servalchat;
 
 import android.content.Context;
 import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.view.View;
 import android.view.ViewGroup;
-
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Created by jeremy on 8/06/16.
  */
-public class NavPageAdapter extends PagerAdapter {
+public class NavPageAdapter extends PagerAdapter implements ViewPager.OnPageChangeListener {
 
     private final Context context;
     private final Navigator navigator;
@@ -48,6 +46,24 @@ public class NavPageAdapter extends PagerAdapter {
         views[position] = null;
     }
 
+    private void pageChanged(int position){
+        if (position == this.position)
+            return;
+
+        if (this.position != -1)
+            navigator.onDeactivate(views[this.position]);
+
+        this.position = position;
+        navigator.onActivate(views[position], screens[position]);
+        navigator.gotoView(screens[position]);
+    }
+
+    @Override
+    public void setPrimaryItem(ViewGroup container, int position, Object object) {
+        super.setPrimaryItem(container, position, object);
+        pageChanged(position);
+    }
+
     @Override
     public boolean isViewFromObject(View view, Object object) {
         return view.equals(object);
@@ -59,16 +75,17 @@ public class NavPageAdapter extends PagerAdapter {
     }
 
     @Override
-    public void setPrimaryItem(ViewGroup container, int position, Object object) {
-        super.setPrimaryItem(container, position, object);
-        if (position == this.position)
-            return;
+    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 
-        if (this.position != -1)
-            navigator.onDeactivate(views[this.position]);
+    }
 
-        this.position = position;
-        navigator.onActivate(views[position], screens[position]);
-        navigator.gotoView(screens[position]);
+    @Override
+    public void onPageSelected(int position) {
+        pageChanged(position);
+    }
+
+    @Override
+    public void onPageScrollStateChanged(int state) {
+
     }
 }

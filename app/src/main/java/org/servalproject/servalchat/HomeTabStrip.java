@@ -24,6 +24,7 @@ public class HomeTabStrip extends LinearLayout implements IContainerView {
         super.onFinishInflate();
         pager = (ViewPager)findViewById(R.id.pager);
         pager.setAdapter(adapter);
+        pager.addOnPageChangeListener(adapter);
         TabLayout tabs = (TabLayout)findViewById(R.id.sliding_tabs);
         tabs.setupWithViewPager(pager);
     }

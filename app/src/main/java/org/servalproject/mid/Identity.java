@@ -1,9 +1,7 @@
 package org.servalproject.mid;
 
-import android.content.Context;
 import android.os.Handler;
 
-import org.servalproject.servalchat.R;
 import org.servalproject.servaldna.SubscriberId;
 import org.servalproject.servaldna.keyring.KeyringIdentity;
 
@@ -20,21 +18,22 @@ public class Identity {
 
     public Identity(Handler handler, SubscriberId sid){
         this.sid = sid;
-        observers = new ObserverSet<>(handler, this);
+        observers = (handler == null) ? null : new ObserverSet<>(handler, this);
         id = nextId++;
     }
 
     public void update(KeyringIdentity id){
         this.identity = id;
-        observers.onUpdate();
+        if (observers != null)
+            observers.onUpdate();
     }
 
-    public String getName(Context c) {
-        return identity==null || identity.name==null ? c.getString(R.string.no_name) : identity.name;
+    public String getName() {
+        return identity==null ? null : identity.name;
     }
 
-    public String getDid(Context c) {
-        return identity==null || identity.did == null ? c.getString(R.string.no_number) : identity.did;
+    public String getDid() {
+        return identity==null ? null : identity.did;
     }
 
     public long getId() {

@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import org.servalproject.mid.ListObserverSet;
 import org.servalproject.mid.Peer;
 import org.servalproject.mid.Serval;
 import org.servalproject.servaldna.SubscriberId;
@@ -28,8 +29,14 @@ public class PeerList extends ObservedRecyclerView<Peer, PeerList.PeerHolder>{
     private static final String TAG = "PeerList";
     private List<Peer> items = new ArrayList<Peer>();
 
+    private static ListObserverSet<Peer> getObserver(){
+        Serval serval = Serval.getInstance();
+        if (serval == null)
+            return null;
+        return serval.knownPeers.peerListObservers;
+    }
     public PeerList(Context context, @Nullable AttributeSet attrs) {
-        super(Serval.getInstance().knownPeers.peerListObservers, context, attrs);
+        super(getObserver(), context, attrs);
         listAdapter.setHasStableIds(true);
         serval = Serval.getInstance();
     }
@@ -83,8 +90,10 @@ public class PeerList extends ObservedRecyclerView<Peer, PeerList.PeerHolder>{
     public void onStart() {
         addedPeers.clear();
         items.clear();
-        for(Peer p:serval.knownPeers.getReachablePeers())
-            add(p);
+        if (serval != null) {
+            for (Peer p : serval.knownPeers.getReachablePeers())
+                add(p);
+        }
         super.onStart();
     }
 

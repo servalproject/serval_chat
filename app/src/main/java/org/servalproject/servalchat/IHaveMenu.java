@@ -8,5 +8,4 @@ import android.view.MenuItem;
  */
 public interface IHaveMenu {
     void populateItems(Menu menu);
-    void onItem(MenuItem item);
 }

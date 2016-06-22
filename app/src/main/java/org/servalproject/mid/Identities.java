@@ -1,11 +1,11 @@
 package org.servalproject.mid;
 
-import android.util.Log;
-
+import org.servalproject.servaldna.ServalDInterfaceException;
 import org.servalproject.servaldna.SubscriberId;
 import org.servalproject.servaldna.keyring.KeyringIdentity;
 import org.servalproject.servaldna.keyring.KeyringIdentityList;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,7 +31,7 @@ public class Identities {
         enterPin(null);
     }
 
-    private void addId(KeyringIdentity id){
+    private Identity addId(KeyringIdentity id){
         Identity i = identities.get(id.sid);
         if (i==null){
             i = new Identity(serval.uiHandler, id.sid);
@@ -45,6 +45,7 @@ public class Identities {
             i.update(id);
             listObservers.onUpdate(i);
         }
+        return i;
     }
 
     public List<Identity> getIdentities(){
@@ -66,30 +67,12 @@ public class Identities {
         return selected;
     }
 
-    public void updateIdentity(final Identity id, final String did, final String name, final String pin){
-        serval.runOnThreadPool(new Runnable() {
-            @Override
-            public void run() {
-                try{
-                    addId(serval.getResultClient().keyringSetDidName(id.sid, did, name, pin));
-                } catch (Exception e) {
-                    throw new IllegalStateException(e);
-                }
-            }
-        });
+    public void updateIdentity(final Identity id, final String did, final String name, final String pin) throws ServalDInterfaceException, IOException {
+        addId(serval.getResultClient().keyringSetDidName(id.sid, did, name, pin));
     }
 
-    public void addIdentity(final String did, final String name, final String pin){
-        serval.runOnThreadPool(new Runnable() {
-            @Override
-            public void run() {
-                try{
-                    addId(serval.getResultClient().keyringAdd(did, name, pin));
-                } catch (Exception e) {
-                    throw new IllegalStateException(e);
-                }
-            }
-        });
+    public Identity addIdentity(final String did, final String name, final String pin) throws ServalDInterfaceException, IOException {
+        return addId(serval.getResultClient().keyringAdd(did, name, pin));
     }
 
     void enterPin(final String pin){

@@ -46,14 +46,17 @@ public abstract class ObservedRecyclerView<T, H extends RecyclerView.ViewHolder>
 
     @Override
     public void onStart() {
-        int g = observerSet.add(this);
-        if (g!=generation)
-            listAdapter.notifyDataSetChanged();
+        if (observerSet!=null) {
+            int g = observerSet.add(this);
+            if (g != generation)
+                listAdapter.notifyDataSetChanged();
+        }
     }
 
     @Override
     public void onStop() {
-        generation = observerSet.remove(this);
+        if (observerSet!=null)
+            generation = observerSet.remove(this);
     }
 
     @Override

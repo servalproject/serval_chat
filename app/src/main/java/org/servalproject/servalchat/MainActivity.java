@@ -3,9 +3,12 @@ package org.servalproject.servalchat;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,9 +18,11 @@ import android.widget.LinearLayout;
 
 public class MainActivity extends AppCompatActivity implements INavigatorHost {
 
+    private static final String TAG = "Activity";
     private Navigator navigator;
     private View activeView;
     private LinearLayout rootLayout;
+    private CoordinatorLayout coordinator;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -25,6 +30,8 @@ public class MainActivity extends AppCompatActivity implements INavigatorHost {
         setContentView(R.layout.activity);
         rootLayout = (LinearLayout) findViewById(R.id.root_layout);
         Toolbar toolbar = (Toolbar) findViewById(R.id.app_toolbar);
+        coordinator = (CoordinatorLayout) findViewById(R.id.coordinator);
+
         setSupportActionBar(toolbar);
 
         navigator = Navigator.getNavigator(this, this);
@@ -76,14 +83,8 @@ public class MainActivity extends AppCompatActivity implements INavigatorHost {
     }
 
     @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        // TODO tweak menu properties here
-        return super.onPrepareOptionsMenu(menu);
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        return super.onCreateOptionsMenu(menu) || navigator.populateMenu(menu);
+        return navigator.populateMenu(menu) || super.onCreateOptionsMenu(menu);
     }
 
     @Override
@@ -144,4 +145,13 @@ public class MainActivity extends AppCompatActivity implements INavigatorHost {
     public void rebuildMenu() {
         getSupportActionBar().invalidateOptionsMenu();
     }
+
+    @Override
+    public void showSnack(CharSequence message, int length, CharSequence actionLabel, View.OnClickListener action) {
+        Snackbar s = Snackbar.make(coordinator, message, length);
+        if (action!=null && actionLabel!=null)
+            s.setAction(actionLabel, action);
+        s.show();
+    }
+
 }

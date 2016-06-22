@@ -2,12 +2,11 @@ package org.servalproject.servalchat;
 
 import android.content.Context;
 import android.content.Intent;
-import android.support.v7.widget.RecyclerView;
+import android.support.design.widget.Snackbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -122,6 +121,24 @@ public class Navigator {
         return true;
     }
 
+    public void showError(final Exception e) {
+        container.showSnack(e.getMessage(), Snackbar.LENGTH_LONG, context.getString(R.string.crash),
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        throw new IllegalStateException(e);
+                    }
+                });
+    }
+
+    public void showPopup(CharSequence label, CharSequence actionLabel, View.OnClickListener action){
+        container.showSnack(label, Snackbar.LENGTH_LONG, actionLabel, action);
+    }
+
+    public void showPopup(CharSequence label){
+        container.showSnack(label, Snackbar.LENGTH_SHORT, null, null);
+    }
+
     class ViewState{
         final IContainerView container;
         final Navigation navKey;
@@ -164,6 +181,10 @@ public class Navigator {
     public View inflate(Navigation n){
         LayoutInflater inflater = LayoutInflater.from(context);
         return inflater.inflate(n.layoutResource, null);
+    }
+
+    public boolean isCurrentView(Navigation obj){
+        return current != null && current.navKey.equals(obj);
     }
 
     public void gotoView(Navigation obj){
