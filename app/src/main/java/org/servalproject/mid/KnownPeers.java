@@ -1,7 +1,5 @@
 package org.servalproject.mid;
 
-import android.util.Log;
-
 import org.servalproject.servaldna.AsyncResult;
 import org.servalproject.servaldna.MdpDnaLookup;
 import org.servalproject.servaldna.MdpRoutingChanges;
@@ -11,7 +9,6 @@ import org.servalproject.servaldna.SubscriberId;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,7 +55,7 @@ public class KnownPeers {
 		}
 	};
 
-	private Peer getPeer(SubscriberId sid){
+	Peer getPeer(SubscriberId sid){
 		Peer p = peers.get(sid);
 		if (p!=null)
 			return p;

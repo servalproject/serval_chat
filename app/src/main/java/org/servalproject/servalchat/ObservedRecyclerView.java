@@ -1,11 +1,12 @@
 package org.servalproject.servalchat;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
-import android.view.ViewGroup;
 
+import org.servalproject.mid.Identity;
 import org.servalproject.mid.ListObserver;
 import org.servalproject.mid.ListObserverSet;
 
@@ -13,96 +14,69 @@ import org.servalproject.mid.ListObserverSet;
  * Created by jeremy on 20/06/16.
  */
 public abstract class ObservedRecyclerView<T, H extends RecyclerView.ViewHolder>
-        extends RecyclerView
-        implements ListObserver<T>, IActivityLifecycle{
+        extends SimpleRecyclerView<T,H>
+        implements ILifecycle, INavigate, ListObserver<T>{
 
-    private final ListObserverSet<T> observerSet;
+    protected MainActivity activity;
+    private ListObserverSet<T> observerSet;
     private int generation =-1;
-    protected final ListAdapter listAdapter;
+    @Override
+    public void added(T obj) {
+        notifyChanged();
+    }
+
+    @Override
+    public void removed(T obj) {
+        notifyChanged();
+    }
+
+    @Override
+    public void updated(T obj) {
+        notifyChanged();
+    }
+
+    @Override
+    public void reset(){
+        notifyChanged();
+    }
+
+    public ObservedRecyclerView(Context context, @Nullable AttributeSet attrs) {
+        this(null, context, attrs);
+    }
 
     public ObservedRecyclerView(ListObserverSet<T> observerSet, Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         this.observerSet = observerSet;
-        listAdapter = new ListAdapter();
+    }
+
+    public void setObserverSet(ListObserverSet<T> observerSet){
+        this.observerSet = observerSet;
     }
 
     @Override
-    protected void onAttachedToWindow() {
-        setAdapter(listAdapter);
-        super.onAttachedToWindow();
-    }
-
-    abstract protected H createHolder(ViewGroup parent);
-
-    abstract protected void bind(H holder, T item);
-
-    protected long getId(T item){
-        return -1;
-    }
-
-    abstract protected T get(int position);
-
-    abstract protected int getCount();
-
-    @Override
-    public void onStart() {
+    public void onVisible() {
         if (observerSet!=null) {
             int g = observerSet.add(this);
             if (g != generation)
-                listAdapter.notifyDataSetChanged();
+                notifyChanged();
         }
     }
 
     @Override
-    public void onStop() {
+    public void onHidden() {
         if (observerSet!=null)
             generation = observerSet.remove(this);
     }
 
     @Override
-    public void onPause() {
+    public void onDetach() {
 
     }
 
     @Override
-    public void onResume() {
-
+    public ILifecycle onAttach(MainActivity activity, Navigation n, Identity id, Bundle args) {
+        this.activity = activity;
+        return this;
     }
 
-    @Override
-    public void added(T obj) {
-        listAdapter.notifyDataSetChanged();
-    }
-
-    @Override
-    public void removed(T obj) {
-        listAdapter.notifyDataSetChanged();
-    }
-
-    @Override
-    public void updated(T obj) {
-        listAdapter.notifyDataSetChanged();
-    }
-
-    protected class ListAdapter extends RecyclerView.Adapter<H>{
-
-        @Override
-        public H onCreateViewHolder(ViewGroup parent, int viewType) {
-            return createHolder(parent);
-        }
-
-        @Override
-        public void onBindViewHolder(H holder, int position) {
-            bind(holder, get(position));
-        }
-
-        @Override
-        public int getItemCount() {
-            return getCount();
-        }
-
-        public long getItemId(int position) {
-            return getId(get(position));
-        }
-    }
 }

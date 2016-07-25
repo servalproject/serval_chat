@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -32,11 +31,11 @@ public class Serval {
 	private Serval(Context context) throws IOException {
 		File appFolder = context.getFilesDir().getParentFile();
 		instancePath = new File(appFolder, "instance");
-		uiHandler = new UIHandler();
+		uiHandler = new UIHandler(context.getMainLooper());
 		backgroundHandler = BackgroundHandler.create(this);
 
 		backgroundQueue = new LinkedBlockingQueue<>();
-		backgroundThreads = new ThreadPoolExecutor(1, 4, 5, TimeUnit.SECONDS, backgroundQueue);
+		backgroundThreads = new ThreadPoolExecutor(3, 10, 5, TimeUnit.SECONDS, backgroundQueue);
 
 		server = new Server(this, context);
 		rhizome = new Rhizome(this, context);
@@ -60,9 +59,13 @@ public class Serval {
 			// partly for slightly better security
 			restfulPassword = new BigInteger(130, new SecureRandom()).toString(32);
 			config.set("api.restful.users." + restfulUsername + ".password", restfulPassword);
+			config.set("api.restful.newsince_timeout","3600"); // 1 hour...
 			config.set("interfaces.0.match", "eth0,tiwlan0,wlan0,wl0.1,tiap0");
 			config.set("interfaces.0.default_route", "on");
 			config.set("mdp.enable_inet", "on");
+
+			config.delete("debug.rhizome");
+			config.delete("debug.rhizome_sync_keys");
 
 			config.sync();
 
@@ -114,9 +117,10 @@ public class Serval {
 	}
 
 	private static Serval instance;
-	public static void start(Context appContext){
+	public static Serval start(Context appContext){
 		try {
-			instance = new Serval(appContext);
+			instance = new Serval(appContext.getApplicationContext());
+			return instance;
 		} catch (IOException e) {
 			// Yep, we want to crash (this shouldn't happen, but would completely break everything anyway)
 			throw new IllegalStateException(e);

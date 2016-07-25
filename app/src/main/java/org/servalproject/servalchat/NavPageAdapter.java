@@ -1,27 +1,29 @@
 package org.servalproject.servalchat;
 
-import android.content.Context;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.View;
 import android.view.ViewGroup;
 
+import org.servalproject.mid.Identity;
+
 /**
  * Created by jeremy on 8/06/16.
  */
-public class NavPageAdapter extends PagerAdapter implements ViewPager.OnPageChangeListener {
+public class NavPageAdapter extends PagerAdapter
+        implements ViewPager.OnPageChangeListener, ILifecycle {
 
-    private final Context context;
-    private final Navigator navigator;
-    final Navigation[] screens;
-    private int position = -1;
-    private final View[] views;
+    private final MainActivity activity;
+    final Identity identity;
+    final HistoryItem[] screens;
+    private final ViewState[] views;
+    private boolean visible = false;
 
-    public NavPageAdapter(Context context, Navigator navigator, Navigation... screens) {
-        this.context = context;
-        this.navigator = navigator;
-        this.screens = screens;
-        this.views = new View[screens.length];
+    public NavPageAdapter(MainActivity activity, Identity identity, HistoryItem[] items) {
+        this.activity = activity;
+        this.identity = identity;
+        this.screens = items;
+        this.views = new ViewState[this.screens.length];
     }
 
     @Override
@@ -29,33 +31,37 @@ public class NavPageAdapter extends PagerAdapter implements ViewPager.OnPageChan
         return screens.length;
     }
 
+    ViewState getViewState(int position){
+        if (views[position] == null)
+            views[position] = ViewState.Inflate(activity, screens[position].key, identity, screens[position].args);
+        return views[position];
+    }
+
     @Override
-    public Object instantiateItem(ViewGroup container, int position) {
-        Navigation screen = screens[position];
-        View view = views[position] = navigator.inflate(screen);
-        container.addView(view);
-        navigator.onAttach(view);
-        return view;
+    public Object instantiateItem(ViewGroup group, int position) {
+        ViewState state = getViewState(position);
+        group.addView(state.view);
+        ILifecycle lifecycle = state.getLifecycle();
+        if (visible && lifecycle!=null)
+            lifecycle.onVisible();
+        return state;
     }
 
     @Override
     public void destroyItem(ViewGroup container, int position, Object object) {
-        View view = ((View) object);
-        navigator.onDetach(view);
-        container.removeView(view);
+        ViewState state = ((ViewState) object);
+        ILifecycle lifecycle = state.getLifecycle();
+        if (lifecycle!=null) {
+            if (visible)
+                lifecycle.onHidden();
+            lifecycle.onDetach();
+        }
+        container.removeView(state.view);
         views[position] = null;
     }
 
     private void pageChanged(int position){
-        if (position == this.position)
-            return;
-
-        if (this.position != -1)
-            navigator.onDeactivate(views[this.position]);
-
-        this.position = position;
-        navigator.onActivate(views[position], screens[position]);
-        navigator.gotoView(screens[position]);
+        activity.go(screens[position]);
     }
 
     @Override
@@ -66,12 +72,12 @@ public class NavPageAdapter extends PagerAdapter implements ViewPager.OnPageChan
 
     @Override
     public boolean isViewFromObject(View view, Object object) {
-        return view.equals(object);
+        return view.equals(((ViewState)object).view);
     }
 
     @Override
     public CharSequence getPageTitle(int position) {
-        return screens[position].getTitle(context);
+        return screens[position].key.getTitle(activity, identity);
     }
 
     @Override
@@ -87,5 +93,33 @@ public class NavPageAdapter extends PagerAdapter implements ViewPager.OnPageChan
     @Override
     public void onPageScrollStateChanged(int state) {
 
+    }
+
+    @Override
+    public void onDetach() {
+    }
+
+    @Override
+    public void onVisible() {
+        visible = true;
+        for(ViewState state:views){
+            if (state==null)
+                continue;
+            ILifecycle lifecycle = state.getLifecycle();
+            if (lifecycle!=null)
+                lifecycle.onVisible();
+        }
+    }
+
+    @Override
+    public void onHidden() {
+        visible = false;
+        for(ViewState state:views){
+            if (state==null)
+                continue;
+            ILifecycle lifecycle = state.getLifecycle();
+            if (lifecycle!=null)
+                lifecycle.onHidden();
+        }
     }
 }

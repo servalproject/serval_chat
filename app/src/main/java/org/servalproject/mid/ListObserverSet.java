@@ -1,8 +1,8 @@
 package org.servalproject.mid;
 
-import android.os.Handler;
-
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -14,6 +14,7 @@ public class ListObserverSet<T> implements UIHandler.MessageHandler<T> {
     private static final int ADD=1;
     private static final int REMOVE=2;
     private static final int UPDATE=3;
+    private static final int RESET=4;
     private int generation=0;
 
     private final UIHandler uiHandler;
@@ -29,6 +30,10 @@ public class ListObserverSet<T> implements UIHandler.MessageHandler<T> {
     public int remove(ListObserver<T> observer){
         observers.remove(observer);
         return generation;
+    }
+
+    public boolean hasObservers(){
+        return !observers.isEmpty();
     }
 
     void onAdd(T t){
@@ -49,16 +54,25 @@ public class ListObserverSet<T> implements UIHandler.MessageHandler<T> {
             return;
         uiHandler.sendMessage(this, t, UPDATE);
     }
+    void onReset(){
+        generation++;
+        if (observers.isEmpty())
+            return;
+        uiHandler.sendMessage(this, null, RESET);
+    }
 
     @Override
     public void handleMessage(T obj, int what) {
         if (observers.isEmpty())
             return;
-        for(ListObserver<T> observer:observers){
+        // clone the list so we can remove while iterating
+        List<ListObserver<T>> notify = new ArrayList<>(observers);
+        for(ListObserver<T> observer:notify){
             switch (what){
                 case ADD: observer.added(obj); break;
                 case REMOVE: observer.removed(obj); break;
                 case UPDATE: observer.updated(obj); break;
+                case RESET: observer.reset(); break;
             }
         }
     }

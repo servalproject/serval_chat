@@ -24,7 +24,7 @@ import java.util.Set;
 /**
  * Created by jeremy on 31/05/16.
  */
-public class PeerList extends ObservedRecyclerView<Peer, PeerList.PeerHolder>{
+public class PeerList extends ObservedRecyclerView<Peer, PeerList.PeerHolder> {
     private Serval serval;
     private static final String TAG = "PeerList";
     private List<Peer> items = new ArrayList<Peer>();
@@ -49,7 +49,7 @@ public class PeerList extends ObservedRecyclerView<Peer, PeerList.PeerHolder>{
     }
 
     @Override
-    public PeerHolder createHolder(ViewGroup parent) {
+    public PeerHolder createHolder(ViewGroup parent, int viewType) {
         return new PeerHolder(parent);
     }
 
@@ -87,19 +87,19 @@ public class PeerList extends ObservedRecyclerView<Peer, PeerList.PeerHolder>{
     private final Set<SubscriberId> addedPeers = new HashSet<>();
 
     @Override
-    public void onStart() {
+    public void onVisible() {
         addedPeers.clear();
         items.clear();
         if (serval != null) {
             for (Peer p : serval.knownPeers.getReachablePeers())
                 add(p);
         }
-        super.onStart();
+        super.onVisible();
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
+    public void onHidden() {
+        super.onHidden();
         addedPeers.clear();
         items.clear();
     }

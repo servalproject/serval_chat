@@ -2,36 +2,55 @@ package org.servalproject.servalchat;
 
 import android.content.Context;
 
+import org.servalproject.mid.Identity;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * Created by jeremy on 14/06/16.
  */
 public class Navigation {
 
+    public final boolean requiresId;
     public final int titleResource;
     public final int layoutResource;
     public final Navigation parent;
     public final Navigation containedIn;
     public final String name;
+    public final List<Navigation> children = new ArrayList<>();
 
-    public Navigation(String name, int titleResource, int layoutResource, Navigation parent, Navigation containedIn){
+    public Navigation(String name, boolean requiresId, int titleResource, int layoutResource, Navigation parent, Navigation containedIn){
+        this.requiresId = requiresId;
         this.titleResource = titleResource;
         this.layoutResource = layoutResource;
         this.parent = parent;
         this.containedIn = containedIn;
         this.name = name;
+        NavMap.put(name, this);
+        if (containedIn != null)
+            containedIn.children.add(this);
     }
 
     public Navigation(String name, int titleResource, int layoutResource){
-        this(name, titleResource, layoutResource, null, null);
+        this(name, true, titleResource, layoutResource, null, null);
     }
 
     public Navigation(String name, int titleResource, int layoutResource, Navigation parent){
-        this(name, titleResource, layoutResource, parent, null);
+        this(name, true, titleResource, layoutResource, parent, null);
+    }
+    public Navigation(String name, int titleResource, int layoutResource, Navigation parent, Navigation containedIn){
+        this(name, true, titleResource, layoutResource, parent, containedIn);
     }
 
-    public CharSequence getTitle(Context context){
+    public CharSequence getTitle(Context context, Identity identity){
+        if (titleResource == R.string.app_name && identity != null)
+            return identity.getName();
         return context.getString(titleResource);
     }
+
 
     @Override
     public boolean equals(Object o) {
@@ -52,12 +71,18 @@ public class Navigation {
         return result;
     }
 
-    public static final Navigation Home = new Navigation("Home", R.string.app_name, R.layout.home_tabs);
-    public static final Navigation Identity = new Navigation("Identity", R.string.my_details, R.layout.identity_list, null, Home);
-    public static final Navigation PeerList = new Navigation("PeerList", R.string.peer_list, R.layout.peer_list, null, Home);
+    public static final Map<String, Navigation> NavMap = new HashMap<>();
+    // launcher..
+    public static final Navigation IdentityList = new Navigation("IdentityList", false, R.string.my_details, R.layout.identity_list, null, null);
+    public static final Navigation NewIdentityDetails = new Navigation("NewDetails", false, R.string.identity_details, R.layout.identity_details, IdentityList, null);
 
-    public static final Navigation HomeTabs[] = new Navigation[] {
-            Identity,
-            PeerList,
-    };
+    // main screen
+    // TODO sidebar menu for details, peer list, block list etc.
+    public static final Navigation Spinner = new Navigation("Spinner", false, R.string.app_name, R.layout.progress, null, null);
+
+    public static final Navigation Main = new Navigation("Main", R.string.app_name, R.layout.main_tabs);
+    public static final Navigation IdentityDetails = new Navigation("Details", R.string.identity_details, R.layout.identity_details, null, Main);
+    public static final Navigation Feed = new Navigation("Feed", R.string.news_feed, R.layout.news_feed, null, Main);
+    public static final Navigation Inbox = new Navigation("Inbox", R.string.conversation_list, R.layout.conversation_list, null, Main);
+    public static final Navigation PeerList = new Navigation("PeerList", R.string.peer_list, R.layout.peer_list, null, Main);
 }

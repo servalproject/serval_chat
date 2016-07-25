@@ -31,7 +31,6 @@ public class IdentityList
         implements IHaveMenu, MenuItem.OnMenuItemClickListener {
     private Serval serval;
     private static final String TAG = "IdentityList";
-    private Navigator navigator;
     private final List<Identity> identities;
 
     private static ListObserverSet<Identity> getObserver(){
@@ -48,13 +47,12 @@ public class IdentityList
             // example data for editing layouts
             identities = new ArrayList<>();
             for(KeyringIdentity i: KeyringIdentityList.getTestIdentities()){
-                Identity id = new Identity(null, i.sid);
+                Identity id = new Identity(null, i.subscriber);
                 id.update(i);
                 identities.add(id);
             }
         } else {
             identities = serval.identities.getIdentities();
-            navigator = Navigator.getNavigator();
         }
         listAdapter.setHasStableIds(true);
     }
@@ -67,7 +65,7 @@ public class IdentityList
     }
 
     @Override
-    public IdentityHolder createHolder(ViewGroup parent) {
+    public IdentityHolder createHolder(ViewGroup parent, int viewType) {
         return new IdentityHolder(parent);
     }
 
@@ -112,8 +110,7 @@ public class IdentityList
     public boolean onMenuItemClick(MenuItem item) {
         switch (item.getItemId()){
             case ADD:
-                if (navigator!=null)
-                    navigator.gotoView(new IdentityDetailsScreen(null));
+                activity.go(Navigation.NewIdentityDetails, null);
                 return true;
         }
         return false;
@@ -131,8 +128,7 @@ public class IdentityList
 
         @Override
         public void onClick(View v) {
-            if (navigator!=null)
-                navigator.gotoView(new IdentityDetailsScreen(id));
+            activity.go(id, Navigation.Feed, null);
         }
     }
 }

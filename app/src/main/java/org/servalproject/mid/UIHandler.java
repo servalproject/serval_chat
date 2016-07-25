@@ -9,8 +9,8 @@ import android.os.Message;
  */
 public class UIHandler extends Handler {
 
-    UIHandler(){
-        super(Looper.getMainLooper());
+    UIHandler(Looper looper){
+        super(looper);
     }
 
     @Override
@@ -25,7 +25,7 @@ public class UIHandler extends Handler {
     }
 
     public <T> void sendMessage(MessageHandler<T> h, T obj, int what){
-        if (Thread.currentThread() == this.getLooper().getThread()){
+        if (isUiThread()){
             // call immediately if already in the right thread
             h.handleMessage(obj, what);
         }else {
@@ -34,6 +34,10 @@ public class UIHandler extends Handler {
             Message msg = obtainMessage(what, m);
             sendMessage(msg);
         }
+    }
+
+    public boolean isUiThread(){
+        return Thread.currentThread() == this.getLooper().getThread();
     }
 
     private class UIMessage<T>{

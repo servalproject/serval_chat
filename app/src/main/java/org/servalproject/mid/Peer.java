@@ -44,6 +44,14 @@ public final class Peer implements Comparable<Peer>{
 		return link!=null;
 	}
 
+	public boolean isContact(){
+		return false;
+	}
+
+	public boolean isBlocked(){
+		return false;
+	}
+
 	void update(RouteLink route){
 		link = route.isReachable() ? route : null;
 		Log.v(TAG, "Updated route "+route.toString());

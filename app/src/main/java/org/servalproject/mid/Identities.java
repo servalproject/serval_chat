@@ -1,6 +1,7 @@
 package org.servalproject.mid;
 
 import org.servalproject.servaldna.ServalDInterfaceException;
+import org.servalproject.servaldna.Subscriber;
 import org.servalproject.servaldna.SubscriberId;
 import org.servalproject.servaldna.keyring.KeyringIdentity;
 import org.servalproject.servaldna.keyring.KeyringIdentityList;
@@ -17,9 +18,10 @@ import java.util.Map;
 public class Identities {
     private static final String TAG = "Identities";
     private final Serval serval;
+    private boolean loaded = false;
     public final ListObserverSet<Identity> listObservers;
     private final List<Identity> identityList = new ArrayList<>();
-    private final Map<SubscriberId, Identity> identities = new HashMap<>();
+    private final Map<Subscriber, Identity> identities = new HashMap<>();
     private Identity selected;
 
     Identities(Serval serval){
@@ -32,10 +34,10 @@ public class Identities {
     }
 
     private Identity addId(KeyringIdentity id){
-        Identity i = identities.get(id.sid);
+        Identity i = identities.get(id.subscriber);
         if (i==null){
-            i = new Identity(serval.uiHandler, id.sid);
-            identities.put(id.sid, i);
+            i = new Identity(serval, id.subscriber);
+            identities.put(id.subscriber, i);
             identityList.add(i);
             if (selected==null)
                 selected = i;
@@ -52,23 +54,20 @@ public class Identities {
         return identityList;
     }
 
-    public void selectIdentity(Identity id){
-        if (id==null)
-            throw new NullPointerException();
-        if (id == selected)
-            return;
-        if (selected!=null)
-            listObservers.onUpdate(selected);
-        selected = id;
-        listObservers.onUpdate(id);
+    public boolean isLoaded(){
+        return loaded;
     }
 
-    public Identity getSelected(){
-        return selected;
+    public Identity getIdentity(SubscriberId sid){
+        for(Identity id:identityList){
+            if (id.subscriber.sid.equals(sid))
+                return id;
+        }
+        return null;
     }
 
     public void updateIdentity(final Identity id, final String did, final String name, final String pin) throws ServalDInterfaceException, IOException {
-        addId(serval.getResultClient().keyringSetDidName(id.sid, did, name, pin));
+        addId(serval.getResultClient().keyringSetDidName(id.subscriber, did, name, pin));
     }
 
     public Identity addIdentity(final String did, final String name, final String pin) throws ServalDInterfaceException, IOException {
@@ -84,6 +83,9 @@ public class Identities {
                     KeyringIdentity id=null;
                     while((id = list.nextIdentity())!=null)
                         addId(id);
+                    if (pin == null)
+                        loaded = true;
+                    listObservers.onReset();
                 } catch (Exception e) {
                     throw new IllegalStateException(e);
                 }

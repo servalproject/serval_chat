@@ -1,17 +1,26 @@
 <resources>
     <string name="app_name">Serval Chat</string>
-    <string name="peer_list">Nearby</string>
     <string name="my_details">Identity</string>
-    <string name="feed">Feed</string>
+
+    <string name="peer_list">Nearby</string>
+    <string name="news_feed">Feed</string>
     <string name="requests">Requests</string>
     <string name="blocked">Blocked</string>
+    <string name="conversation_list">Inbox</string>
+    <string name="identity_details">Identity</string>
+
     <string name="no_name">[Name]</string>
     <string name="no_number">[Number]</string>
     <string name="name_label">Name</string>
     <string name="number_label">Phone Number</string>
     <string name="email_label">Email Address</string>
     <string name="identity_update">Update</string>
-    <string name="identity_details">Identity</string>
     <string name="add">Add</string>
     <string name="crash">Crash!</string>
+
+    <string name="private_messaging_title">New messages</string>
+    <plurals name="private_messages">
+        <item quantity="one">%1$s has %2$d unread message</item>
+        <item quantity="other">%1$s has %2$d unread messages</item>
+    </plurals>
 </resources>

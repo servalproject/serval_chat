@@ -1,7 +1,11 @@
 package org.servalproject.servalchat;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
@@ -16,17 +20,26 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
-public class MainActivity extends AppCompatActivity implements INavigatorHost {
+import org.servalproject.mid.Identity;
+import org.servalproject.mid.ListObserver;
+import org.servalproject.mid.Serval;
+
+import java.util.Stack;
+
+public class MainActivity extends AppCompatActivity implements IContainerView {
 
     private static final String TAG = "Activity";
-    private Navigator navigator;
-    private View activeView;
     private LinearLayout rootLayout;
     private CoordinatorLayout coordinator;
+    private NavHistory history;
+    private Serval serval;
+    private Identity identity;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.v(TAG, "onCreate");
+        serval = Serval.getInstance();
         setContentView(R.layout.activity);
         rootLayout = (LinearLayout) findViewById(R.id.root_layout);
         Toolbar toolbar = (Toolbar) findViewById(R.id.app_toolbar);
@@ -34,119 +47,311 @@ public class MainActivity extends AppCompatActivity implements INavigatorHost {
 
         setSupportActionBar(toolbar);
 
-        navigator = Navigator.getNavigator(this, this);
-        Intent i = getIntent();
-        if (i!=null)
-            navigator.gotoIntent(i);
+        Intent intent = getIntent();
+        init(intent, savedInstanceState);
+    }
+
+    private void init(Intent intent, Bundle savedInstanceState){
+        if (intent != null){
+            Bundle extras = intent.getExtras();
+            if (extras != null && extras.size()>0){
+                // assume everything is fine...
+                savedInstanceState = extras;
+            }
+        }
+
+        history = NavHistory.restore(savedInstanceState);
+        go();
+        if (viewStack.isEmpty())
+            throw new IllegalStateException();
+    }
+
+    private Stack<ViewState> viewStack = new Stack<>();
+
+    private boolean isStarted = false;
+
+    private final ListObserver<Identity> idLoaded = new ListObserver<Identity>() {
+        @Override
+        public void added(Identity obj) {
+            if (identity == null && obj.subscriber.equals(history.identity))
+                go();
+        }
+
+        @Override
+        public void removed(Identity obj) {
+
+        }
+
+        @Override
+        public void updated(Identity obj) {
+
+        }
+
+        @Override
+        public void reset() {
+            go();
+        }
+    };
+
+    private void go(){
+        HistoryItem item = history.getTop();
+        Navigation n = item.key;
+        Bundle args = item.args;
+
+        if (identity == null && history.identity != null)
+            identity = serval.identities.getIdentity(history.identity);
+
+        if (n.requiresId && identity == null && !serval.identities.isLoaded()) {
+            // go() again if the identity appears
+            serval.identities.listObservers.add(idLoaded);
+            n = Navigation.Spinner;
+            args = null;
+        }
+
+        if (identity != null)
+            serval.identities.listObservers.remove(idLoaded);
+
+        // ignore the history for now, open the identity list so a pin can be provided
+        // TODO not sure if this will work right...
+        // Options;
+        // 1) pin entry prompt
+        // 2) hide the pin in the notification
+        if (n.requiresId && identity == null) {
+            n = Navigation.IdentityList;
+            args = null;
+        }
+
+        Log.v(TAG, "Attempting to open "+n.name+" in response to request for "+item.key.name);
+
+        if (!n.children.isEmpty())
+            throw new IllegalStateException();
+
+        Stack<Navigation> newViews = new Stack<>();
+        while(n != null){
+            newViews.push(n);
+            n = n.containedIn;
+        }
+        // ignore common parent views
+        n = newViews.pop();
+
+        int i=0;
+        while (i<viewStack.size() && viewStack.get(i).key.equals(n)){
+            i++;
+            n = newViews.empty() ? null : newViews.pop();
+        }
+
+        // pop un-common views
+        for (int j=viewStack.size()-1; j>=i; j--){
+            ViewState v = viewStack.get(j);
+            // remove views from their containers (if required)
+            IContainerView container = j>0 ? viewStack.get(j -1).getContainer() : this;
+            container.deactivate(v);
+            viewStack.remove(j);
+        }
+
+        // add views (& locate containers?)
+        LayoutInflater inflater = LayoutInflater.from(this);
+        ViewState parent = viewStack.isEmpty() ? null : viewStack.get(viewStack.size()-1);
+        while(n!=null){
+            IContainerView container = (parent == null) ? this : parent.getContainer();
+            if (container == null)
+                throw new NullPointerException();
+            parent = container.activate(n, identity, newViews.isEmpty()?args:null);
+            if (parent == null)
+                throw new NullPointerException();
+            viewStack.add(parent);
+            if (newViews.empty())
+                break;
+            n = newViews.empty() ? null : newViews.pop();
+        }
+
+        ActionBar bar = getSupportActionBar();
+        bar.invalidateOptionsMenu();
+        bar.setDisplayOptions(
+                ActionBar.DISPLAY_SHOW_HOME | (item.key.parent!=null ? ActionBar.DISPLAY_HOME_AS_UP : 0),
+                ActionBar.DISPLAY_SHOW_HOME | ActionBar.DISPLAY_HOME_AS_UP);
+    }
+
+    public static Intent getIntentFor(Context context, Identity identity, Navigation key, Bundle args){
+        // Spawn new task
+        Intent intent = new Intent();
+        Class<?> activity = MainActivity.class;
+        if (Build.VERSION.SDK_INT>=21) {
+            // Untested!
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
+            intent.setDataAndType(Uri.parse("sid:"+identity.subscriber.sid.toHex()), "application/org.servalproject.sid");
+        } else {
+            if (identity != null){
+                // TODO use & persist some kind of MRU ordering?
+                switch ((int)identity.getId()%4){
+                    default:
+                        activity = Id4.class;
+                        break;
+                    case 1:
+                        activity = Id1.class;
+                        break;
+                    case 2:
+                        activity = Id2.class;
+                        break;
+                    case 3:
+                        activity = Id3.class;
+                        break;
+                }
+            }
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        }
+        intent.setClass(context, activity);
+        intent.putExtras(NavHistory.prepareNew(identity==null ? null : identity.subscriber.sid, key, args));
+        return intent;
+    }
+
+    public void go(Identity identity, Navigation key, Bundle args){
+        if (this.identity == identity){
+            go(key, args);
+            return;
+        }
+
+        startActivity(getIntentFor(this, identity, key, args));
+        if (Build.VERSION.SDK_INT>=21)
+            finishAndRemoveTask();
+        else
+            // TODO need an ugly work around here?
+            finish();
+    }
+
+    public void go(Navigation key, Bundle args){
+        // record the change first, then create views
+        if (history.add(key, args))
+            go();
+    }
+
+    public void go(HistoryItem item){
+        // record the change first, then create views
+        if (history.add(item))
+            go();
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        navigator.gotoIntent(intent);
+        Log.v(TAG, "onNewIntent?");
+        init(intent, null);
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        // TODO add navigator backstack?
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        navigator.onDestroy();
-        navigator = null;
+        history.save(outState);
     }
 
     @Override
     public void onBackPressed() {
-        if (!navigator.goBack())
+        if (history.back()){
+            go();
+        }else{
             super.onBackPressed();
+        }
+    }
+
+    public boolean goUp() {
+        if (history.up()) {
+            go();
+            return true;
+        }
+        return false;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case android.R.id.home:
-                if (navigator.goUp())
+                if (goUp())
                     return true;
                 break;
-            // TODO menu items per view?
         }
         return super.onOptionsItemSelected(item);
     }
 
+    private void populateMenu(Menu menu, View v){
+        if (v == null)
+            return;
+        if (v instanceof IHaveMenu) {
+            ((IHaveMenu)v).populateItems(menu);
+        }
+        if (v instanceof ViewGroup){
+            ViewGroup g = (ViewGroup)v;
+            for(int i=0;i<g.getChildCount();i++)
+                populateMenu(menu, g.getChildAt(i));
+        }
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        return navigator.populateMenu(menu) || super.onCreateOptionsMenu(menu);
+        populateMenu(menu, viewStack.peek().view);
+        super.onCreateOptionsMenu(menu);
+        return true;
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        navigator.onStop();
+        isStarted = false;
+        for(ViewState state:viewStack){
+            ILifecycle lifecycle = state.getLifecycle();
+            if (lifecycle!=null)
+                lifecycle.onHidden();
+        }
     }
 
     @Override
     protected void onStart() {
-        navigator.onStart();
+        isStarted = true;
+        for(ViewState state:viewStack){
+            ILifecycle lifecycle = state.getLifecycle();
+            if (lifecycle!=null)
+                lifecycle.onVisible();
+        }
         super.onStart();
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-        navigator.onPause();
+    public void deactivate(ViewState state) {
+        ILifecycle lifecycle = state.getLifecycle();
+        if (isStarted && lifecycle!=null)
+            lifecycle.onHidden();
+        if (lifecycle!=null)
+            lifecycle.onDetach();
+        rootLayout.removeView(state.view);
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        navigator.onResume();
-    }
-
-    @Override
-    public void removeView(Navigation n) {
-        if (activeView==null)
-            throw new IllegalStateException();
-        navigator.onDeactivate(activeView);
-        navigator.onDetach(activeView);
-        rootLayout.removeView(activeView);
-        activeView = null;
-    }
-
-    @Override
-    public IContainerView addView(LayoutInflater inflater, Navigation n) {
-        if (activeView!=null)
-            throw new IllegalStateException();
-        activeView = inflater.inflate(n.layoutResource, null);
-        rootLayout.addView(activeView);
-        IContainerView ret = Navigator.findContainer(activeView);
-        navigator.onAttach(activeView);
-        navigator.onActivate(activeView, n);
-        getSupportActionBar().setTitle(n.getTitle(this));
+    public ViewState activate(Navigation n, Identity identity, Bundle args) {
+        ViewState ret = ViewState.Inflate(this, n, identity, args);
+        rootLayout.addView(ret.view);
+        ILifecycle lifecycle = ret.getLifecycle();
+        if (isStarted && lifecycle!=null)
+            lifecycle.onVisible();
+        getSupportActionBar().setTitle(n.getTitle(this, identity));
         return ret;
     }
 
-    @Override
-    public void navigated(boolean backEnabled, boolean upEnabled) {
-        getSupportActionBar().setDisplayOptions(
-                ActionBar.DISPLAY_SHOW_HOME | (upEnabled ? ActionBar.DISPLAY_HOME_AS_UP : 0),
-                ActionBar.DISPLAY_SHOW_HOME|ActionBar.DISPLAY_HOME_AS_UP);
+    @NonNull @Override
+    public ActionBar getSupportActionBar() {
+        ActionBar ret = super.getSupportActionBar();
+        if (ret==null)
+            throw new IllegalStateException();
+        return ret;
     }
 
-    @Override
-    public void rebuildMenu() {
-        getSupportActionBar().invalidateOptionsMenu();
+    public void showError(final Exception e) {
+        showSnack(e.getMessage(), Snackbar.LENGTH_LONG, getString(R.string.crash),
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        throw new IllegalStateException(e);
+                    }
+                });
     }
-
-    @Override
     public void showSnack(CharSequence message, int length, CharSequence actionLabel, View.OnClickListener action) {
         Snackbar s = Snackbar.make(coordinator, message, length);
         if (action!=null && actionLabel!=null)
