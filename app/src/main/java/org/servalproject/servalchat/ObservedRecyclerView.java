@@ -18,6 +18,7 @@ public abstract class ObservedRecyclerView<T, H extends RecyclerView.ViewHolder>
         implements ILifecycle, INavigate, ListObserver<T>{
 
     protected MainActivity activity;
+    protected Identity identity;
     private ListObserverSet<T> observerSet;
     private int generation =-1;
     @Override
@@ -76,6 +77,7 @@ public abstract class ObservedRecyclerView<T, H extends RecyclerView.ViewHolder>
     @Override
     public ILifecycle onAttach(MainActivity activity, Navigation n, Identity id, Bundle args) {
         this.activity = activity;
+        this.identity = id;
         return this;
     }
 

@@ -19,6 +19,7 @@
     <string name="crash">Crash!</string>
 
     <string name="private_messaging_title">New messages</string>
+    <string name="message_list">Messages</string>
     <plurals name="private_messages">
         <item quantity="one">%1$s has %2$d unread message</item>
         <item quantity="other">%1$s has %2$d unread messages</item>

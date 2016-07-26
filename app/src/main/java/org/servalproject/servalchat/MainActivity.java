@@ -38,7 +38,6 @@ public class MainActivity extends AppCompatActivity implements IContainerView {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.v(TAG, "onCreate");
         serval = Serval.getInstance();
         setContentView(R.layout.activity);
         rootLayout = (LinearLayout) findViewById(R.id.root_layout);
@@ -52,7 +51,7 @@ public class MainActivity extends AppCompatActivity implements IContainerView {
     }
 
     private void init(Intent intent, Bundle savedInstanceState){
-        if (intent != null){
+        if ((savedInstanceState == null || savedInstanceState.isEmpty()) && intent != null){
             Bundle extras = intent.getExtras();
             if (extras != null && extras.size()>0){
                 // assume everything is fine...

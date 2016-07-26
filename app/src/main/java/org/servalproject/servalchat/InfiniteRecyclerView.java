@@ -18,11 +18,11 @@ public abstract class InfiniteRecyclerView<T, H extends RecyclerView.ViewHolder>
     private final List<T> past = new ArrayList<>();
     private final List<T> future = new ArrayList<>();
     private final LinearLayoutManager layoutManager;
-    private int firstVisible=0;
     private int lastVisible=0;
     private int minPrefetch=5;
     private boolean fetching=false;
     private boolean atEnd = false;
+    private static final String TAG = "InfiniteView";
 
     public InfiniteRecyclerView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -33,7 +33,6 @@ public abstract class InfiniteRecyclerView<T, H extends RecyclerView.ViewHolder>
         this.addOnScrollListener(new OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                firstVisible = layoutManager.findFirstVisibleItemPosition();
                 lastVisible = layoutManager.findLastVisibleItemPosition();
                 if (!atEnd && !fetching && lastVisible + minPrefetch > getCount()){
                     fetching = true;
@@ -46,6 +45,7 @@ public abstract class InfiniteRecyclerView<T, H extends RecyclerView.ViewHolder>
 
     protected void fetchComplete(boolean atEnd){
         this.atEnd = atEnd;
+        lastVisible = layoutManager.findLastVisibleItemPosition();
         if (!atEnd && lastVisible + minPrefetch > getCount()){
             fetching = true;
             fetchMore();
@@ -54,6 +54,12 @@ public abstract class InfiniteRecyclerView<T, H extends RecyclerView.ViewHolder>
         }
     }
 
+    protected void begin(){
+        if (!fetching && getCount()==0){
+            fetching = true;
+            fetchMore();
+        }
+    }
     // must call fetchComplete from within the ui thread once batch of items have been added.
     protected abstract void fetchMore();
 
@@ -61,37 +67,58 @@ public abstract class InfiniteRecyclerView<T, H extends RecyclerView.ViewHolder>
     protected T get(int position) {
         int futureSize = future.size();
         if (position < futureSize)
-            return future.get(futureSize - position);
+            return future.get(futureSize - 1 - position);
         return past.get(position - futureSize);
     }
 
     @Override
     protected int getCount() {
-        return past.size() + future.size();
+        int ret = past.size() + future.size();
+        return ret;
     }
 
     // TODO scrolling is bound to be broken in some fashion when future items are added.
 
     public void addFuture(T item){
+        int size = getCount();
         future.add(item);
-        listAdapter.notifyItemInserted(0);
+        if (size==0)
+            listAdapter.notifyDataSetChanged();
+        else
+            listAdapter.notifyItemInserted(0);
     }
 
     // newest items should be at the end of the collection
     public void addFuture(Collection<T> items){
+        int size = getCount();
         future.addAll(items);
-        listAdapter.notifyItemRangeInserted(0, items.size());
+        if (size==0)
+            listAdapter.notifyDataSetChanged();
+        else
+            listAdapter.notifyItemRangeInserted(0, items.size());
     }
 
     public void addPast(T item){
+        int size = getCount();
         past.add(item);
-        listAdapter.notifyItemInserted(getCount() -1);
+        if (size==0)
+            listAdapter.notifyDataSetChanged();
+        else
+            listAdapter.notifyItemInserted(size);
     }
 
     // oldest items should be at the end of the collection
     public void addPast(Collection<T> items){
+
         int count = items.size();
+        if (count==0)
+            return;
+        int size = getCount();
+
         past.addAll(items);
-        listAdapter.notifyItemRangeInserted(getCount() - count, count);
+        if (size==0)
+            listAdapter.notifyDataSetChanged();
+        else
+            listAdapter.notifyItemRangeInserted(size, count);
     }
 }

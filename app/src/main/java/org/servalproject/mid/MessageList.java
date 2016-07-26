@@ -17,11 +17,13 @@ public class MessageList {
     private boolean hasMore = true;
     private final SubscriberId self;
     private final SubscriberId peer;
-    public final ListObserverSet<MeshMSMessage> observeFuture;
+    private final ListObserverSet<MeshMSMessage> observeFuture;
     private boolean closed = false;
     private MeshMSMessageList futureList;
     private MeshMSMessageList pastList;
     private String token;
+    private boolean polling = false;
+    private Thread pollingThread;
 
     MessageList(Serval serval, SubscriberId self, SubscriberId peer){
         this.serval = serval;
@@ -30,15 +32,37 @@ public class MessageList {
         this.observeFuture = new ListObserverSet<>(serval.uiHandler);
     }
 
+    private void start(){
+        if (polling || token== null || !observeFuture.hasObservers())
+            return;
+        polling = true;
+        serval.runOnThreadPool(readFuture);
+    }
+
+    public void observe(ListObserver<MeshMSMessage> observer){
+        observeFuture.add(observer);
+        start();
+    }
+
+    public void stopObserving(ListObserver<MeshMSMessage> observer){
+        observeFuture.remove(observer);
+        if (!observeFuture.hasObservers()){
+            polling = false;
+            Thread p = pollingThread;
+            if (p!=null)
+                p.interrupt();
+        }
+    }
+
     private Runnable readFuture = new Runnable() {
         @Override
         public void run() {
             try {
-                //noinspection InfiniteLoopStatement
-                while(true) {
+                pollingThread = Thread.currentThread();
+                while (polling) {
                     MeshMSMessageList list = futureList = serval.getResultClient().meshmsListMessagesSince(self, peer, token);
                     MeshMSMessage item;
-                    while ((item = list.nextMessage()) != null) {
+                    while (polling && (item = list.nextMessage()) != null) {
                         token = item.token;
                         observeFuture.onAdd(item);
                     }
@@ -52,6 +76,23 @@ public class MessageList {
                     throw new IllegalStateException(e);
             } catch (Exception e) {
                 throw new IllegalStateException(e);
+            } finally {
+                pollingThread = null;
+            }
+
+            if (closed){
+                if (pastList !=null) {
+                    try {
+                        pastList.close();
+                    } catch (IOException e) {}
+                    pastList = null;
+                }
+                if (futureList != null){
+                    try {
+                        futureList.close();
+                    } catch (IOException e) {}
+                    futureList = null;
+                }
             }
         }
     };
@@ -83,16 +124,17 @@ public class MessageList {
                 }
                 if (token == null) {
                     token = item.token;
-                    serval.runOnThreadPool(readFuture);
+                    start();
                 }
                 messageList.add(item);
             }
-
+/*
             if (token == null){
                 // TODO fix newsince API to allow waiting for new messages when the pastList is empty
                 token = "";
                 serval.runOnThreadPool(readFuture);
             }
+            */
         }
         if (!hasMore && pastList !=null) {
             pastList.close();
@@ -101,17 +143,12 @@ public class MessageList {
         return hasMore;
     }
 
-    public void close() throws IOException {
+    public void close() {
         hasMore = false;
+        polling = false;
         closed = true;
-        if (pastList !=null) {
-            pastList.close();
-            pastList = null;
-        }
-        if (futureList != null){
-            futureList.close();
-            futureList = null;
-        }
-
+        Thread p = pollingThread;
+        if (p!=null)
+            p.interrupt();
     }
 }

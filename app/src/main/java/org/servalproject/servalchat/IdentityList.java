@@ -66,7 +66,8 @@ public class IdentityList
 
     @Override
     public IdentityHolder createHolder(ViewGroup parent, int viewType) {
-        return new IdentityHolder(parent);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.identity, parent, false);
+        return new IdentityHolder(view);
     }
 
     @Override
@@ -120,8 +121,8 @@ public class IdentityList
         private final TextView name;
         private Identity id;
 
-        public IdentityHolder(ViewGroup parent) {
-            super(LayoutInflater.from(parent.getContext()).inflate(R.layout.identity, parent, false));
+        public IdentityHolder(View view) {
+            super(view);
             name = (TextView)this.itemView.findViewById(R.id.name);
             this.itemView.setOnClickListener(this);
         }

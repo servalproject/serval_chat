@@ -85,4 +85,6 @@ public class Navigation {
     public static final Navigation Feed = new Navigation("Feed", R.string.news_feed, R.layout.news_feed, null, Main);
     public static final Navigation Inbox = new Navigation("Inbox", R.string.conversation_list, R.layout.conversation_list, null, Main);
     public static final Navigation PeerList = new Navigation("PeerList", R.string.peer_list, R.layout.peer_list, null, Main);
+
+    public static final Navigation PrivateMessages = new Navigation("Messages", R.string.message_list, R.layout.message_list, Inbox, null);
 }

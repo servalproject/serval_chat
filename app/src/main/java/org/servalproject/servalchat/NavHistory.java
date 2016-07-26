@@ -14,6 +14,7 @@ import java.util.List;
 public class NavHistory {
     public final SubscriberId identity;
     public final List<HistoryItem> history = new ArrayList<>();
+    private static final String TAG = "History";
 
     public HistoryItem getTop(){
         if (history.size()==0)
