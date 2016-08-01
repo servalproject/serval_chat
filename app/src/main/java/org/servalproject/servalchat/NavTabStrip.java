@@ -35,14 +35,15 @@ public class NavTabStrip extends LinearLayout implements IContainerView, INaviga
                 return adapter.getViewState(i);
             }
         }
-        throw new IllegalStateException();
+        throw new IllegalStateException("Cannot locate "+n.name);
     }
 
     @Override
     public ILifecycle onAttach(MainActivity activity, Navigation n, Identity id, Bundle args) {
         HistoryItem items[] = new HistoryItem[n.children.size()];
+        // use the same arguments for all tabs
         for(int i=0;i<n.children.size();i++)
-            items[i] = new HistoryItem(n.children.get(i), null);
+            items[i] = new HistoryItem(n.children.get(i), args);
         adapter =  new NavPageAdapter(activity, id, items);
         pager = (ViewPager)findViewById(R.id.pager);
         pager.setAdapter(adapter);

@@ -12,7 +12,6 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -130,8 +129,6 @@ public class MainActivity extends AppCompatActivity implements IContainerView {
             args = null;
         }
 
-        Log.v(TAG, "Attempting to open "+n.name+" in response to request for "+item.key.name);
-
         if (!n.children.isEmpty())
             throw new IllegalStateException();
 
@@ -159,7 +156,7 @@ public class MainActivity extends AppCompatActivity implements IContainerView {
             IContainerView container = (parent == null) ? this : parent.getContainer();
             if (container == null)
                 throw new NullPointerException();
-            parent = container.activate(n, identity, newViews.isEmpty()?args:null);
+            parent = container.activate(n, identity, args);
             if (parent == null)
                 throw new NullPointerException();
             viewStack.add(parent);
@@ -224,20 +221,23 @@ public class MainActivity extends AppCompatActivity implements IContainerView {
 
     public void go(Navigation key, Bundle args){
         // record the change first, then create views
-        if (history.add(key, args))
+        if (history.add(key, args, false))
             go();
     }
 
     public void go(HistoryItem item){
+        go(item, false);
+    }
+
+    public void go(HistoryItem item, boolean replace){
         // record the change first, then create views
-        if (history.add(item))
+        if (history.add(item, replace))
             go();
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        Log.v(TAG, "onNewIntent?");
         init(intent, null);
     }
 

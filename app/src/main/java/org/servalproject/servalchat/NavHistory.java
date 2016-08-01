@@ -42,7 +42,7 @@ public class NavHistory {
                 return true;
             }
         }
-        add(item.key.parent, null);
+        add(item.key.parent, null, false);
         return true;
     }
 
@@ -57,17 +57,19 @@ public class NavHistory {
         return true;
     }
 
-    public boolean add(HistoryItem item){
+    public boolean add(HistoryItem item, boolean replace){
         HistoryItem top = getTop();
         // Ignore if we haven't gone anywhere
         if (top.equals(item))
             return false;
+        if (replace)
+            pop();
         history.add(item);
         return true;
     }
 
-    public boolean add(Navigation key, Bundle args){
-        return add(new HistoryItem(key, args));
+    public boolean add(Navigation key, Bundle args, boolean replace){
+        return add(new HistoryItem(key, args), replace);
     }
 
     public void save(Bundle state){
@@ -111,7 +113,7 @@ public class NavHistory {
                 if (nav == null)
                     throw new IllegalStateException();
                 Bundle args = state.getBundle("history.args_"+i);
-                ret.add(nav, args);
+                ret.add(nav, args, false);
             }
             return ret;
         } catch (AbstractId.InvalidBinaryException e) {

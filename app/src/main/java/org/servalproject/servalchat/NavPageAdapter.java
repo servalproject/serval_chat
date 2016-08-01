@@ -61,7 +61,7 @@ public class NavPageAdapter extends PagerAdapter
     }
 
     private void pageChanged(int position){
-        activity.go(screens[position]);
+        activity.go(screens[position], true);
     }
 
     @Override

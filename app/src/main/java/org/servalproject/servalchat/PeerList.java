@@ -1,6 +1,7 @@
 package org.servalproject.servalchat;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -55,6 +56,7 @@ public class PeerList extends ObservedRecyclerView<Peer, PeerList.PeerHolder> {
 
     @Override
     public void bind(PeerHolder holder, Peer item) {
+        holder.peer = item;
         holder.name.setText(item.displayName());
         if (item.isReachable()){
             // Show green dot?
@@ -69,6 +71,7 @@ public class PeerList extends ObservedRecyclerView<Peer, PeerList.PeerHolder> {
     public class PeerHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         //private final ImageView avatar;
         private final TextView name;
+        private Peer peer;
 
         public PeerHolder(ViewGroup parent) {
             super(LayoutInflater.from(parent.getContext()).inflate(R.layout.peer, parent, false));
@@ -79,7 +82,9 @@ public class PeerList extends ObservedRecyclerView<Peer, PeerList.PeerHolder> {
 
         @Override
         public void onClick(View v) {
-            // TODO
+            Bundle args = new Bundle();
+            args.putByteArray("them", peer.sid.getBinary());
+            activity.go(Navigation.PeerDetails, args);
         }
     }
 

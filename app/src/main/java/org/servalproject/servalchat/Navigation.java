@@ -29,6 +29,8 @@ public class Navigation {
         this.parent = parent;
         this.containedIn = containedIn;
         this.name = name;
+        if (NavMap.containsKey(name))
+            throw new IllegalStateException(name+" has already been defined");
         NavMap.put(name, this);
         if (containedIn != null)
             containedIn.children.add(this);
@@ -51,19 +53,6 @@ public class Navigation {
         return context.getString(titleResource);
     }
 
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Navigation that = (Navigation) o;
-
-        if (layoutResource != that.layoutResource) return false;
-        return parent != null ? parent.equals(that.parent) : that.parent == null;
-
-    }
-
     @Override
     public int hashCode() {
         int result = layoutResource;
@@ -82,9 +71,12 @@ public class Navigation {
 
     public static final Navigation Main = new Navigation("Main", R.string.app_name, R.layout.main_tabs);
     public static final Navigation IdentityDetails = new Navigation("Details", R.string.identity_details, R.layout.identity_details, null, Main);
-    public static final Navigation Feed = new Navigation("Feed", R.string.news_feed, R.layout.news_feed, null, Main);
+    public static final Navigation Feed = new Navigation("Feed", R.string.news_feed, R.layout.placeholder, null, Main);
     public static final Navigation Inbox = new Navigation("Inbox", R.string.conversation_list, R.layout.conversation_list, null, Main);
     public static final Navigation PeerList = new Navigation("PeerList", R.string.peer_list, R.layout.peer_list, null, Main);
 
-    public static final Navigation PrivateMessages = new Navigation("Messages", R.string.message_list, R.layout.message_list, Inbox, null);
+    public static final Navigation PeerTabs = new Navigation("PeerTabs", R.string.app_name, R.layout.main_tabs);
+    public static final Navigation PeerDetails = new Navigation("PeerDetails", R.string.peer_details, R.layout.placeholder, null, PeerTabs);
+    public static final Navigation PeerFeed = new Navigation("PeerFeed", R.string.peer_feed, R.layout.placeholder, null, PeerTabs);
+    public static final Navigation PrivateMessages = new Navigation("PeerMessaging", R.string.message_list, R.layout.message_list, null, PeerTabs);
 }
