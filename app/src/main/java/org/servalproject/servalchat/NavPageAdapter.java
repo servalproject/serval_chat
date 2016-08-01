@@ -97,6 +97,13 @@ public class NavPageAdapter extends PagerAdapter
 
     @Override
     public void onDetach(boolean configChange) {
+        for(ViewState state:views){
+            if (state==null)
+                continue;
+            ILifecycle lifecycle = state.getLifecycle();
+            if (lifecycle!=null)
+                lifecycle.onDetach(configChange);
+        }
     }
 
     @Override

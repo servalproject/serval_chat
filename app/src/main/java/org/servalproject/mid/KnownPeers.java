@@ -55,7 +55,7 @@ public class KnownPeers {
 		}
 	};
 
-	Peer getPeer(SubscriberId sid){
+	public Peer getPeer(SubscriberId sid){
 		Peer p = peers.get(sid);
 		if (p!=null)
 			return p;

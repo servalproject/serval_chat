@@ -76,7 +76,7 @@ public class Navigation {
     public static final Navigation PeerList = new Navigation("PeerList", R.string.peer_list, R.layout.peer_list, null, Main);
 
     public static final Navigation PeerTabs = new Navigation("PeerTabs", R.string.app_name, R.layout.main_tabs);
-    public static final Navigation PeerDetails = new Navigation("PeerDetails", R.string.peer_details, R.layout.placeholder, null, PeerTabs);
+    public static final Navigation PeerDetails = new Navigation("PeerDetails", R.string.peer_details, R.layout.peer_details, null, PeerTabs);
     public static final Navigation PeerFeed = new Navigation("PeerFeed", R.string.peer_feed, R.layout.placeholder, null, PeerTabs);
     public static final Navigation PrivateMessages = new Navigation("PeerMessaging", R.string.message_list, R.layout.message_list, null, PeerTabs);
 }
