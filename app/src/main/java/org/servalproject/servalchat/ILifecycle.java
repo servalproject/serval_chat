@@ -5,7 +5,7 @@ package org.servalproject.servalchat;
  */
 public interface ILifecycle {
 
-    void onDetach();
+    void onDetach(boolean configChange);
 
     void onVisible();
 

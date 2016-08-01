@@ -15,15 +15,14 @@ import java.util.Collection;
 public class MessageList {
     private final Serval serval;
     private boolean hasMore = true;
-    private final SubscriberId self;
-    private final SubscriberId peer;
+    public final SubscriberId self;
+    public final SubscriberId peer;
     private final ListObserverSet<MeshMSMessage> observeFuture;
     private boolean closed = false;
     private MeshMSMessageList futureList;
     private MeshMSMessageList pastList;
     private String token;
     private boolean polling = false;
-    private Thread pollingThread;
 
     MessageList(Serval serval, SubscriberId self, SubscriberId peer){
         this.serval = serval;
@@ -48,9 +47,12 @@ public class MessageList {
         observeFuture.remove(observer);
         if (!observeFuture.hasObservers()){
             polling = false;
-            Thread p = pollingThread;
-            if (p!=null)
-                p.interrupt();
+            if (futureList != null){
+                try {
+                    futureList.close();
+                } catch (IOException e) {}
+                futureList = null;
+            }
         }
     }
 
@@ -58,7 +60,6 @@ public class MessageList {
         @Override
         public void run() {
             try {
-                pollingThread = Thread.currentThread();
                 while (polling) {
                     MeshMSMessageList list = futureList = serval.getResultClient().meshmsListMessagesSince(self, peer, token);
                     MeshMSMessage item;
@@ -72,27 +73,10 @@ public class MessageList {
                 }
             } catch (IOException e) {
                 // ignore if we caused this deliberately in another thread.
-                if (!closed)
+                if (polling)
                     throw new IllegalStateException(e);
             } catch (Exception e) {
                 throw new IllegalStateException(e);
-            } finally {
-                pollingThread = null;
-            }
-
-            if (closed){
-                if (pastList !=null) {
-                    try {
-                        pastList.close();
-                    } catch (IOException e) {}
-                    pastList = null;
-                }
-                if (futureList != null){
-                    try {
-                        futureList.close();
-                    } catch (IOException e) {}
-                    futureList = null;
-                }
             }
         }
     };
@@ -109,46 +93,55 @@ public class MessageList {
         serval.getResultClient().meshmsMarkAllMessagesRead(self, peer);
     }
 
-    public boolean moreOldMessages(int maxCount, Collection<MeshMSMessage> messageList) throws ServalDInterfaceException, MeshMSException, IOException {
-        if (serval.uiHandler.isUiThread())
-            throw new IllegalStateException();
-        if (hasMore) {
-            if (pastList == null)
-                pastList = serval.getResultClient().meshmsListMessages(self, peer);
+    public boolean hasMore(){
+        return hasMore;
+    }
 
-            for (int i = 0; i < maxCount; i++) {
-                MeshMSMessage item = pastList.nextMessage();
-                if (item == null) {
-                    hasMore = false;
-                    break;
-                }
-                if (token == null) {
-                    token = item.token;
-                    start();
-                }
-                messageList.add(item);
-            }
-/*
-            if (token == null){
-                // TODO fix newsince API to allow waiting for new messages when the pastList is empty
-                token = "";
-                serval.runOnThreadPool(readFuture);
-            }
-            */
-        }
-        if (!hasMore && pastList !=null) {
+    public MeshMSMessage nextMessage() throws ServalDInterfaceException, MeshMSException, IOException {
+        if (!hasMore)
+            return null;
+        if (pastList == null)
+            pastList = serval.getResultClient().meshmsListMessages(self, peer);
+
+        MeshMSMessage item = pastList.nextMessage();
+        if (item == null) {
+            hasMore = false;
             pastList.close();
             pastList = null;
+            return null;
         }
-        return hasMore;
+        if (token == null) {
+            token = item.token;
+            start();
+        }
+        return item;
+    }
+
+    public boolean moreOldMessages(int maxCount, Collection<MeshMSMessage> messageList) throws ServalDInterfaceException, MeshMSException, IOException {
+        for (int i = 0; i < maxCount; i++) {
+            MeshMSMessage item = nextMessage();
+            if (item==null)
+                return false;
+            messageList.add(item);
+        }
+        return true;
     }
 
     public void close() {
         hasMore = false;
         polling = false;
         closed = true;
-        Thread p = pollingThread;
-        if (p!=null)
-            p.interrupt();
+        if (pastList !=null) {
+            try {
+                pastList.close();
+            } catch (IOException e) {}
+            pastList = null;
+        }
+        if (futureList != null){
+            try {
+                futureList.close();
+            } catch (IOException e) {}
+            futureList = null;
+        }
     }
 }

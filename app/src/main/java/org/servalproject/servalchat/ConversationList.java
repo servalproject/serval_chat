@@ -39,7 +39,7 @@ public class ConversationList
 
     @Override
     protected void bind(ConversationHolder holder, MeshMSConversation item) {
-        holder.name.setText(item.them.toString());
+        holder.name.setText(item.them.sid.abbreviation());
         holder.conversation = item;
     }
 

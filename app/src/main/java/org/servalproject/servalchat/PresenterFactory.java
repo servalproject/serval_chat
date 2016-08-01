@@ -15,11 +15,15 @@ public abstract class PresenterFactory<V extends View, P extends Presenter<V>> {
 
     private Map<String, P> presenters = new HashMap<>();
 
-    public P getPresenter(V view, Identity id, Bundle savedState){
-        String key = (id == null) ? "null" : id.subscriber.toString();
+    protected String getKey(Identity id, Bundle savedState){
+        return id == null?"null":id.subscriber.toString();
+    }
+
+    public final P getPresenter(V view, Identity id, Bundle savedState){
+        String key = getKey(id, savedState);
         P ret = presenters.get(key);
         if (ret == null) {
-            ret = create(id);
+            ret = create(key, id);
             ret.restore(savedState);
         }
         ret.takeView(view);
@@ -27,11 +31,9 @@ public abstract class PresenterFactory<V extends View, P extends Presenter<V>> {
         return ret;
     }
 
-    public void release(P presenter){
-        Identity id = presenter.identity;
-        String key = (id == null) ? "null" : id.subscriber.toString();
-        presenters.remove(key);
+    public void release(Presenter<?> presenter){
+        presenters.remove(presenter.key);
     }
 
-    protected abstract P create(Identity id);
+    protected abstract P create(String key, Identity id);
 }

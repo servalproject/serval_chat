@@ -1,18 +1,24 @@
 package org.servalproject.servalchat;
 
 import android.os.Bundle;
+import android.view.View;
 
 import org.servalproject.mid.Identity;
 
 /**
  * Created by jeremy on 20/07/16.
  */
-public abstract class Presenter<V> implements ILifecycle {
+public abstract class Presenter<V extends View> implements ILifecycle {
     private V view;
 
+    public final String key;
     public final Identity identity;
-    protected Presenter(Identity identity){
+    private PresenterFactory<V, ?> factory;
+
+    protected Presenter(PresenterFactory<V, ?> factory, String key, Identity identity){
+        this.key = key;
         this.identity = identity;
+        this.factory = factory;
     }
 
     protected final V getView(){
@@ -35,9 +41,18 @@ public abstract class Presenter<V> implements ILifecycle {
 
     }
 
+    void onDestroy(){
+
+    }
+
     @Override
-    public void onDetach() {
+    public void onDetach(boolean changingConfig) {
         takeView(null);
+        if (!changingConfig) {
+            factory.release(this);
+            factory = null;
+            onDestroy();
+        }
     }
 
     @Override

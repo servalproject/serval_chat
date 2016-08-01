@@ -54,7 +54,7 @@ public class NavPageAdapter extends PagerAdapter
         if (lifecycle!=null) {
             if (visible)
                 lifecycle.onHidden();
-            lifecycle.onDetach();
+            lifecycle.onDetach(false);
         }
         container.removeView(state.view);
         views[position] = null;
@@ -96,7 +96,7 @@ public class NavPageAdapter extends PagerAdapter
     }
 
     @Override
-    public void onDetach() {
+    public void onDetach(boolean configChange) {
     }
 
     @Override

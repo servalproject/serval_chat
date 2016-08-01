@@ -17,9 +17,13 @@
     <string name="identity_update">Update</string>
     <string name="add">Add</string>
     <string name="crash">Crash!</string>
+    <string name="block_contact">Block</string>
+    <string name="ignore_contact">Ignore</string>
+    <string name="add_contact">Add</string>
 
     <string name="private_messaging_title">New messages</string>
     <string name="message_list">Messages</string>
+    <string name="send_message">Send</string>
     <plurals name="private_messages">
         <item quantity="one">%1$s has %2$d unread message</item>
         <item quantity="other">%1$s has %2$d unread messages</item>

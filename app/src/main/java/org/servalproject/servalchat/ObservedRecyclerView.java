@@ -70,7 +70,7 @@ public abstract class ObservedRecyclerView<T, H extends RecyclerView.ViewHolder>
     }
 
     @Override
-    public void onDetach() {
+    public void onDetach(boolean configChanging) {
 
     }
 

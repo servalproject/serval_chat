@@ -1,7 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
-<org.servalproject.servalchat.PrivateMessageList xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<org.servalproject.servalchat.PrivateMessaging
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    >
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:text="@string/send_message"
+        android:id="@+id/send"/>
 
-</org.servalproject.servalchat.PrivateMessageList>
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/send"
+        android:layout_toLeftOf="@id/send"
+        android:id="@+id/message" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/message_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/message"
+        android:layout_alignParentTop="true"
+        android:paddingBottom="@dimen/activity_vertical_margin"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin" />
+
+
+</org.servalproject.servalchat.PrivateMessaging>

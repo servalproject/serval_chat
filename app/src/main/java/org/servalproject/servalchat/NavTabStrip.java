@@ -21,7 +21,7 @@ public class NavTabStrip extends LinearLayout implements IContainerView, INaviga
     }
 
     @Override
-    public void deactivate(ViewState viewState) {
+    public void deactivate(ViewState viewState, boolean configChange) {
         // Noop, handled by viewpager
     }
 

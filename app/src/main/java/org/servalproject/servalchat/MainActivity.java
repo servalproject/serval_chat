@@ -92,6 +92,16 @@ public class MainActivity extends AppCompatActivity implements IContainerView {
         }
     };
 
+    private void popViewsTo(int offset, boolean configChange){
+        for (int j=viewStack.size()-1; j>=offset; j--){
+            ViewState v = viewStack.get(j);
+            // remove views from their containers (if required)
+            IContainerView container = j>0 ? viewStack.get(j -1).getContainer() : this;
+            container.deactivate(v, configChange);
+            viewStack.remove(j);
+        }
+    }
+
     private void go(){
         HistoryItem item = history.getTop();
         Navigation n = item.key;
@@ -140,13 +150,7 @@ public class MainActivity extends AppCompatActivity implements IContainerView {
         }
 
         // pop un-common views
-        for (int j=viewStack.size()-1; j>=i; j--){
-            ViewState v = viewStack.get(j);
-            // remove views from their containers (if required)
-            IContainerView container = j>0 ? viewStack.get(j -1).getContainer() : this;
-            container.deactivate(v);
-            viewStack.remove(j);
-        }
+        popViewsTo(i, false);
 
         // add views (& locate containers?)
         LayoutInflater inflater = LayoutInflater.from(this);
@@ -311,21 +315,39 @@ public class MainActivity extends AppCompatActivity implements IContainerView {
                 lifecycle.onVisible();
         }
         super.onStart();
+        changingConfig = false;
+    }
+
+    private boolean changingConfig = false;
+    @Override
+    public Object onRetainCustomNonConfigurationInstance() {
+        changingConfig = true;
+        return super.onRetainCustomNonConfigurationInstance();
     }
 
     @Override
-    public void deactivate(ViewState state) {
+    protected void onDestroy() {
+        if (Build.VERSION.SDK_INT>=11)
+            changingConfig = isChangingConfigurations();
+        popViewsTo(0, changingConfig);
+        super.onDestroy();
+    }
+
+    @Override
+    public void deactivate(ViewState state, boolean configChange) {
         ILifecycle lifecycle = state.getLifecycle();
         if (isStarted && lifecycle!=null)
             lifecycle.onHidden();
         if (lifecycle!=null)
-            lifecycle.onDetach();
+            lifecycle.onDetach(configChange);
         rootLayout.removeView(state.view);
     }
 
     @Override
     public ViewState activate(Navigation n, Identity identity, Bundle args) {
         ViewState ret = ViewState.Inflate(this, n, identity, args);
+        ret.view.setLayoutParams(new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         rootLayout.addView(ret.view);
         ILifecycle lifecycle = ret.getLifecycle();
         if (isStarted && lifecycle!=null)
@@ -351,6 +373,11 @@ public class MainActivity extends AppCompatActivity implements IContainerView {
                     }
                 });
     }
+
+    public void showSnack(CharSequence message, int length) {
+        this.showSnack(message, length, null, null);
+    }
+
     public void showSnack(CharSequence message, int length, CharSequence actionLabel, View.OnClickListener action) {
         Snackbar s = Snackbar.make(coordinator, message, length);
         if (action!=null && actionLabel!=null)
