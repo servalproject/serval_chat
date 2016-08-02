@@ -4,6 +4,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
@@ -72,21 +73,37 @@ public class Notifications {
         hashCode = newHashCode;
 
         NotificationManager nm = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
-        int unread = id.messaging.getUnreadCount();
-        if (unread==0){
+
+        MeshMSConversation unread = null;
+        int unreadCount=0;
+        for (MeshMSConversation conv:id.messaging.conversations) {
+            if (!conv.isRead) {
+                unread = conv;
+                unreadCount++;
+            }
+        }
+
+        if (unreadCount==0){
             Log.v(TAG, "Cancelling "+NotificationTag+" "+notificationId);
             nm.cancel(NotificationTag, notificationId);
         }else{
 
-            // TODO open message thread if only one unread
-            Intent intent = MainActivity.getIntentFor(context, id, Navigation.Inbox, null);
+            Navigation key = Navigation.Inbox;
+            Bundle args = null;
+            if (unreadCount == 1){
+                key = Navigation.PrivateMessages;
+                args = new Bundle();
+                args.putByteArray("them", unread.them.sid.getBinary());
+            }
+
+            Intent intent = MainActivity.getIntentFor(context, id, key, args);
             PendingIntent pending = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
             NotificationCompat.Builder builder =
                     new NotificationCompat.Builder(context)
                     .setSmallIcon(R.mipmap.ic_launcher)
                     .setContentTitle(context.getString(R.string.private_messaging_title))
-                    .setContentText(context.getResources().getQuantityString(R.plurals.private_messages, unread, id.getName(), unread))
+                    .setContentText(context.getResources().getQuantityString(R.plurals.private_messages, unreadCount, id.getName(), unreadCount))
                     .setContentIntent(pending)
                     ;
 

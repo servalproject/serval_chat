@@ -107,15 +107,16 @@ public class MessageList {
             pastList = serval.getResultClient().meshmsListMessages(self, peer);
 
         MeshMSMessage item = pastList.nextMessage();
+        if (token == null) {
+            token = (item == null) ? "" : item.token;
+            start();
+        }
+
         if (item == null) {
             hasMore = false;
             pastList.close();
             pastList = null;
             return null;
-        }
-        if (token == null) {
-            token = item.token;
-            start();
         }
         return item;
     }
