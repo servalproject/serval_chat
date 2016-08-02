@@ -27,7 +27,7 @@
     <string name="peer_feed">Feed</string>
     <string name="peer_details">Details</string>
     <plurals name="private_messages">
-        <item quantity="one">%1$s has %2$d unread message</item>
-        <item quantity="other">%1$s has %2$d unread messages</item>
+        <item quantity="one">%1$s has %2$d unread conversation</item>
+        <item quantity="other">%1$s has %2$d unread conversations</item>
     </plurals>
 </resources>

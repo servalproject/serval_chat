@@ -14,6 +14,7 @@ import java.util.Collection;
  */
 public class MessageList {
     private final Serval serval;
+    private final Messaging messaging;
     private boolean hasMore = true;
     public final SubscriberId self;
     public final SubscriberId peer;
@@ -24,8 +25,9 @@ public class MessageList {
     private String token;
     private boolean polling = false;
 
-    MessageList(Serval serval, SubscriberId self, SubscriberId peer){
+    MessageList(Serval serval, Messaging messaging, SubscriberId self, SubscriberId peer){
         this.serval = serval;
+        this.messaging = messaging;
         this.self = self;
         this.peer = peer;
         this.observeFuture = new ListObserverSet<>(serval.uiHandler);
@@ -91,6 +93,7 @@ public class MessageList {
         if (serval.uiHandler.isUiThread())
             throw new IllegalStateException();
         serval.getResultClient().meshmsMarkAllMessagesRead(self, peer);
+        messaging.refresh();
     }
 
     public boolean hasMore(){

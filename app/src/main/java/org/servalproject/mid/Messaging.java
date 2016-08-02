@@ -44,7 +44,7 @@ public class Messaging {
         @Override
         public void added(RhizomeListBundle obj) {
             if (obj.manifest.service.equals(SERVICE)
-            && obj.manifest.recipient == identity.subscriber.sid)
+            && obj.manifest.recipient.equals(identity.subscriber.sid))
                 refresh();
         }
 
@@ -59,7 +59,7 @@ public class Messaging {
     };
 
     private Refresh refreshing;
-    private void refresh(){
+    void refresh(){
         Log.v(TAG, "Refreshing private messages for "+identity.subscriber.toString());
         synchronized (this) {
             Refresh refreshing = this.refreshing;
@@ -124,6 +124,6 @@ public class Messaging {
     }
 
     public MessageList getPrivateMessages(Subscriber peer) {
-        return new MessageList(serval, identity.subscriber.sid, peer.sid);
+        return new MessageList(serval, this, identity.subscriber.sid, peer.sid);
     }
 }

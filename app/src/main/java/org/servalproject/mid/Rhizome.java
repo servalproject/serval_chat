@@ -67,8 +67,8 @@ public class Rhizome extends BroadcastReceiver{
 						RhizomeListBundle bundle;
 						while ((bundle = list.nextBundle()) != null) {
 							token = bundle.token;
-							observerSet.onAdd(bundle);
 							Log.v(TAG, "Added bundle; "+bundle.manifest.id.toHex());
+							observerSet.onAdd(bundle);
 						}
 					} catch (IOException e) {
 						if (list == watchList)
