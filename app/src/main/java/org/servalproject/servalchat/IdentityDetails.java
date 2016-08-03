@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -16,8 +17,10 @@ import org.servalproject.mid.Identity;
 public class IdentityDetails extends LinearLayout
         implements INavigate, View.OnClickListener {
     MainActivity activity;
-    TextView name;
-    TextView phone;
+    TextView sidLabel;
+    TextView sid;
+    EditText name;
+    EditText phone;
     Button update;
     IdentityDetailsPresenter presenter;
 
@@ -28,8 +31,10 @@ public class IdentityDetails extends LinearLayout
     @Override
     public ILifecycle onAttach(MainActivity activity, Navigation n, Identity id, Bundle args) {
         this.activity = activity;
-        name = (TextView)findViewById(R.id.name);
-        phone = (TextView)findViewById(R.id.did);
+        sidLabel = (TextView)findViewById(R.id.sid_label);
+        sid = (TextView)findViewById(R.id.sid);
+        name = (EditText)findViewById(R.id.name);
+        phone = (EditText)findViewById(R.id.did);
         update = (Button)findViewById(R.id.update);
         update.setOnClickListener(this);
 

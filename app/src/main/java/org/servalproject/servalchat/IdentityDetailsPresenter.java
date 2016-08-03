@@ -1,6 +1,7 @@
 package org.servalproject.servalchat;
 
 import android.os.AsyncTask;
+import android.view.View;
 
 import org.servalproject.mid.Identity;
 import org.servalproject.mid.Serval;
@@ -26,9 +27,18 @@ public class IdentityDetailsPresenter extends Presenter<IdentityDetails> {
 
     @Override
     protected void bind() {
-        getView().name.setText(identity == null ? null : identity.getName());
-        getView().phone.setText(identity == null ? null : identity.getDid());
-        getView().update.setEnabled(!updating);
+        IdentityDetails view = getView();
+        if (identity!=null){
+            view.name.setText(identity.getName());
+            view.phone.setText(identity.getDid());
+            view.sid.setText(identity.subscriber.sid.abbreviation());
+            view.sidLabel.setVisibility(View.VISIBLE);
+            view.sid.setVisibility(View.VISIBLE);
+        }else{
+            view.sidLabel.setVisibility(View.GONE);
+            view.sid.setVisibility(View.GONE);
+        }
+        view.update.setEnabled(!updating);
     }
 
     @Override
