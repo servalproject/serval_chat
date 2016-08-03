@@ -1,4 +1,4 @@
-package org.servalproject.servalchat;
+package org.servalproject.servalchat.identity;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -14,6 +14,9 @@ import android.widget.TextView;
 import org.servalproject.mid.ListObserverSet;
 import org.servalproject.mid.Peer;
 import org.servalproject.mid.Serval;
+import org.servalproject.servalchat.navigation.Navigation;
+import org.servalproject.servalchat.views.ObservedRecyclerView;
+import org.servalproject.servalchat.R;
 import org.servalproject.servaldna.SubscriberId;
 
 import java.util.ArrayList;

@@ -1,4 +1,4 @@
-package org.servalproject.servalchat;
+package org.servalproject.servalchat.navigation;
 
 /**
  * Created by jeremy on 14/06/16.

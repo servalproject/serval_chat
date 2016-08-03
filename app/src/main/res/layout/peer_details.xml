@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<org.servalproject.servalchat.PeerDetails
+<org.servalproject.servalchat.peer.PeerDetails
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
@@ -42,4 +42,4 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:id="@+id/number" />
-</org.servalproject.servalchat.PeerDetails>
+</org.servalproject.servalchat.peer.PeerDetails>

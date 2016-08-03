@@ -1,4 +1,4 @@
-package org.servalproject.servalchat;
+package org.servalproject.servalchat.peer;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -11,6 +11,11 @@ import android.widget.EditText;
 import android.widget.RelativeLayout;
 
 import org.servalproject.mid.Identity;
+import org.servalproject.servalchat.navigation.ILifecycle;
+import org.servalproject.servalchat.navigation.INavigate;
+import org.servalproject.servalchat.navigation.MainActivity;
+import org.servalproject.servalchat.navigation.Navigation;
+import org.servalproject.servalchat.R;
 
 /**
  * Created by jeremy on 27/07/16.

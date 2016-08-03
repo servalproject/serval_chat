@@ -1,4 +1,4 @@
-package org.servalproject.servalchat;
+package org.servalproject.servalchat.identity;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -13,6 +13,12 @@ import android.widget.TextView;
 
 import org.servalproject.mid.Identity;
 import org.servalproject.mid.Messaging;
+import org.servalproject.servalchat.navigation.ILifecycle;
+import org.servalproject.servalchat.navigation.INavigate;
+import org.servalproject.servalchat.navigation.MainActivity;
+import org.servalproject.servalchat.navigation.Navigation;
+import org.servalproject.servalchat.views.ObservedRecyclerView;
+import org.servalproject.servalchat.R;
 import org.servalproject.servaldna.meshms.MeshMSConversation;
 
 /**
@@ -20,7 +26,7 @@ import org.servalproject.servaldna.meshms.MeshMSConversation;
  */
 public class ConversationList
         extends ObservedRecyclerView<MeshMSConversation, ConversationList.ConversationHolder>
-        implements INavigate{
+        implements INavigate {
 
     private Messaging messaging;
     private static final String TAG = "ConversationList";

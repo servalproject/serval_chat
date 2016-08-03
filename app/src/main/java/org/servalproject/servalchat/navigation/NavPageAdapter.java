@@ -1,4 +1,4 @@
-package org.servalproject.servalchat;
+package org.servalproject.servalchat.navigation;
 
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;

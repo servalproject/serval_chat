@@ -1,10 +1,13 @@
-package org.servalproject.servalchat;
+package org.servalproject.servalchat.identity;
 
 import android.os.AsyncTask;
 import android.view.View;
 
 import org.servalproject.mid.Identity;
 import org.servalproject.mid.Serval;
+import org.servalproject.servalchat.navigation.Navigation;
+import org.servalproject.servalchat.views.Presenter;
+import org.servalproject.servalchat.views.PresenterFactory;
 
 /**
  * Created by jeremy on 20/07/16.

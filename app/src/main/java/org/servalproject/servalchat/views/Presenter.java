@@ -1,9 +1,10 @@
-package org.servalproject.servalchat;
+package org.servalproject.servalchat.views;
 
 import android.os.Bundle;
 import android.view.View;
 
 import org.servalproject.mid.Identity;
+import org.servalproject.servalchat.navigation.ILifecycle;
 
 /**
  * Created by jeremy on 20/07/16.
@@ -33,11 +34,11 @@ public abstract class Presenter<V extends View> implements ILifecycle {
 
     protected void bind(){}
 
-    void save(Bundle config){
+    protected void save(Bundle config){
 
     }
 
-    void restore(Bundle config){
+    protected void restore(Bundle config){
 
     }
 

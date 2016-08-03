@@ -1,4 +1,4 @@
-package org.servalproject.servalchat;
+package org.servalproject.servalchat.navigation;
 
 import android.content.Context;
 import android.content.Intent;
@@ -22,6 +22,7 @@ import android.widget.LinearLayout;
 import org.servalproject.mid.Identity;
 import org.servalproject.mid.ListObserver;
 import org.servalproject.mid.Serval;
+import org.servalproject.servalchat.R;
 
 import java.util.Stack;
 

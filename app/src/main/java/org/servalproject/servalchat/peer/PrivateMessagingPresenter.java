@@ -1,4 +1,4 @@
-package org.servalproject.servalchat;
+package org.servalproject.servalchat.peer;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -12,6 +12,9 @@ import org.servalproject.mid.Identity;
 import org.servalproject.mid.ListObserver;
 import org.servalproject.mid.MessageList;
 import org.servalproject.mid.Serval;
+import org.servalproject.servalchat.views.Presenter;
+import org.servalproject.servalchat.views.PresenterFactory;
+import org.servalproject.servalchat.R;
 import org.servalproject.servaldna.AbstractId;
 import org.servalproject.servaldna.Subscriber;
 import org.servalproject.servaldna.SubscriberId;
@@ -126,13 +129,13 @@ public final class PrivateMessagingPresenter extends Presenter<PrivateMessaging>
     }
 
     @Override
-    void save(Bundle config) {
+    protected void save(Bundle config) {
         super.save(config);
         config.putByteArray("them", messages.peer.getBinary());
     }
 
     @Override
-    void restore(Bundle config) {
+    protected void restore(Bundle config) {
         try {
             // TODO peer details?
             SubscriberId sid = new SubscriberId(config.getByteArray("them"));

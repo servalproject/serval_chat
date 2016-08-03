@@ -1,4 +1,4 @@
-package org.servalproject.servalchat;
+package org.servalproject.servalchat.views;
 
 import android.content.Context;
 import android.support.annotation.Nullable;

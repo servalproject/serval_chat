@@ -1,4 +1,4 @@
-package org.servalproject.servalchat;
+package org.servalproject.servalchat.identity;
 
 import android.content.Context;
 import android.graphics.Typeface;
@@ -17,6 +17,10 @@ import android.widget.TextView;
 import org.servalproject.mid.Identity;
 import org.servalproject.mid.ListObserverSet;
 import org.servalproject.mid.Serval;
+import org.servalproject.servalchat.navigation.IHaveMenu;
+import org.servalproject.servalchat.navigation.Navigation;
+import org.servalproject.servalchat.views.ObservedRecyclerView;
+import org.servalproject.servalchat.R;
 import org.servalproject.servaldna.keyring.KeyringIdentity;
 import org.servalproject.servaldna.keyring.KeyringIdentityList;
 
@@ -101,7 +105,7 @@ public class IdentityList
 
     @Override
     public void populateItems(Menu menu) {
-        MenuItem add = menu.add(Menu.NONE, ADD, Menu.NONE, R.string.add)
+        MenuItem add = menu.add(Menu.NONE, ADD, Menu.NONE, R.string.add_identity)
                 .setOnMenuItemClickListener(this)
                 .setIcon(R.drawable.ic_add_circle);
         MenuItemCompat.setShowAsAction(add, MenuItemCompat.SHOW_AS_ACTION_IF_ROOM);

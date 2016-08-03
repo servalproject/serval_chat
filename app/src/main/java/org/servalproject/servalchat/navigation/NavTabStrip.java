@@ -1,4 +1,4 @@
-package org.servalproject.servalchat;
+package org.servalproject.servalchat.navigation;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -8,6 +8,7 @@ import android.util.AttributeSet;
 import android.widget.LinearLayout;
 
 import org.servalproject.mid.Identity;
+import org.servalproject.servalchat.R;
 
 /**
  * Created by jeremy on 7/06/16.

@@ -1,4 +1,4 @@
-package org.servalproject.servalchat;
+package org.servalproject.servalchat.views;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -9,6 +9,10 @@ import android.util.AttributeSet;
 import org.servalproject.mid.Identity;
 import org.servalproject.mid.ListObserver;
 import org.servalproject.mid.ListObserverSet;
+import org.servalproject.servalchat.navigation.ILifecycle;
+import org.servalproject.servalchat.navigation.INavigate;
+import org.servalproject.servalchat.navigation.MainActivity;
+import org.servalproject.servalchat.navigation.Navigation;
 
 /**
  * Created by jeremy on 20/06/16.

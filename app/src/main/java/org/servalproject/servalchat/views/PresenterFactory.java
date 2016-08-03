@@ -1,4 +1,4 @@
-package org.servalproject.servalchat;
+package org.servalproject.servalchat.views;
 
 import android.os.Bundle;
 import android.view.View;

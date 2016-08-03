@@ -1,4 +1,4 @@
-package org.servalproject.servalchat;
+package org.servalproject.servalchat.peer;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -13,6 +13,12 @@ import org.servalproject.mid.Identity;
 import org.servalproject.mid.Observer;
 import org.servalproject.mid.Peer;
 import org.servalproject.mid.Serval;
+import org.servalproject.servalchat.navigation.IHaveMenu;
+import org.servalproject.servalchat.navigation.ILifecycle;
+import org.servalproject.servalchat.navigation.INavigate;
+import org.servalproject.servalchat.navigation.MainActivity;
+import org.servalproject.servalchat.navigation.Navigation;
+import org.servalproject.servalchat.R;
 import org.servalproject.servaldna.AbstractId;
 import org.servalproject.servaldna.SubscriberId;
 

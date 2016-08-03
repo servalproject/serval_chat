@@ -11,6 +11,8 @@ import android.util.Log;
 import org.servalproject.mid.Identity;
 import org.servalproject.mid.ListObserver;
 import org.servalproject.mid.Serval;
+import org.servalproject.servalchat.navigation.MainActivity;
+import org.servalproject.servalchat.navigation.Navigation;
 import org.servalproject.servaldna.meshms.MeshMSConversation;
 
 /**

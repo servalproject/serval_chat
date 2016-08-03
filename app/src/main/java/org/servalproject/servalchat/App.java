@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Intent;
 
 import org.servalproject.mid.Serval;
+import org.servalproject.servalchat.navigation.Navigation;
 
 /**
  * Created by jeremy on 11/05/16.
