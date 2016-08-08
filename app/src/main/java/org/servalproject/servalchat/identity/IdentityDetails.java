@@ -49,7 +49,10 @@ public class IdentityDetails extends LinearLayout
 
     @Override
     public void onClick(View v) {
-        presenter.update();
+        switch (v.getId()){
+            case R.id.update:
+                presenter.update();
+        }
     }
 
 }

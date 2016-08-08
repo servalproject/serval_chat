@@ -65,7 +65,7 @@ public class IdentityDetailsPresenter extends Presenter<IdentityDetails> {
                     if (e!=null)
                         view.activity.showError(e);
                     else {
-                        view.activity.go(result, Navigation.Feed, null);
+                        view.activity.go(result, Navigation.MyFeed, null);
                     }
                 }
             }

@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import org.servalproject.mid.KnownPeers;
 import org.servalproject.mid.ListObserverSet;
 import org.servalproject.mid.Peer;
 import org.servalproject.mid.Serval;
@@ -86,7 +87,7 @@ public class PeerList extends ObservedRecyclerView<Peer, PeerList.PeerHolder> {
         @Override
         public void onClick(View v) {
             Bundle args = new Bundle();
-            args.putByteArray("them", peer.sid.getBinary());
+            KnownPeers.saveSubscriber(peer.subscriber, args);
             activity.go(Navigation.PeerDetails, args);
         }
     }
@@ -115,9 +116,9 @@ public class PeerList extends ObservedRecyclerView<Peer, PeerList.PeerHolder> {
     private boolean add(Peer p){
         if (!p.isReachable())
             return false;
-        if (addedPeers.contains(p.sid))
+        if (addedPeers.contains(p.subscriber.sid))
             return false;
-        addedPeers.add(p.sid);
+        addedPeers.add(p.subscriber.sid);
         items.add(p);
         sorted = false;
         return true;

@@ -124,6 +124,6 @@ public class Messaging {
     }
 
     public MessageList getPrivateMessages(Subscriber peer) {
-        return new MessageList(serval, this, identity.subscriber.sid, peer.sid);
+        return new MessageList(serval, this, identity.subscriber, peer);
     }
 }

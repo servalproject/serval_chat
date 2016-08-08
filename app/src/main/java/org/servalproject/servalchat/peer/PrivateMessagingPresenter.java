@@ -9,34 +9,26 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import org.servalproject.mid.Identity;
-import org.servalproject.mid.ListObserver;
+import org.servalproject.mid.KnownPeers;
 import org.servalproject.mid.MessageList;
 import org.servalproject.mid.Serval;
+import org.servalproject.servalchat.R;
 import org.servalproject.servalchat.views.Presenter;
 import org.servalproject.servalchat.views.PresenterFactory;
-import org.servalproject.servalchat.R;
+import org.servalproject.servalchat.views.ScrollingAdapter;
 import org.servalproject.servaldna.AbstractId;
 import org.servalproject.servaldna.Subscriber;
-import org.servalproject.servaldna.SubscriberId;
 import org.servalproject.servaldna.meshms.MeshMSMessage;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by jeremy on 27/07/16.
  */
-public final class PrivateMessagingPresenter extends Presenter<PrivateMessaging>
-        implements ListObserver<MeshMSMessage> {
+public final class PrivateMessagingPresenter extends Presenter<PrivateMessaging>{
     private MessageList messages;
 
-    private List<MeshMSMessage> future;
-    private List<MeshMSMessage> past;
     private static final String TAG = "PrivateMessaging";
     private boolean sending = false;
-    private boolean fetching = false;
-    private RecyclerView.Adapter<ItemHolder> adapter;
-    private boolean hasMore = true;
+    private ScrollingAdapter<MeshMSMessage, ItemHolder> adapter;
 
     private PrivateMessagingPresenter(PresenterFactory<PrivateMessaging, ?> factory, String key, Identity identity) {
         super(factory, key, identity);
@@ -48,8 +40,8 @@ public final class PrivateMessagingPresenter extends Presenter<PrivateMessaging>
         @Override
         protected String getKey(Identity id, Bundle savedState) {
             try {
-                SubscriberId them = new SubscriberId(savedState.getByteArray("them"));
-                return id.subscriber.sid.toHex()+":"+them.toHex();
+                Subscriber them = KnownPeers.getSubscriber(savedState);
+                return id.subscriber.sid.toHex()+":"+them.sid.toHex();
             } catch (AbstractId.InvalidBinaryException e) {
                 throw new IllegalStateException(e);
             }
@@ -68,82 +60,21 @@ public final class PrivateMessagingPresenter extends Presenter<PrivateMessaging>
         view.message.setEnabled(!sending);
         view.send.setEnabled(!sending);
         view.list.setAdapter(adapter);
-        view.list.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-                testPosition();
-            }
-        });
-    }
-
-    private void testPosition(){
-        if (fetching || !hasMore)
-            return;
-
-        PrivateMessaging view = getView();
-        int lastVisible = view.layoutManager.findLastVisibleItemPosition();
-        final int fetchCount = lastVisible + 15 - (past.size() + future.size());
-
-        if (fetchCount<=0)
-            return;
-
-        Log.v(TAG, "Fetching "+fetchCount+" more items ("+lastVisible+", "+past.size()+", "+future.size()+")");
-        fetching = true;
-
-        final AsyncTask<Void, MeshMSMessage, Void> fetch = new AsyncTask<Void, MeshMSMessage, Void>() {
-            @Override
-            protected Void doInBackground(Void... params) {
-                try{
-                    for (int i=0;i<fetchCount;i++){
-                        MeshMSMessage msg = messages.nextMessage();
-                        publishProgress(msg);
-                        if (msg == null)
-                            break;
-                    }
-                }catch (Exception e){
-                    throw new IllegalStateException(e);
-                }
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                super.onPostExecute(aVoid);
-                fetching = false;
-                testPosition();
-            }
-
-            @Override
-            protected void onProgressUpdate(MeshMSMessage... values) {
-                super.onProgressUpdate(values);
-                MeshMSMessage msg = values[0];
-                if (msg == null) {
-                    hasMore = false;
-                    adapter.notifyItemRemoved(past.size() + future.size());
-                }else
-                    addItem(msg, true);
-            }
-        };
-        fetch.execute();
     }
 
     @Override
     protected void save(Bundle config) {
         super.save(config);
-        config.putByteArray("them", messages.peer.getBinary());
+        KnownPeers.saveSubscriber(messages.peer, config);
     }
 
     @Override
     protected void restore(Bundle config) {
         try {
             // TODO peer details?
-            SubscriberId sid = new SubscriberId(config.getByteArray("them"));
-            Subscriber peer = new Subscriber(sid);
+            Subscriber peer = KnownPeers.getSubscriber(config);
             messages = identity.messaging.getPrivateMessages(peer);
-            future = new ArrayList<>();
-            past = new ArrayList<>();
-            adapter = new RecyclerView.Adapter<ItemHolder>() {
+            adapter = new ScrollingAdapter<MeshMSMessage, ItemHolder>(messages){
                 @Override
                 public ItemHolder onCreateViewHolder(ViewGroup parent, int viewType) {
                     LayoutInflater inflater = LayoutInflater.from(parent.getContext());
@@ -153,26 +84,22 @@ public final class PrivateMessagingPresenter extends Presenter<PrivateMessaging>
                     return new MessageHolder(inflater, parent, mine);
                 }
 
-                private MeshMSMessage getItem(int position){
-                    if (position<0)
-                        return null;
-                    int futureSize = future.size();
-                    if (position < futureSize)
-                        return future.get(futureSize - 1 - position);
-                    position -= futureSize;
-                    if (position<past.size())
-                        return past.get(position);
-                    return null;
+                @Override
+                protected void addItem(MeshMSMessage item, boolean inPast) {
+                    if (item.type == MeshMSMessage.Type.ACK_RECEIVED) {
+                        // TODO display "delivered" marker
+                        return;
+                    }
+                    super.addItem(item, inPast);
                 }
 
                 @Override
-                public void onBindViewHolder(ItemHolder holder, int position) {
-                    holder.bind(getItem(position));
+                protected void bind(ItemHolder holder, MeshMSMessage item) {
+                    holder.bind(item);
                 }
 
                 @Override
-                public int getItemViewType(int position) {
-                    MeshMSMessage item = getItem(position);
+                protected int getItemType(MeshMSMessage item) {
                     if (item == null)
                         return 4;
                     return item.type.ordinal();
@@ -185,14 +112,6 @@ public final class PrivateMessagingPresenter extends Presenter<PrivateMessaging>
                         return Long.MAX_VALUE;
                     return item.getId();
                 }
-
-                @Override
-                public int getItemCount() {
-                    int count = past.size() + future.size();
-                    if (hasMore)
-                        count++;
-                    return count;
-                }
             };
             adapter.setHasStableIds(true);
         } catch (AbstractId.InvalidBinaryException e) {
@@ -201,9 +120,7 @@ public final class PrivateMessagingPresenter extends Presenter<PrivateMessaging>
     }
 
     void onDestroy(){
-        messages.close();
-        future.clear();
-        past.clear();
+        adapter.clear();
         Serval.getInstance().runOnThreadPool(new Runnable() {
             @Override
             public void run() {
@@ -219,14 +136,13 @@ public final class PrivateMessagingPresenter extends Presenter<PrivateMessaging>
     @Override
     public void onVisible() {
         super.onVisible();
-        messages.observe(this);
-        testPosition();
+        adapter.onVisible();
     }
 
     @Override
     public void onHidden() {
         super.onHidden();
-        messages.stopObserving(this);
+        adapter.onHidden();
     }
 
     public void send(final String message){
@@ -272,43 +188,6 @@ public final class PrivateMessagingPresenter extends Presenter<PrivateMessaging>
         sender.execute();
     }
 
-    private void addItem(MeshMSMessage item, boolean inPast){
-        if (item.type == MeshMSMessage.Type.ACK_RECEIVED){
-            // TODO display "delivered" marker
-            return;
-        }
-
-        if (inPast){
-            past.add(item);
-            adapter.notifyItemInserted(past.size() + future.size() - 1);
-        }else{
-            future.add(item);
-            adapter.notifyItemInserted(0);
-            PrivateMessaging view = getView();
-            if (view != null)
-                view.layoutManager.scrollToPosition(0);
-        }
-    }
-
-    @Override
-    public void added(MeshMSMessage obj) {
-        addItem(obj, false);
-    }
-
-    @Override
-    public void removed(MeshMSMessage obj) {
-
-    }
-
-    @Override
-    public void updated(MeshMSMessage obj) {
-
-    }
-
-    @Override
-    public void reset() {
-
-    }
 
     public abstract class ItemHolder extends RecyclerView.ViewHolder{
         public ItemHolder(LayoutInflater inflater, ViewGroup parent, int layoutResource) {

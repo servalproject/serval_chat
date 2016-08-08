@@ -3,7 +3,8 @@
     <string name="my_details">Identity</string>
 
     <string name="peer_list">Nearby</string>
-    <string name="news_feed">Feed</string>
+    <string name="my_feed">Feed</string>
+    <string name="my_news">Activity</string>
     <string name="requests">Requests</string>
     <string name="blocked">Blocked</string>
     <string name="conversation_list">Inbox</string>

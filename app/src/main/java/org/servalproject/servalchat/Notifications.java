@@ -9,6 +9,7 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import org.servalproject.mid.Identity;
+import org.servalproject.mid.KnownPeers;
 import org.servalproject.mid.ListObserver;
 import org.servalproject.mid.Serval;
 import org.servalproject.servalchat.navigation.MainActivity;
@@ -95,7 +96,7 @@ public class Notifications {
             if (unreadCount == 1){
                 key = Navigation.PrivateMessages;
                 args = new Bundle();
-                args.putByteArray("them", unread.them.sid.getBinary());
+                KnownPeers.saveSubscriber(unread.them, args);
             }
 
             Intent intent = MainActivity.getIntentFor(context, id, key, args);

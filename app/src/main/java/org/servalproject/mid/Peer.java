@@ -1,11 +1,12 @@
 package org.servalproject.mid;
 
+import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 
 import org.servalproject.servaldna.RouteLink;
 import org.servalproject.servaldna.ServalDCommand;
-import org.servalproject.servaldna.SubscriberId;
+import org.servalproject.servaldna.Subscriber;
 
 /**
  * Created by jeremy on 4/05/16.
@@ -16,14 +17,14 @@ public final class Peer implements Comparable<Peer>{
 	private static long nextId=0;
 	private final long id;
 
-	Peer(Handler handler, SubscriberId sid){
-		this.sid = sid;
+	Peer(Handler handler, Subscriber subscriber){
+		this.subscriber = subscriber;
 		observers = new ObserverSet<>(handler, this);
 		id = nextId++;
 	}
 
 	public final ObserverSet<Peer> observers;
-	public final SubscriberId sid;
+	public final Subscriber subscriber;
 
 	ServalDCommand.LookupResult lookup;
 	public String getDid(){
@@ -66,7 +67,7 @@ public final class Peer implements Comparable<Peer>{
 	@Override
 	public String toString() {
 		return "Peer{" +
-				"sid=" + sid +
+				"subscriber=" + subscriber +
 				", lookup=" + lookup +
 				", link=" + link +
 				'}';
@@ -77,8 +78,12 @@ public final class Peer implements Comparable<Peer>{
 		if (n==null || "".equals(n))
 			n = getDid();
 		if (n==null || "".equals(n))
-			n = sid.abbreviation();
+			n = subscriber.sid.abbreviation();
 		return n;
+	}
+
+	public MessageFeed getFeed(){
+		return new MessageFeed(Serval.getInstance(), subscriber.signingKey);
 	}
 
 	@Override

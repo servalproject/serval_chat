@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import org.servalproject.mid.Identity;
+import org.servalproject.mid.KnownPeers;
 import org.servalproject.mid.Messaging;
 import org.servalproject.servalchat.navigation.ILifecycle;
 import org.servalproject.servalchat.navigation.INavigate;
@@ -83,7 +84,7 @@ public class ConversationList
         @Override
         public void onClick(View v) {
             Bundle args = new Bundle();
-            args.putByteArray("them", conversation.them.sid.getBinary());
+            KnownPeers.saveSubscriber(conversation.them, args);
             activity.go(identity, Navigation.PrivateMessages, args);
         }
     }

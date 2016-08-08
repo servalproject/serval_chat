@@ -13,14 +13,13 @@ import org.servalproject.mid.Identity;
 import org.servalproject.mid.Observer;
 import org.servalproject.mid.Peer;
 import org.servalproject.mid.Serval;
+import org.servalproject.servalchat.R;
 import org.servalproject.servalchat.navigation.IHaveMenu;
 import org.servalproject.servalchat.navigation.ILifecycle;
 import org.servalproject.servalchat.navigation.INavigate;
 import org.servalproject.servalchat.navigation.MainActivity;
 import org.servalproject.servalchat.navigation.Navigation;
-import org.servalproject.servalchat.R;
 import org.servalproject.servaldna.AbstractId;
-import org.servalproject.servaldna.SubscriberId;
 
 /**
  * Created by jeremy on 1/08/16.
@@ -46,10 +45,8 @@ public class PeerDetails extends LinearLayout
         sid = (TextView) findViewById(R.id.sid);
 
         try {
-            SubscriberId theirSid = new SubscriberId(args.getByteArray("them"));
-
             Serval serval = Serval.getInstance();
-            this.peer = serval.knownPeers.getPeer(theirSid);
+            this.peer = serval.knownPeers.getPeer(args);
             updated(this.peer);
         } catch (AbstractId.InvalidBinaryException e) {
             throw new IllegalStateException();
@@ -110,6 +107,6 @@ public class PeerDetails extends LinearLayout
     public void updated(Peer obj) {
         name.setText(peer.getName());
         number.setText(peer.getDid());
-        sid.setText(peer.sid.abbreviation());
+        sid.setText(peer.subscriber.sid.abbreviation());
     }
 }

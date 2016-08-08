@@ -1,23 +1,22 @@
 package org.servalproject.mid;
 
 import org.servalproject.servaldna.ServalDInterfaceException;
-import org.servalproject.servaldna.SubscriberId;
+import org.servalproject.servaldna.Subscriber;
 import org.servalproject.servaldna.meshms.MeshMSException;
 import org.servalproject.servaldna.meshms.MeshMSMessage;
 import org.servalproject.servaldna.meshms.MeshMSMessageList;
 
 import java.io.IOException;
-import java.util.Collection;
 
 /**
  * Created by jeremy on 11/07/16.
  */
-public class MessageList {
+public class MessageList implements IObservableList<MeshMSMessage, MeshMSException>{
     private final Serval serval;
     private final Messaging messaging;
     private boolean hasMore = true;
-    public final SubscriberId self;
-    public final SubscriberId peer;
+    public final Subscriber self;
+    public final Subscriber peer;
     private final ListObserverSet<MeshMSMessage> observeFuture;
     private boolean closed = false;
     private MeshMSMessageList futureList;
@@ -25,7 +24,7 @@ public class MessageList {
     private String token;
     private boolean polling = false;
 
-    MessageList(Serval serval, Messaging messaging, SubscriberId self, SubscriberId peer){
+    MessageList(Serval serval, Messaging messaging, Subscriber self, Subscriber peer){
         this.serval = serval;
         this.messaging = messaging;
         this.self = self;
@@ -63,7 +62,7 @@ public class MessageList {
         public void run() {
             try {
                 while (polling) {
-                    MeshMSMessageList list = futureList = serval.getResultClient().meshmsListMessagesSince(self, peer, token);
+                    MeshMSMessageList list = futureList = serval.getResultClient().meshmsListMessagesSince(self.sid, peer.sid, token);
                     MeshMSMessage item;
                     while (polling && (item = list.nextMessage()) != null) {
                         token = item.token;
@@ -86,25 +85,21 @@ public class MessageList {
     public void sendMessage(String message) throws ServalDInterfaceException, MeshMSException, IOException {
         if (serval.uiHandler.isUiThread())
             throw new IllegalStateException();
-        serval.getResultClient().meshmsSendMessage(self, peer, message);
+        serval.getResultClient().meshmsSendMessage(self.sid, peer.sid, message);
     }
 
     public void markRead() throws ServalDInterfaceException, MeshMSException, IOException {
         if (serval.uiHandler.isUiThread())
             throw new IllegalStateException();
-        serval.getResultClient().meshmsMarkAllMessagesRead(self, peer);
+        serval.getResultClient().meshmsMarkAllMessagesRead(self.sid, peer.sid);
         messaging.refresh();
     }
 
-    public boolean hasMore(){
-        return hasMore;
-    }
-
-    public MeshMSMessage nextMessage() throws ServalDInterfaceException, MeshMSException, IOException {
+    public MeshMSMessage next() throws ServalDInterfaceException, MeshMSException, IOException {
         if (!hasMore)
             return null;
         if (pastList == null)
-            pastList = serval.getResultClient().meshmsListMessages(self, peer);
+            pastList = serval.getResultClient().meshmsListMessages(self.sid, peer.sid);
 
         MeshMSMessage item = pastList.nextMessage();
         if (token == null) {
@@ -119,16 +114,6 @@ public class MessageList {
             return null;
         }
         return item;
-    }
-
-    public boolean moreOldMessages(int maxCount, Collection<MeshMSMessage> messageList) throws ServalDInterfaceException, MeshMSException, IOException {
-        for (int i = 0; i < maxCount; i++) {
-            MeshMSMessage item = nextMessage();
-            if (item==null)
-                return false;
-            messageList.add(item);
-        }
-        return true;
     }
 
     public void close() {

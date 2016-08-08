@@ -7,6 +7,7 @@ import org.servalproject.servaldna.keyring.KeyringIdentity;
  * Created by jeremy on 6/06/16.
  */
 public class Identity {
+    private final Serval serval;
     public final Subscriber subscriber;
     public final ObserverSet<Identity> observers;
     private KeyringIdentity identity;
@@ -16,6 +17,7 @@ public class Identity {
     public final Messaging messaging;
 
     public Identity(Serval serval, Subscriber subscriber){
+        this.serval = serval;
         this.subscriber = subscriber;
         id = nextId++;
         if (serval == null){
@@ -26,6 +28,14 @@ public class Identity {
             observers = new ObserverSet<>(serval.uiHandler, this);
             this.messaging = new Messaging(serval, this);
         }
+    }
+
+    public MessageFeed getFeed(){
+        return new MessageFeed(serval, subscriber.signingKey);
+    }
+
+    public void post(String message){
+        throw new IllegalStateException("TODO, post message");
     }
 
     public void update(KeyringIdentity id){

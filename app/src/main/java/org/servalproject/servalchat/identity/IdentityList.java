@@ -133,7 +133,7 @@ public class IdentityList
 
         @Override
         public void onClick(View v) {
-            activity.go(id, Navigation.Feed, null);
+            activity.go(id, Navigation.MyNews, null);
         }
     }
 }
