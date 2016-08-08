@@ -1,13 +1,15 @@
 apply plugin: 'com.android.application'
 
 def computeVersionName() {
-    // TODO git describe
-    return "1.0"
+    def cmd = "git describe --long --always --dirty --tags"
+    def proc = cmd.execute()
+    return proc.text.trim();
 }
 
 def computeVersionCode() {
-    // TODO git log | wc
-    return 1;
+    def cmd = "git rev-list --count HEAD"
+    def proc = cmd.execute()
+    return proc.text.toInteger();
 }
 
 def readPassword(String fmt) {
