@@ -30,12 +30,8 @@ public class Identity {
         }
     }
 
-    public MessageFeed getFeed(){
-        return new MessageFeed(serval, subscriber.signingKey);
-    }
-
-    public void post(String message){
-        throw new IllegalStateException("TODO, post message");
+    public IdentityFeed getFeed(){
+        return new IdentityFeed(serval, this);
     }
 
     public void update(KeyringIdentity id){

@@ -24,6 +24,8 @@ public abstract class ScrollingAdapter<T, VH extends RecyclerView.ViewHolder>
 
     public ScrollingAdapter(IObservableList<T, ?> list){
         this.list = list;
+        if (list==null)
+            hasMore = false;
     }
 
     protected abstract void bind(VH holder, T item);
@@ -141,11 +143,15 @@ public abstract class ScrollingAdapter<T, VH extends RecyclerView.ViewHolder>
     }
 
     public void onVisible(){
+        if (list==null)
+            return;
         list.observe(this);
         testPosition();
     }
 
     public void onHidden(){
+        if (list==null)
+            return;
         list.stopObserving(this);
     }
 
@@ -170,6 +176,8 @@ public abstract class ScrollingAdapter<T, VH extends RecyclerView.ViewHolder>
     }
 
     public void clear(){
+        if (list==null)
+            return;
         list.close();
         past.clear();
         future.clear();

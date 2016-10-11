@@ -3,7 +3,7 @@ package org.servalproject.servalchat.identity;
 import android.os.AsyncTask;
 
 import org.servalproject.mid.Identity;
-import org.servalproject.mid.MessageFeed;
+import org.servalproject.mid.IdentityFeed;
 import org.servalproject.servalchat.views.FeedAdapter;
 import org.servalproject.servalchat.views.Presenter;
 import org.servalproject.servalchat.views.PresenterFactory;
@@ -12,7 +12,7 @@ import org.servalproject.servalchat.views.PresenterFactory;
  * Created by jeremy on 8/08/16.
  */
 public class MyFeedPresenter extends Presenter<MyFeed> {
-    private final MessageFeed feed;
+    private final IdentityFeed feed;
     private final FeedAdapter adapter;
 
     protected MyFeedPresenter(PresenterFactory<MyFeed, ?> factory, String key, Identity identity) {
@@ -77,7 +77,7 @@ public class MyFeedPresenter extends Presenter<MyFeed> {
             @Override
             protected Void doInBackground(Void... params) {
                 try {
-                    identity.post(message);
+                    feed.sendMessage(message);
                 }catch(Exception e){
                     this.e = e;
                 }

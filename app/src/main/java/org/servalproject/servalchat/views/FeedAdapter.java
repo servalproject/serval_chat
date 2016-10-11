@@ -8,11 +8,12 @@ import android.widget.TextView;
 
 import org.servalproject.mid.MessageFeed;
 import org.servalproject.servalchat.R;
+import org.servalproject.servaldna.meshmb.PlyMessage;
 
 /**
  * Created by jeremy on 8/08/16.
  */
-public class FeedAdapter extends ScrollingAdapter<MessageFeed.Message, FeedAdapter.MessageHolder>{
+public class FeedAdapter extends ScrollingAdapter<PlyMessage, FeedAdapter.MessageHolder>{
     public FeedAdapter(MessageFeed feed){
         super(feed);
     }
@@ -31,12 +32,12 @@ public class FeedAdapter extends ScrollingAdapter<MessageFeed.Message, FeedAdapt
     }
 
     @Override
-    protected void bind(MessageHolder holder, MessageFeed.Message item) {
+    protected void bind(MessageHolder holder, PlyMessage item) {
         holder.bind(item);
     }
 
     @Override
-    protected int getItemType(MessageFeed.Message item) {
+    protected int getItemType(PlyMessage item) {
         return (item == null) ? SPINNER : MESSAGE;
     }
 
@@ -44,7 +45,7 @@ public class FeedAdapter extends ScrollingAdapter<MessageFeed.Message, FeedAdapt
         public MessageHolder(View itemView) {
             super(itemView);
         }
-        public void bind(MessageFeed.Message item){}
+        public void bind(PlyMessage item){}
     }
 
     public class SpinnerHolder extends MessageHolder{
@@ -59,7 +60,7 @@ public class FeedAdapter extends ScrollingAdapter<MessageFeed.Message, FeedAdapt
             super(itemView);
             this.message = (TextView)this.itemView.findViewById(R.id.message);
         }
-        public void bind(MessageFeed.Message item){
+        public void bind(PlyMessage item){
             message.setText(item.text);
         }
     }

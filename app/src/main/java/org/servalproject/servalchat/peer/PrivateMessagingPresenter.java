@@ -90,6 +90,7 @@ public final class PrivateMessagingPresenter extends Presenter<PrivateMessaging>
                         // TODO display "delivered" marker
                         return;
                     }
+                    // TODO sort future messages that arrive in a burst!
                     super.addItem(item, inPast);
                 }
 

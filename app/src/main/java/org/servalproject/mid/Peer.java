@@ -1,6 +1,5 @@
 package org.servalproject.mid;
 
-import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 
@@ -83,6 +82,8 @@ public final class Peer implements Comparable<Peer>{
 	}
 
 	public MessageFeed getFeed(){
+		if (subscriber.signingKey==null)
+			return null;
 		return new MessageFeed(Serval.getInstance(), subscriber.signingKey);
 	}
 
