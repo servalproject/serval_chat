@@ -1,4 +1,4 @@
-package org.servalproject.servalchat.peer;
+package org.servalproject.servalchat.feeds;
 
 import android.content.Context;
 import android.os.Bundle;

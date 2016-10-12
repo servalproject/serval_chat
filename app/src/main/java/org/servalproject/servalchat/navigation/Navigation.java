@@ -73,9 +73,9 @@ public class Navigation {
     public static final Navigation Main = new Navigation("Main", R.string.app_name, R.layout.main_tabs);
     public static final Navigation IdentityDetails = new Navigation("Details", R.string.identity_details, R.layout.identity_details, null, Main);
     public static final Navigation MyFeed = new Navigation("MyFeed", R.string.my_feed, R.layout.my_feed, null, Main);
-    public static final Navigation MyNews = new Navigation("MyNews", R.string.my_news, R.layout.placeholder, null, Main);
+    public static final Navigation MyNews = new Navigation("MyNews", R.string.my_news, R.layout.feed_list, null, Main);
     public static final Navigation Inbox = new Navigation("Inbox", R.string.conversation_list, R.layout.conversation_list, null, Main);
-    public static final Navigation Requests = new Navigation("Requests", R.string.requests, R.layout.placeholder, null, Main);
+    //public static final Navigation Requests = new Navigation("Requests", R.string.requests, R.layout.placeholder, null, Main);
     public static final Navigation PeerList = new Navigation("PeerList", R.string.peer_list, R.layout.peer_list, null, Main);
 
     public static final Navigation PeerTabs = new Navigation("PeerTabs", R.string.app_name, R.layout.main_tabs);

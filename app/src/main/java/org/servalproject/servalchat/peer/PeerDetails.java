@@ -107,6 +107,6 @@ public class PeerDetails extends LinearLayout
     public void updated(Peer obj) {
         name.setText(peer.getName());
         number.setText(peer.getDid());
-        sid.setText(peer.subscriber.sid.abbreviation());
+        sid.setText(peer.getSubscriber().sid.abbreviation());
     }
 }

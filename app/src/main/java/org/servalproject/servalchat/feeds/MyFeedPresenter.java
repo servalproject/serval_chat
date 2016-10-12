@@ -1,10 +1,9 @@
-package org.servalproject.servalchat.identity;
+package org.servalproject.servalchat.feeds;
 
 import android.os.AsyncTask;
 
 import org.servalproject.mid.Identity;
 import org.servalproject.mid.IdentityFeed;
-import org.servalproject.servalchat.views.FeedAdapter;
 import org.servalproject.servalchat.views.Presenter;
 import org.servalproject.servalchat.views.PresenterFactory;
 

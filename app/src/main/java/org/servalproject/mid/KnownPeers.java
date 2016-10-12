@@ -98,6 +98,15 @@ public class KnownPeers {
 				p = peersBySid.get(subscriber.sid);
 			}else{
 				p = peersBySign.get(subscriber.signingKey);
+				if (p==null){
+					// if we later learn the peer's signing key
+					// update it
+					p = peersBySid.get(subscriber.sid);
+					if (p!=null) {
+						p.updateSubscriber(subscriber);
+						peersBySign.put(subscriber.signingKey, p);
+					}
+				}
 			}
 			if (p!=null)
 				return p;
@@ -144,7 +153,7 @@ public class KnownPeers {
 
 	public void requestRefresh(Peer p){
 		try {
-			dnaLookup.sendRequest(p.subscriber.sid, "");
+			dnaLookup.sendRequest(p.getSubscriber().sid, "");
 		} catch (IOException e) {
 			// We might as well crash, something has gone terribly wrong
 			throw new IllegalStateException(e);

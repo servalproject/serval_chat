@@ -1,4 +1,4 @@
-package org.servalproject.servalchat.views;
+package org.servalproject.servalchat.feeds;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -8,12 +8,13 @@ import android.widget.TextView;
 
 import org.servalproject.mid.MessageFeed;
 import org.servalproject.servalchat.R;
+import org.servalproject.servalchat.views.ScrollingAdapter;
 import org.servalproject.servaldna.meshmb.PlyMessage;
 
 /**
  * Created by jeremy on 8/08/16.
  */
-public class FeedAdapter extends ScrollingAdapter<PlyMessage, FeedAdapter.MessageHolder>{
+public class FeedAdapter extends ScrollingAdapter<PlyMessage, FeedAdapter.MessageHolder> {
     public FeedAdapter(MessageFeed feed){
         super(feed);
     }

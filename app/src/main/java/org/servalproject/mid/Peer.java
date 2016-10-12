@@ -23,7 +23,15 @@ public final class Peer implements Comparable<Peer>{
 	}
 
 	public final ObserverSet<Peer> observers;
-	public final Subscriber subscriber;
+	private Subscriber subscriber;
+	public Subscriber getSubscriber(){
+		return subscriber;
+	}
+	public void updateSubscriber(Subscriber subscriber){
+		if (this.subscriber.sid.equals(subscriber.sid)
+				&& this.subscriber.signingKey == null)
+			this.subscriber = subscriber;
+	}
 
 	ServalDCommand.LookupResult lookup;
 	public String getDid(){
@@ -72,6 +80,8 @@ public final class Peer implements Comparable<Peer>{
 				'}';
 	}
 
+	private String feedName;
+
 	public String displayName(){
 		String n = getName();
 		if (n==null || "".equals(n))
@@ -81,10 +91,19 @@ public final class Peer implements Comparable<Peer>{
 		return n;
 	}
 
+	public void updateFeedName(String name){
+		if (feedName == null && name == null)
+			return;
+		if (name!=null && name.equals(feedName))
+			return;
+		feedName = name;
+		observers.onUpdate();
+	}
+
 	public MessageFeed getFeed(){
 		if (subscriber.signingKey==null)
 			return null;
-		return new MessageFeed(Serval.getInstance(), subscriber.signingKey);
+		return new MessageFeed(Serval.getInstance(), this);
 	}
 
 	@Override

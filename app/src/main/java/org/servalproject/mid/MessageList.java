@@ -49,8 +49,8 @@ public class MessageList extends AbstractGrowingList<MeshMSMessage, MeshMSExcept
 
     @Override
     protected void addingPastItem(MeshMSMessage item) {
-        if (token == null) {
-            token = (item == null) ? "" : item.token;
+        if (token == null && item != null) {
+            token = item.token;
             start();
         }
         super.addingPastItem(item);

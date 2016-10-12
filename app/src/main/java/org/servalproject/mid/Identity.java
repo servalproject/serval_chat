@@ -34,6 +34,10 @@ public class Identity {
         return new IdentityFeed(serval, this);
     }
 
+    public FeedList getAllFeeds(){
+        return new FeedList(serval);
+    }
+
     public void update(KeyringIdentity id){
         this.identity = id;
         if (observers != null)

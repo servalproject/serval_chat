@@ -1,4 +1,4 @@
-package org.servalproject.servalchat.identity;
+package org.servalproject.servalchat.peer;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -87,7 +87,7 @@ public class PeerList extends ObservedRecyclerView<Peer, PeerList.PeerHolder> {
         @Override
         public void onClick(View v) {
             Bundle args = new Bundle();
-            KnownPeers.saveSubscriber(peer.subscriber, args);
+            KnownPeers.saveSubscriber(peer.getSubscriber(), args);
             activity.go(Navigation.PeerDetails, args);
         }
     }
@@ -116,9 +116,9 @@ public class PeerList extends ObservedRecyclerView<Peer, PeerList.PeerHolder> {
     private boolean add(Peer p){
         if (!p.isReachable())
             return false;
-        if (addedPeers.contains(p.subscriber.sid))
+        if (addedPeers.contains(p.getSubscriber().sid))
             return false;
-        addedPeers.add(p.subscriber.sid);
+        addedPeers.add(p.getSubscriber().sid);
         items.add(p);
         sorted = false;
         return true;

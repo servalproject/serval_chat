@@ -3,6 +3,7 @@ package org.servalproject.mid;
 import org.servalproject.servaldna.AbstractJsonList;
 import org.servalproject.servaldna.ServalDInterfaceException;
 import org.servalproject.servaldna.SigningKey;
+import org.servalproject.servaldna.meshmb.MessagePlyList;
 import org.servalproject.servaldna.meshmb.PlyMessage;
 
 import java.io.IOException;
@@ -13,6 +14,13 @@ import java.io.IOException;
 public class MessageFeed extends AbstractGrowingList<PlyMessage, IOException>{
     private final SigningKey id;
     private String token;
+    private Peer peer;
+    private String name;
+
+    MessageFeed(Serval serval, Peer peer) {
+        this(serval, peer.getSubscriber().signingKey);
+        this.peer = peer;
+    }
 
     MessageFeed(Serval serval, SigningKey id) {
         super(serval);
@@ -30,12 +38,20 @@ public class MessageFeed extends AbstractGrowingList<PlyMessage, IOException>{
 
     @Override
     protected AbstractJsonList<PlyMessage, IOException> openPast() throws ServalDInterfaceException, IOException {
-        return serval.getResultClient().meshmbListMessages(id);
+        MessagePlyList list = serval.getResultClient().meshmbListMessages(id);
+        this.name = list.getName();
+        if (peer!=null)
+            peer.updateFeedName(name);
+        return list;
     }
 
     @Override
     protected AbstractJsonList<PlyMessage, IOException> openFuture() throws ServalDInterfaceException, IOException {
-        return serval.getResultClient().meshmbListMessagesSince(id, token);
+        MessagePlyList list = serval.getResultClient().meshmbListMessagesSince(id, token);
+        this.name = list.getName();
+        if (peer!=null)
+            peer.updateFeedName(name);
+        return list;
     }
 
     @Override

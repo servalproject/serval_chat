@@ -1,4 +1,4 @@
-package org.servalproject.servalchat.peer;
+package org.servalproject.servalchat.feeds;
 
 import android.os.Bundle;
 
@@ -7,7 +7,6 @@ import org.servalproject.mid.KnownPeers;
 import org.servalproject.mid.MessageFeed;
 import org.servalproject.mid.Peer;
 import org.servalproject.mid.Serval;
-import org.servalproject.servalchat.views.FeedAdapter;
 import org.servalproject.servalchat.views.Presenter;
 import org.servalproject.servalchat.views.PresenterFactory;
 import org.servalproject.servaldna.AbstractId;
