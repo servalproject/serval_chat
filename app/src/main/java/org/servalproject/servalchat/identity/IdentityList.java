@@ -1,7 +1,9 @@
 package org.servalproject.servalchat.identity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.LinearLayoutManager;
@@ -24,6 +26,7 @@ import org.servalproject.servalchat.R;
 import org.servalproject.servaldna.keyring.KeyringIdentity;
 import org.servalproject.servaldna.keyring.KeyringIdentityList;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -102,6 +105,7 @@ public class IdentityList
     }
 
     private static final int ADD = 1;
+    private static final int SHARE = 2;
 
     @Override
     public void populateItems(Menu menu) {
@@ -109,6 +113,8 @@ public class IdentityList
                 .setOnMenuItemClickListener(this)
                 .setIcon(R.drawable.ic_add_circle);
         MenuItemCompat.setShowAsAction(add, MenuItemCompat.SHOW_AS_ACTION_IF_ROOM);
+        menu.add(Menu.NONE, SHARE, Menu.NONE, R.string.share_app)
+                .setOnMenuItemClickListener(this);
     }
 
     @Override
@@ -117,6 +123,29 @@ public class IdentityList
             case ADD:
                 activity.go(Navigation.NewIdentityDetails, null);
                 return true;
+            case SHARE:
+                try {
+                    File apk = new File(activity.getApplicationInfo().sourceDir);
+                    Intent intent = new Intent(Intent.ACTION_SEND);
+                    intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(apk));
+                    intent.setType("image/apk");
+                    intent.addCategory(Intent.CATEGORY_DEFAULT);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    // There are at least two different classes for handling this intent on
+                    // different platforms.  Find the bluetooth one.  Alternative strategy: let the
+                    // user choose.
+                    // for (ResolveInfo r :
+                    // getPackageManager().queryIntentActivities(intent, 0)) {
+                    // if (r.activityInfo.packageName.equals("com.android.bluetooth")) {
+                    // intent.setClassName(r.activityInfo.packageName,
+                    // r.activityInfo.name);
+                    // intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    // break;
+                    activity.startActivity(intent);
+                }catch (Exception e){
+                    activity.showError(e);
+                }
+
         }
         return false;
     }
