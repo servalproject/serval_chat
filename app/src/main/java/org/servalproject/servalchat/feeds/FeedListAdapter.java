@@ -71,7 +71,9 @@ public class FeedListAdapter extends ScrollingAdapter<RhizomeListBundle, FeedLis
         }
 
         public void bind(RhizomeListBundle item){
-            subscriber = new Subscriber(item.manifest.sender, item.manifest.id, true);
+            subscriber = new Subscriber(
+                    item.author!=null ? item.author : item.manifest.sender,
+                    item.manifest.id, true);
             if (item.manifest.name==null || "".equals(item.manifest.name))
                 name.setText(subscriber.sid.abbreviation());
             else

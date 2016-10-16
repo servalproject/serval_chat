@@ -52,7 +52,9 @@ public class FeedList extends AbstractGrowingList<RhizomeListBundle, IOException
         token = item.token;
         // TODO verify that the sender and id are for the same identity!
         // for now we can assume this, but we might break this rule in a future version
-        Subscriber subscriber = new Subscriber(item.manifest.sender, item.manifest.id, true);
+        Subscriber subscriber = new Subscriber(
+                item.author != null ? item.author : item.manifest.sender,
+                item.manifest.id, true);
         Peer p = serval.knownPeers.getPeer(subscriber);
         p.updateFeedName(item.manifest.name);
         super.addingFutureItem(item);
