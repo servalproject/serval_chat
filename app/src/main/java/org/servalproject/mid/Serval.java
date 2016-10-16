@@ -1,7 +1,10 @@
 package org.servalproject.mid;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 
+import org.servalproject.networking.BlueToothControl;
 import org.servalproject.servaldna.ChannelSelector;
 import org.servalproject.servaldna.ServalDClient;
 import org.servalproject.servaldna.ServalDCommand;
@@ -29,6 +32,7 @@ public class Serval {
 	static final int SERVER_UP = 3;
 
 	private Serval(Context context) throws IOException {
+		settings = PreferenceManager.getDefaultSharedPreferences(context);
 		File appFolder = context.getFilesDir().getParentFile();
 		instancePath = new File(appFolder, "instance");
 		uiHandler = new UIHandler(context.getMainLooper());
@@ -85,11 +89,13 @@ public class Serval {
 	public final Config config;
 	public final KnownPeers knownPeers;
 	public final Identities identities;
+	public final SharedPreferences settings;
 	private final BlockingQueue<Runnable> backgroundQueue;
 	private final ThreadPoolExecutor backgroundThreads;
 	private String restfulUsername="ServalDClient";
 	private String restfulPassword;
 	private ServalDClient client;
+	public BlueToothControl blueTooth;
 	final ChannelSelector selector;;
 	final File instancePath;
 
@@ -102,6 +108,9 @@ public class Serval {
 		identities.onStart();
 		knownPeers.onStart();
 		rhizome.onStart();
+		blueTooth = BlueToothControl.getBlueToothControl(this, selector, server.getMdpPort());
+		if (blueTooth!=null)
+			blueTooth.onEnableChanged();
 		// TODO trigger other startup here
 		server.onStart();
 	}
@@ -116,8 +125,18 @@ public class Serval {
 		backgroundThreads.execute(r);
 	}
 
+	public void runOnBackground(Runnable r){
+		backgroundHandler.post(r);
+	}
+
+	public void runDelayed(Runnable r, int delay){
+		backgroundHandler.postDelayed(r, delay);
+	}
+
 	private static Serval instance;
 	public static Serval start(Context appContext){
+		if (instance!=null)
+			throw new IllegalStateException("instance already created!");
 		try {
 			instance = new Serval(appContext.getApplicationContext());
 			return instance;
