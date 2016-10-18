@@ -55,7 +55,7 @@ public class KnownPeers {
 	private final AsyncResult<ServalDCommand.LookupResult> dnaResults = new AsyncResult<ServalDCommand.LookupResult>() {
 		@Override
 		public void result(ServalDCommand.LookupResult nextResult) {
-			Peer p = peersBySid.get(nextResult.subscriberId);
+			Peer p = getPeer(new Subscriber(nextResult.subscriberId));
 			p.update(nextResult);
 			peerListObservers.onUpdate(p);
 		}
