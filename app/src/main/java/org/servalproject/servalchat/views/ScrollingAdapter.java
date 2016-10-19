@@ -17,8 +17,8 @@ public abstract class ScrollingAdapter<T, VH extends RecyclerView.ViewHolder>
         extends RecyclerView.Adapter<VH> implements ListObserver<T> {
     private LinearLayoutManager layoutManager;
     private IObservableList<T, ?> list;
-    private List<T> past = new ArrayList<>();
-    private List<T> future = new ArrayList<>();
+    protected List<T> past = new ArrayList<>();
+    protected List<T> future = new ArrayList<>();
     private boolean hasMore = true;
     private boolean fetching = false;
 

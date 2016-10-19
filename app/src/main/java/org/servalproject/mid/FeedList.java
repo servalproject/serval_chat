@@ -46,10 +46,7 @@ public class FeedList extends AbstractGrowingList<RhizomeListBundle, IOException
         return list;
     }
 
-    @Override
-    protected void addingFutureItem(RhizomeListBundle item) {
-        Log.v(TAG, "Adding future "+item.manifest.id.abbreviation()+" - "+item.manifest.name);
-        token = item.token;
+    private void updatePeer(RhizomeListBundle item){
         // TODO verify that the sender and id are for the same identity!
         // for now we can assume this, but we might break this rule in a future version
         Subscriber subscriber = new Subscriber(
@@ -57,6 +54,13 @@ public class FeedList extends AbstractGrowingList<RhizomeListBundle, IOException
                 item.manifest.id, true);
         Peer p = serval.knownPeers.getPeer(subscriber);
         p.updateFeedName(item.manifest.name);
+    }
+
+    @Override
+    protected void addingFutureItem(RhizomeListBundle item) {
+        Log.v(TAG, "Adding future "+item.manifest.id.abbreviation()+" - "+item.manifest.name);
+        token = item.token;
+        updatePeer(item);
         super.addingFutureItem(item);
     }
 
@@ -66,6 +70,7 @@ public class FeedList extends AbstractGrowingList<RhizomeListBundle, IOException
             Log.v(TAG, "End of past items");
         } else {
             Log.v(TAG, "Adding past " + item.manifest.id.abbreviation() + " - " + item.manifest.name);
+            updatePeer(item);
         }
 
         if (token == null) {

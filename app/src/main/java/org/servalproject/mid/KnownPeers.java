@@ -28,7 +28,6 @@ public class KnownPeers {
 	private MdpRoutingChanges routingChanges;
 	private final Serval serval;
 	private final Map<SubscriberId, Peer> peersBySid = new HashMap<>();
-	private final Map<SigningKey, Peer> peersBySign = new HashMap<>();
 	private int reachableCount=0;
 	public final ListObserverSet<Peer> peerListObservers;
 	public final ObserverSet<KnownPeers> observers;
@@ -45,7 +44,7 @@ public class KnownPeers {
 
 	public List<Peer> getReachablePeers(){
 		List<Peer> list = new ArrayList<>();
-		for(Peer p:peersBySign.values()){
+		for(Peer p:peersBySid.values()){
 			if (p.isReachable())
 				list.add(p);
 		}
@@ -84,38 +83,29 @@ public class KnownPeers {
 	}
 
 	public Peer getPeer(Subscriber subscriber){
-		Peer p = null;
-		if (subscriber.signingKey == null){
-			p = peersBySid.get(subscriber.sid);
-		}else{
-			p = peersBySign.get(subscriber.signingKey);
-		}
-		if (p!=null)
-			return p;
+		boolean isNew = false;
 
-		synchronized (this){
-			if (subscriber.signingKey == null){
+		Peer p = peersBySid.get(subscriber.sid);
+
+		if (p == null){
+			synchronized (this){
 				p = peersBySid.get(subscriber.sid);
-			}else{
-				p = peersBySign.get(subscriber.signingKey);
-				if (p==null){
-					// if we later learn the peer's signing key
-					// update it
-					p = peersBySid.get(subscriber.sid);
-					if (p!=null) {
-						p.updateSubscriber(subscriber);
-						peersBySign.put(subscriber.signingKey, p);
-					}
+				if (p == null){
+					p = new Peer(serval.uiHandler, subscriber);
+					peersBySid.put(subscriber.sid, p);
+					isNew = true;
 				}
 			}
-			if (p!=null)
-				return p;
-			p = new Peer(serval.uiHandler, subscriber);
-			peersBySid.put(subscriber.sid, p);
-			if (subscriber.signingKey!=null)
-				peersBySign.put(subscriber.signingKey, p);
 		}
-		peerListObservers.onAdd(p);
+
+		if (subscriber.signingKey!=null
+			&& p.getSubscriber().signingKey == null){
+			p.updateSubscriber(subscriber);
+		}
+
+		if (isNew)
+			peerListObservers.onAdd(p);
+
 		return p;
 	}
 

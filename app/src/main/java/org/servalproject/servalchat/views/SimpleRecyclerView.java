@@ -32,6 +32,8 @@ public abstract class SimpleRecyclerView<T, H extends RecyclerView.ViewHolder>
 
     abstract protected void bind(H holder, T item);
 
+    protected void unBind(H holder, T item){}
+
     protected long getId(T item){
         return -1;
     }
@@ -48,6 +50,13 @@ public abstract class SimpleRecyclerView<T, H extends RecyclerView.ViewHolder>
         @Override
         public H onCreateViewHolder(ViewGroup parent, int viewType) {
             return createHolder(parent, viewType);
+        }
+
+        @Override
+        public void onViewRecycled(H holder) {
+            int position = holder.getAdapterPosition();
+            if (position!=NO_POSITION)
+                unBind(holder, get(position));
         }
 
         @Override

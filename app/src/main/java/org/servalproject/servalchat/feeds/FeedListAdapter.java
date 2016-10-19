@@ -9,8 +9,11 @@ import android.widget.TextView;
 import org.servalproject.mid.FeedList;
 import org.servalproject.servalchat.R;
 import org.servalproject.servalchat.views.ScrollingAdapter;
+import org.servalproject.servaldna.BundleId;
 import org.servalproject.servaldna.Subscriber;
 import org.servalproject.servaldna.rhizome.RhizomeListBundle;
+
+import java.util.HashSet;
 
 /**
  * Created by jeremy on 11/10/16.
@@ -20,10 +23,44 @@ public class FeedListAdapter extends ScrollingAdapter<RhizomeListBundle, FeedLis
     private final PublicFeedsPresenter presenter;
     private static final int SPINNER = 0;
     private static final int FEED = 1;
+    private HashSet<BundleId> bundles = new HashSet<>();
 
     public FeedListAdapter(FeedList list, PublicFeedsPresenter presenter) {
         super(list);
         this.presenter = presenter;
+    }
+
+    private void removeItem(BundleId id){
+        // find the old item and remove it.
+        for (int i=0;i<future.size();i++){
+            if (future.get(i).manifest.id.equals(id)){
+                future.remove(i);
+                notifyItemRemoved(future.size() - i);
+                return;
+            }
+        }
+        for (int i=0;i<past.size();i++){
+            if (past.get(i).manifest.id.equals(id)){
+                past.remove(i);
+                notifyItemRemoved(future.size() + i);
+                return;
+            }
+        }
+    }
+
+    @Override
+    protected void addItem(RhizomeListBundle item, boolean inPast) {
+        if (bundles.contains(item.manifest.id)){
+            // the back end could write the details of an old bundle
+            // then we could hear about an updated version,
+            // then scroll back and see the details of the old version
+            if (inPast)
+                return;
+            removeItem(item.manifest.id);
+        }else{
+            bundles.add(item.manifest.id);
+        }
+        super.addItem(item, inPast);
     }
 
     @Override

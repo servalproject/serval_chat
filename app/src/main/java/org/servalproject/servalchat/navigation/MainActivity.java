@@ -199,7 +199,7 @@ public class MainActivity extends AppCompatActivity implements IContainerView {
                         break;
                 }
             }
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         }
         intent.setClass(context, activity);
         intent.putExtras(NavHistory.prepareNew(identity==null ? null : identity.subscriber.sid, key, args));
@@ -353,6 +353,7 @@ public class MainActivity extends AppCompatActivity implements IContainerView {
         ILifecycle lifecycle = ret.getLifecycle();
         if (isStarted && lifecycle!=null)
             lifecycle.onVisible();
+        // TODO observe identity and update title
         getSupportActionBar().setTitle(n.getTitle(this, identity));
         return ret;
     }

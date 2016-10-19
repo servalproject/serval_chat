@@ -44,7 +44,8 @@ public class Messaging {
         @Override
         public void added(RhizomeListBundle obj) {
             if (obj.manifest.service.equals(SERVICE)
-            && obj.manifest.recipient.equals(identity.subscriber.sid))
+            && (obj.manifest.recipient.equals(identity.subscriber.sid)
+            || obj.manifest.sender.equals(identity.subscriber.sid)))
                 refresh();
         }
 
@@ -101,7 +102,7 @@ public class Messaging {
                     list.close();
                 }
 
-                Log.v(TAG, "Found "+unreadCount+" unread conversations!");
+                Log.v(TAG, "Found "+unreadCount+" unread of "+ replace.size()+" conversations!");
 
                 synchronized (Messaging.this) {
                     if (cancel)

@@ -29,8 +29,9 @@ public final class Peer implements Comparable<Peer>{
 	}
 	public void updateSubscriber(Subscriber subscriber){
 		if (this.subscriber.sid.equals(subscriber.sid)
-				&& this.subscriber.signingKey == null)
+				&& this.subscriber.signingKey == null) {
 			this.subscriber = subscriber;
+		}
 	}
 
 	ServalDCommand.LookupResult lookup;
@@ -83,10 +84,12 @@ public final class Peer implements Comparable<Peer>{
 	private String feedName;
 
 	public String displayName(){
-		String n = getName();
-		if (n==null || "".equals(n))
+		String n = feedName;
+		if (n == null || "".equals(n))
+			n = getName();
+		if (n == null || "".equals(n))
 			n = getDid();
-		if (n==null || "".equals(n))
+		if (n == null || "".equals(n))
 			n = subscriber.sid.abbreviation();
 		return n;
 	}

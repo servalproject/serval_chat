@@ -14,6 +14,9 @@ import android.widget.TextView;
 import org.servalproject.mid.Identity;
 import org.servalproject.mid.KnownPeers;
 import org.servalproject.mid.Messaging;
+import org.servalproject.mid.Observer;
+import org.servalproject.mid.Peer;
+import org.servalproject.mid.Serval;
 import org.servalproject.servalchat.navigation.ILifecycle;
 import org.servalproject.servalchat.navigation.INavigate;
 import org.servalproject.servalchat.navigation.MainActivity;
@@ -31,9 +34,11 @@ public class ConversationList
 
     private Messaging messaging;
     private static final String TAG = "ConversationList";
+    private final Serval serval;
 
     public ConversationList(Context context, @Nullable AttributeSet attrs) {
         super(null, context, attrs);
+        this.serval = Serval.getInstance();
         setHasFixedSize(true);
         setLayoutManager(new LinearLayoutManager(getContext()));
     }
@@ -46,8 +51,12 @@ public class ConversationList
 
     @Override
     protected void bind(ConversationHolder holder, MeshMSConversation item) {
-        holder.name.setText(item.them.sid.abbreviation());
-        holder.conversation = item;
+        holder.setConversation(item);
+    }
+
+    @Override
+    protected void unBind(ConversationHolder holder, MeshMSConversation item) {
+        holder.setConversation(null);
     }
 
     @Override
@@ -66,14 +75,20 @@ public class ConversationList
 
     @Override
     public ILifecycle onAttach(MainActivity activity, Navigation n, Identity id, Bundle args){
-        this.messaging = id.messaging;
-        this.setObserverSet(messaging.observers);
+        if (this.messaging != id.messaging) {
+            this.messaging = id.messaging;
+            this.setObserverSet(messaging.observers);
+            notifyChanged();
+        }
         return super.onAttach(activity, n, id, args);
     }
 
-    public class ConversationHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public class ConversationHolder
+            extends RecyclerView.ViewHolder
+            implements View.OnClickListener, Observer<Peer> {
         final TextView name;
-        MeshMSConversation conversation;
+        private MeshMSConversation conversation;
+        private Peer peer;
 
         public ConversationHolder(View itemView) {
             super(itemView);
@@ -81,11 +96,32 @@ public class ConversationList
             name.setOnClickListener(this);
         }
 
+        public void setConversation(MeshMSConversation conversation){
+            this.conversation = conversation;
+            Peer p = null;
+            if (conversation!=null)
+                p = serval.knownPeers.getPeer(conversation.them);
+            if (this.peer != p) {
+                if (this.peer != null)
+                    this.peer.observers.remove(this);
+                this.peer = p;
+                if (p!=null)
+                    this.peer.observers.add(this);
+            }
+            if (p!=null)
+                updated(p);
+        }
+
         @Override
         public void onClick(View v) {
             Bundle args = new Bundle();
             KnownPeers.saveSubscriber(conversation.them, args);
             activity.go(identity, Navigation.PrivateMessages, args);
+        }
+
+        @Override
+        public void updated(Peer obj) {
+            name.setText(obj.displayName());
         }
     }
 }

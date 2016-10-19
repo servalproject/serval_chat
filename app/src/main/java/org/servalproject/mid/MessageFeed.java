@@ -56,6 +56,7 @@ public class MessageFeed extends AbstractGrowingList<PlyMessage, IOException>{
 
     @Override
     protected void addingFutureItem(PlyMessage item) {
+        // TODO if we hear a burst of items, we need to keep the first token, not the last one
         token = item.token;
         super.addingFutureItem(item);
     }
