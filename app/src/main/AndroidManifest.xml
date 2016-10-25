@@ -55,6 +55,8 @@
         <activity android:name=".navigation.Id3" android:taskAffinity="org.servalproject.id3" />
         <activity android:name=".navigation.Id4" android:taskAffinity="org.servalproject.id4" />
 
+        <service android:name=".ForegroundService" android:enabled="true"/>
+
         <receiver
             android:name="org.servalproject.networking.WifiNetworkChanges"
             android:enabled="true"

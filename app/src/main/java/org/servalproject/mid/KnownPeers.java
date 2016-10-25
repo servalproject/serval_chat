@@ -30,11 +30,13 @@ public class KnownPeers {
 	private final Map<SubscriberId, Peer> peersBySid = new HashMap<>();
 	private int reachableCount=0;
 	public final ListObserverSet<Peer> peerListObservers;
+	public final ListObserverSet<Interface> interfaceObservers;
 	public final ObserverSet<KnownPeers> observers;
 
 	KnownPeers(Serval serval){
 		this.serval = serval;
 		peerListObservers = new ListObserverSet<>(serval.uiHandler);
+		interfaceObservers = new ListObserverSet<>(serval.uiHandler);
 		observers = new ObserverSet<>(serval.uiHandler, this);
 	}
 
@@ -109,11 +111,22 @@ public class KnownPeers {
 		return p;
 	}
 
+	private void interfaceChange(RouteLink link){
+		Interface i = new Interface(link.interface_id, link.interface_name);
+		if (link.interface_up)
+			interfaceObservers.onAdd(i);
+		else
+			interfaceObservers.onRemove(i);
+	}
+
 	private final AsyncResult<RouteLink> routeResults = new AsyncResult<RouteLink>() {
 		@Override
 		public void result(RouteLink nextResult) {
-			if (nextResult.isSelf())
+			if (nextResult.isSelf()){
+				if (nextResult.interface_id>=0)
+					interfaceChange(nextResult);
 				return;
+			}
 			Peer p = getPeer(nextResult.subscriber);
 			boolean wasReachable = p.isReachable();
 			p.update(nextResult);

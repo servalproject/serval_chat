@@ -9,6 +9,7 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import org.servalproject.mid.Identity;
+import org.servalproject.mid.Interface;
 import org.servalproject.mid.KnownPeers;
 import org.servalproject.mid.ListObserver;
 import org.servalproject.mid.Serval;
@@ -40,6 +41,45 @@ public class Notifications {
 
             @Override
             public void updated(Identity obj) {}
+
+            @Override
+            public void reset() {}
+        });
+
+        // track which interfaces are running, start a foreground service whenever an interface is up
+        serval.knownPeers.interfaceObservers.add(new ListObserver<Interface>() {
+            private Interface interfaces[] = new Interface[16];
+            private int count = 0;
+            private boolean serviceStarted = false;
+
+            @Override
+            public void added(Interface obj) {
+                if (interfaces[obj.id] == null)
+                    count ++;
+                interfaces[obj.id] = obj;
+                updateNotification();
+            }
+
+            @Override
+            public void removed(Interface obj) {
+                if (interfaces[obj.id] != null)
+                    count --;
+                interfaces[obj.id] = null;
+                updateNotification();
+            }
+
+            private void updateNotification(){
+                boolean shouldRun = count>0;
+                if (shouldRun == serviceStarted)
+                    return;
+                Intent i = new Intent(context, ForegroundService.class);
+                i.putExtra("foreground", shouldRun);
+                context.startService(i);
+                serviceStarted = shouldRun;
+            }
+
+            @Override
+            public void updated(Interface obj) {}
 
             @Override
             public void reset() {}
