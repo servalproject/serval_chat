@@ -61,7 +61,6 @@ public class Messaging {
 
     private Refresh refreshing;
     void refresh(){
-        Log.v(TAG, "Refreshing private messages for "+identity.subscriber.toString());
         synchronized (this) {
             Refresh refreshing = this.refreshing;
             if (refreshing != null)
@@ -78,8 +77,6 @@ public class Messaging {
         public void run() {
             try {
                 // TODO abort on new incoming message?
-                Log.v(TAG, "Fetching private messages for "+identity.subscriber.toString());
-
                 List<MeshMSConversation> replace = new ArrayList<>();
                 MeshMSConversationList list = serval.getResultClient().meshmsListConversations(identity.subscriber.sid);
                 int hashCode = 0;
@@ -88,10 +85,8 @@ public class Messaging {
                 try {
                     MeshMSConversation conversation;
                     while ((conversation = list.nextConversation()) != null) {
-                        if (cancel) {
-                            Log.v(TAG, "Cancelled");
+                        if (cancel)
                             return;
-                        }
                         if (!conversation.isRead) {
                             hashCode = hashCode ^ conversation.readHashCode();
                             unreadCount++;
@@ -101,8 +96,6 @@ public class Messaging {
                 }finally{
                     list.close();
                 }
-
-                Log.v(TAG, "Found "+unreadCount+" unread of "+ replace.size()+" conversations!");
 
                 synchronized (Messaging.this) {
                     if (cancel)

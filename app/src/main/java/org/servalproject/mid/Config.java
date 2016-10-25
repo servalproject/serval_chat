@@ -60,7 +60,6 @@ public class Config {
 			}
 		}
 		changes.add("sync");
-		Log.v(TAG, "Setting configuration");
 		ServalDCommand.configActions(changes.toArray(new Object[changes.size()]));
 		ServalDCommand.ConfigItems items = ServalDCommand.getConfig();
 		values = items.values;

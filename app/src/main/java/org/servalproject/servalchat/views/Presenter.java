@@ -42,7 +42,7 @@ public abstract class Presenter<V extends View> implements ILifecycle {
 
     }
 
-    void onDestroy(){
+    protected void onDestroy(){
 
     }
 

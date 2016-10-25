@@ -29,7 +29,6 @@ public class Notifications {
     private static final String NotificationTag = "PrivateMessaging";
 
     static void onStart(final Serval serval, final Context context){
-        Log.v(TAG, "Waiting for identities...");
         serval.identities.listObservers.add(new ListObserver<Identity>() {
             @Override
             public void added(Identity obj) {
@@ -110,7 +109,6 @@ public class Notifications {
 
     private void updateNotification(){
         int newHashCode =id.messaging.getHashCode();
-        Log.v(TAG, "Hashcode "+newHashCode+" (last saw "+hashCode+")");
         if (hashCode == newHashCode)
             return;
         hashCode = newHashCode;
@@ -127,7 +125,6 @@ public class Notifications {
         }
 
         if (unreadCount==0){
-            Log.v(TAG, "Cancelling "+NotificationTag+" "+notificationId);
             nm.cancel(NotificationTag, notificationId);
         }else{
 
@@ -150,7 +147,6 @@ public class Notifications {
                     .setContentIntent(pending)
                     ;
 
-            Log.v(TAG, "Notifying "+unread+" messages "+NotificationTag+" "+notificationId);
             nm.notify(NotificationTag, this.notificationId, builder.build());
         }
     }

@@ -32,7 +32,6 @@ public class FeedList extends AbstractGrowingList<RhizomeListBundle, IOException
     protected AbstractJsonList<RhizomeListBundle, IOException> openPast() throws ServalDInterfaceException, IOException {
         RhizomeBundleList list = new RhizomeBundleList(serval.getResultClient());
         list.setServiceFilter(MeshMBCommon.SERVICE);
-        Log.v(TAG, "Connecting past list...");
         list.connect();
         return list;
     }
@@ -41,7 +40,6 @@ public class FeedList extends AbstractGrowingList<RhizomeListBundle, IOException
     protected AbstractJsonList<RhizomeListBundle, IOException> openFuture() throws ServalDInterfaceException, IOException {
         RhizomeBundleList list = new RhizomeBundleList(serval.getResultClient(), token);
         list.setServiceFilter(MeshMBCommon.SERVICE);
-        Log.v(TAG, "Connecting future list...");
         list.connect();
         return list;
     }
@@ -58,7 +56,6 @@ public class FeedList extends AbstractGrowingList<RhizomeListBundle, IOException
 
     @Override
     protected void addingFutureItem(RhizomeListBundle item) {
-        Log.v(TAG, "Adding future "+item.manifest.id.abbreviation()+" - "+item.manifest.name);
         token = item.token;
         updatePeer(item);
         super.addingFutureItem(item);
@@ -66,12 +63,8 @@ public class FeedList extends AbstractGrowingList<RhizomeListBundle, IOException
 
     @Override
     protected void addingPastItem(RhizomeListBundle item) {
-        if (item==null){
-            Log.v(TAG, "End of past items");
-        } else {
-            Log.v(TAG, "Adding past " + item.manifest.id.abbreviation() + " - " + item.manifest.name);
+        if (item!=null)
             updatePeer(item);
-        }
 
         if (token == null) {
             token = (item == null) ? "" : item.token;

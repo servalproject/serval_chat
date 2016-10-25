@@ -120,7 +120,8 @@ public final class PrivateMessagingPresenter extends Presenter<PrivateMessaging>
         }
     }
 
-    void onDestroy(){
+    @Override
+    protected void onDestroy(){
         adapter.clear();
         Serval.getInstance().runOnThreadPool(new Runnable() {
             @Override

@@ -57,7 +57,6 @@ public class Rhizome extends BroadcastReceiver{
 						try {
 							RhizomeListBundle lastBundle = lastList.nextBundle();
 							token = (lastBundle == null) ? "" : lastBundle.token;
-							Log.v(TAG, "Watching for new bundles since "+token);
 						} finally {
 							lastList.close();
 						}
@@ -67,7 +66,6 @@ public class Rhizome extends BroadcastReceiver{
 						RhizomeListBundle bundle;
 						while ((bundle = list.nextBundle()) != null) {
 							token = bundle.token;
-							Log.v(TAG, "Added bundle; "+bundle.manifest.id.toHex());
 							observerSet.onAdd(bundle);
 						}
 					} catch (IOException e) {
@@ -78,7 +76,6 @@ public class Rhizome extends BroadcastReceiver{
 						if (list == watchList)
 							watchList = null;
 					}
-					Log.v(TAG, "List returned?");
 					Thread.sleep(5000);
 				}
 			}catch (IllegalStateException e){

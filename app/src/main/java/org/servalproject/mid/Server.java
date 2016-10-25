@@ -148,7 +148,6 @@ public class Server extends BroadcastReceiver implements IJniServer, Runnable {
 		serverTid = android.os.Process.myTid();
 		wakeAt = 0;
 
-		Log.v(TAG, "Calling native method server()");
 		ServalDCommand.server(this, "", null);
 
 		// we don't currently stop the server, so this is effectively unreachable

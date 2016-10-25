@@ -22,17 +22,14 @@ public class ObserverSet<T> implements Runnable {
 	}
 
 	public void add(Observer<T> observer){
-		Log.v(TAG, "Adding observer");
 		observers.add(observer);
 	}
 
 	public void remove(Observer<T> observer){
-		Log.v(TAG, "Removing observer");
 		observers.remove(observer);
 	}
 
 	void onUpdate(){
-		Log.v(TAG, "Updated: "+obj.toString());
 		if (observers.isEmpty())
 			return;
 		handler.post(this);
@@ -42,9 +39,7 @@ public class ObserverSet<T> implements Runnable {
 	public void run() {
 		if (observers.isEmpty())
 			return;
-		Log.v(TAG, "Observing change: "+obj.toString());
-		for(Observer<T> observer:observers){
+		for(Observer<T> observer:observers)
 			observer.updated(obj);
-		}
 	}
 }

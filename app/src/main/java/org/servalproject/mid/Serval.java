@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
 import org.servalproject.networking.BlueToothControl;
+import org.servalproject.servalchat.BuildConfig;
 import org.servalproject.servaldna.ChannelSelector;
 import org.servalproject.servaldna.ServalDClient;
 import org.servalproject.servaldna.ServalDCommand;
@@ -67,9 +68,14 @@ public class Serval {
 			config.set("interfaces.0.match", "eth0,tiwlan0,wlan0,wl0.1,tiap0");
 			config.set("interfaces.0.default_route", "on");
 			config.set("mdp.enable_inet", "on");
+			config.set("log.android.show_pid", "0");
+			config.set("log.android.show_time", "0");
 
-			config.delete("debug.rhizome");
-			config.delete("debug.rhizome_sync_keys");
+			if (!BuildConfig.DEBUG){
+				config.set("log.android.level", "WARN");
+				config.set("log.android.dump_config", "0");
+				config.set("log.file.dump_config", "0");
+			}
 
 			config.sync();
 
