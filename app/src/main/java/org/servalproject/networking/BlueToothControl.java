@@ -108,6 +108,7 @@ public class BlueToothControl extends AbstractExternalInterface{
 				// on some devices it seems to be (127 - 7)/8*7 = 105
 
 				sb	.append("socket_type=EXTERNAL\n")
+						.append("match=bluetooth\n")
 						.append("prefer_unicast=on\n")
 						.append("broadcast.tick_ms=120000\n")
 						.append("broadcast.reachable_timeout_ms=180000\n")
