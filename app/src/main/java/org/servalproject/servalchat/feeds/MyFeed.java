@@ -21,35 +21,35 @@ import org.servalproject.servalchat.navigation.Navigation;
  * Created by jeremy on 8/08/16.
  */
 public class MyFeed extends RelativeLayout
-        implements INavigate, View.OnClickListener{
-    Button post;
-    EditText message;
-    RecyclerView list;
-    MyFeedPresenter presenter;
-    MainActivity activity;
-    LinearLayoutManager layoutManager;
+		implements INavigate, View.OnClickListener {
+	Button post;
+	EditText message;
+	RecyclerView list;
+	MyFeedPresenter presenter;
+	MainActivity activity;
+	LinearLayoutManager layoutManager;
 
-    public MyFeed(Context context, AttributeSet attrs) {
-        super(context, attrs);
-    }
+	public MyFeed(Context context, AttributeSet attrs) {
+		super(context, attrs);
+	}
 
-    @Override
-    public ILifecycle onAttach(MainActivity activity, Navigation n, Identity id, Bundle args) {
-        this.activity = activity;
-        this.post = (Button)findViewById(R.id.post);
-        this.post.setOnClickListener(this);
-        this.message = (EditText)findViewById(R.id.message);
-        this.list = (RecyclerView)findViewById(R.id.feed_list);
-        layoutManager = new LinearLayoutManager(this.getContext());
-        list.setLayoutManager(layoutManager);
-        return presenter = MyFeedPresenter.factory.getPresenter(this, id, args);
-    }
+	@Override
+	public ILifecycle onAttach(MainActivity activity, Navigation n, Identity id, Bundle args) {
+		this.activity = activity;
+		this.post = (Button) findViewById(R.id.post);
+		this.post.setOnClickListener(this);
+		this.message = (EditText) findViewById(R.id.message);
+		this.list = (RecyclerView) findViewById(R.id.feed_list);
+		layoutManager = new LinearLayoutManager(this.getContext());
+		list.setLayoutManager(layoutManager);
+		return presenter = MyFeedPresenter.factory.getPresenter(this, id, args);
+	}
 
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()){
-            case R.id.post:
-                presenter.post();
-        }
-    }
+	@Override
+	public void onClick(View v) {
+		switch (v.getId()) {
+			case R.id.post:
+				presenter.post();
+		}
+	}
 }

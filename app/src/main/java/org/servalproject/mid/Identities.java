@@ -16,80 +16,80 @@ import java.util.Map;
  * Created by jeremy on 6/06/16.
  */
 public class Identities {
-    private static final String TAG = "Identities";
-    private final Serval serval;
-    private boolean loaded = false;
-    public final ListObserverSet<Identity> listObservers;
-    private final List<Identity> identityList = new ArrayList<>();
-    private final Map<Subscriber, Identity> identities = new HashMap<>();
-    private Identity selected;
+	private static final String TAG = "Identities";
+	private final Serval serval;
+	private boolean loaded = false;
+	public final ListObserverSet<Identity> listObservers;
+	private final List<Identity> identityList = new ArrayList<>();
+	private final Map<Subscriber, Identity> identities = new HashMap<>();
+	private Identity selected;
 
-    Identities(Serval serval){
-        this.serval = serval;
-        listObservers = new ListObserverSet<>(serval.uiHandler);
-    }
+	Identities(Serval serval) {
+		this.serval = serval;
+		listObservers = new ListObserverSet<>(serval.uiHandler);
+	}
 
-    void onStart() {
-        enterPin(null);
-    }
+	void onStart() {
+		enterPin(null);
+	}
 
-    private Identity addId(KeyringIdentity id){
-        Identity i = identities.get(id.subscriber);
-        if (i==null){
-            i = new Identity(serval, id.subscriber);
-            identities.put(id.subscriber, i);
-            identityList.add(i);
-            if (selected==null)
-                selected = i;
-            i.update(id);
-            listObservers.onAdd(i);
-        }else{
-            i.update(id);
-            listObservers.onUpdate(i);
-        }
-        return i;
-    }
+	private Identity addId(KeyringIdentity id) {
+		Identity i = identities.get(id.subscriber);
+		if (i == null) {
+			i = new Identity(serval, id.subscriber);
+			identities.put(id.subscriber, i);
+			identityList.add(i);
+			if (selected == null)
+				selected = i;
+			i.update(id);
+			listObservers.onAdd(i);
+		} else {
+			i.update(id);
+			listObservers.onUpdate(i);
+		}
+		return i;
+	}
 
-    public List<Identity> getIdentities(){
-        return identityList;
-    }
+	public List<Identity> getIdentities() {
+		return identityList;
+	}
 
-    public boolean isLoaded(){
-        return loaded;
-    }
+	public boolean isLoaded() {
+		return loaded;
+	}
 
-    public Identity getIdentity(SubscriberId sid){
-        for(Identity id:identityList){
-            if (id.subscriber.sid.equals(sid))
-                return id;
-        }
-        return null;
-    }
+	public Identity getIdentity(SubscriberId sid) {
+		for (Identity id : identityList) {
+			if (id.subscriber.sid.equals(sid))
+				return id;
+		}
+		return null;
+	}
 
-    public void updateIdentity(final Identity id, final String did, final String name, final String pin) throws ServalDInterfaceException, IOException {
-        addId(serval.getResultClient().keyringSetDidName(id.subscriber, did, name, pin));
-    }
+	public void updateIdentity(final Identity id, final String did, final String name, final String pin) throws ServalDInterfaceException, IOException {
+		addId(serval.getResultClient().keyringSetDidName(id.subscriber, did, name, pin));
+	}
 
-    public Identity addIdentity(final String did, final String name, final String pin) throws ServalDInterfaceException, IOException {
-        return addId(serval.getResultClient().keyringAdd(did, name, pin));
-    }
+	public Identity addIdentity(final String did, final String name, final String pin) throws ServalDInterfaceException, IOException {
+		return addId(serval.getResultClient().keyringAdd(did, name, pin));
+	}
 
-    void enterPin(final String pin){
-        serval.runOnThreadPool(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    KeyringIdentityList list = serval.getResultClient().keyringListIdentities(pin);
-                    KeyringIdentity id=null;
-                    while((id = list.nextIdentity())!=null)
-                        addId(id);
-                    if (pin == null)
-                        loaded = true;
-                    listObservers.onReset();
-                } catch (Exception e) {
-                    throw new IllegalStateException(e);
-                }
-            }
-        });
-    }
+	void enterPin(final String pin) {
+		serval.runOnThreadPool(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					KeyringIdentityList list = serval.getResultClient().keyringListIdentities(pin);
+					KeyringIdentity id = null;
+					while ((id = list.nextIdentity()) != null)
+						addId(id);
+					if (pin == null)
+						loaded = true;
+					listObservers.onReset();
+				} catch (Exception e) {
+					throw new IllegalStateException(e);
+				}
+			}
+		});
+	}
 }

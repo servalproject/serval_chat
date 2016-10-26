@@ -7,52 +7,52 @@ import org.servalproject.servaldna.keyring.KeyringIdentity;
  * Created by jeremy on 6/06/16.
  */
 public class Identity {
-    private final Serval serval;
-    public final Subscriber subscriber;
-    public final ObserverSet<Identity> observers;
-    private KeyringIdentity identity;
+	private final Serval serval;
+	public final Subscriber subscriber;
+	public final ObserverSet<Identity> observers;
+	private KeyringIdentity identity;
 
-    private static long nextId=0;
-    private final long id;
-    public final Messaging messaging;
+	private static long nextId = 0;
+	private final long id;
+	public final Messaging messaging;
 
-    public Identity(Serval serval, Subscriber subscriber){
-        this.serval = serval;
-        this.subscriber = subscriber;
-        id = nextId++;
-        if (serval == null){
-            // dummy object for ui design
-            messaging = null;
-            observers = null;
-        }else{
-            observers = new ObserverSet<>(serval.uiHandler, this);
-            this.messaging = new Messaging(serval, this);
-        }
-    }
+	public Identity(Serval serval, Subscriber subscriber) {
+		this.serval = serval;
+		this.subscriber = subscriber;
+		id = nextId++;
+		if (serval == null) {
+			// dummy object for ui design
+			messaging = null;
+			observers = null;
+		} else {
+			observers = new ObserverSet<>(serval.uiHandler, this);
+			this.messaging = new Messaging(serval, this);
+		}
+	}
 
-    public IdentityFeed getFeed(){
-        return new IdentityFeed(serval, this);
-    }
+	public IdentityFeed getFeed() {
+		return new IdentityFeed(serval, this);
+	}
 
-    public FeedList getAllFeeds(){
-        return new FeedList(serval);
-    }
+	public FeedList getAllFeeds() {
+		return new FeedList(serval);
+	}
 
-    public void update(KeyringIdentity id){
-        this.identity = id;
-        if (observers != null)
-            observers.onUpdate();
-    }
+	public void update(KeyringIdentity id) {
+		this.identity = id;
+		if (observers != null)
+			observers.onUpdate();
+	}
 
-    public String getName() {
-        return identity==null ? null : identity.name;
-    }
+	public String getName() {
+		return identity == null ? null : identity.name;
+	}
 
-    public String getDid() {
-        return identity==null ? null : identity.did;
-    }
+	public String getDid() {
+		return identity == null ? null : identity.did;
+	}
 
-    public long getId() {
-        return id;
-    }
+	public long getId() {
+		return id;
+	}
 }

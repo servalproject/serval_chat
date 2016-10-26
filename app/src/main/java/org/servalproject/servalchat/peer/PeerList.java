@@ -15,9 +15,9 @@ import org.servalproject.mid.KnownPeers;
 import org.servalproject.mid.ListObserverSet;
 import org.servalproject.mid.Peer;
 import org.servalproject.mid.Serval;
+import org.servalproject.servalchat.R;
 import org.servalproject.servalchat.navigation.Navigation;
 import org.servalproject.servalchat.views.ObservedRecyclerView;
-import org.servalproject.servalchat.R;
 import org.servalproject.servaldna.SubscriberId;
 
 import java.util.ArrayList;
@@ -30,129 +30,130 @@ import java.util.Set;
  * Created by jeremy on 31/05/16.
  */
 public class PeerList extends ObservedRecyclerView<Peer, PeerList.PeerHolder> {
-    private Serval serval;
-    private static final String TAG = "PeerList";
-    private List<Peer> items = new ArrayList<Peer>();
+	private Serval serval;
+	private static final String TAG = "PeerList";
+	private List<Peer> items = new ArrayList<Peer>();
 
-    private static ListObserverSet<Peer> getObserver(){
-        Serval serval = Serval.getInstance();
-        if (serval == null)
-            return null;
-        return serval.knownPeers.peerListObservers;
-    }
-    public PeerList(Context context, @Nullable AttributeSet attrs) {
-        super(getObserver(), context, attrs);
-        listAdapter.setHasStableIds(true);
-        serval = Serval.getInstance();
-    }
+	private static ListObserverSet<Peer> getObserver() {
+		Serval serval = Serval.getInstance();
+		if (serval == null)
+			return null;
+		return serval.knownPeers.peerListObservers;
+	}
 
-    @Override
-    protected void onFinishInflate() {
-        super.onFinishInflate();
-        setHasFixedSize(true);
-        setLayoutManager(new LinearLayoutManager(getContext()));
-    }
+	public PeerList(Context context, @Nullable AttributeSet attrs) {
+		super(getObserver(), context, attrs);
+		listAdapter.setHasStableIds(true);
+		serval = Serval.getInstance();
+	}
 
-    @Override
-    public PeerHolder createHolder(ViewGroup parent, int viewType) {
-        return new PeerHolder(parent);
-    }
+	@Override
+	protected void onFinishInflate() {
+		super.onFinishInflate();
+		setHasFixedSize(true);
+		setLayoutManager(new LinearLayoutManager(getContext()));
+	}
 
-    @Override
-    public void bind(PeerHolder holder, Peer item) {
-        holder.peer = item;
-        holder.name.setText(item.displayName());
-        if (item.isReachable()){
-            // Show green dot?
-        }
-    }
+	@Override
+	public PeerHolder createHolder(ViewGroup parent, int viewType) {
+		return new PeerHolder(parent);
+	}
 
-    @Override
-    public long getId(Peer item){
-        return item.getId();
-    }
+	@Override
+	public void bind(PeerHolder holder, Peer item) {
+		holder.peer = item;
+		holder.name.setText(item.displayName());
+		if (item.isReachable()) {
+			// Show green dot?
+		}
+	}
 
-    public class PeerHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        //private final ImageView avatar;
-        private final TextView name;
-        private Peer peer;
+	@Override
+	public long getId(Peer item) {
+		return item.getId();
+	}
 
-        public PeerHolder(ViewGroup parent) {
-            super(LayoutInflater.from(parent.getContext()).inflate(R.layout.peer, parent, false));
-            //avatar = (ImageView)this.itemView.findViewById(R.id.avatar);
-            name = (TextView)this.itemView.findViewById(R.id.name);
-            this.itemView.setOnClickListener(this);
-        }
+	public class PeerHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+		//private final ImageView avatar;
+		private final TextView name;
+		private Peer peer;
 
-        @Override
-        public void onClick(View v) {
-            Bundle args = new Bundle();
-            KnownPeers.saveSubscriber(peer.getSubscriber(), args);
-            activity.go(Navigation.PeerDetails, args);
-        }
-    }
+		public PeerHolder(ViewGroup parent) {
+			super(LayoutInflater.from(parent.getContext()).inflate(R.layout.peer, parent, false));
+			//avatar = (ImageView)this.itemView.findViewById(R.id.avatar);
+			name = (TextView) this.itemView.findViewById(R.id.name);
+			this.itemView.setOnClickListener(this);
+		}
 
-    private boolean sorted = false;
-    private final Set<SubscriberId> addedPeers = new HashSet<>();
+		@Override
+		public void onClick(View v) {
+			Bundle args = new Bundle();
+			KnownPeers.saveSubscriber(peer.getSubscriber(), args);
+			activity.go(Navigation.PeerDetails, args);
+		}
+	}
 
-    @Override
-    public void onVisible() {
-        addedPeers.clear();
-        items.clear();
-        if (serval != null) {
-            for (Peer p : serval.knownPeers.getReachablePeers())
-                add(p);
-        }
-        super.onVisible();
-    }
+	private boolean sorted = false;
+	private final Set<SubscriberId> addedPeers = new HashSet<>();
 
-    @Override
-    public void onHidden() {
-        super.onHidden();
-        addedPeers.clear();
-        items.clear();
-    }
+	@Override
+	public void onVisible() {
+		addedPeers.clear();
+		items.clear();
+		if (serval != null) {
+			for (Peer p : serval.knownPeers.getReachablePeers())
+				add(p);
+		}
+		super.onVisible();
+	}
 
-    private boolean add(Peer p){
-        if (!p.isReachable())
-            return false;
-        if (addedPeers.contains(p.getSubscriber().sid))
-            return false;
-        addedPeers.add(p.getSubscriber().sid);
-        items.add(p);
-        sorted = false;
-        return true;
-    }
+	@Override
+	public void onHidden() {
+		super.onHidden();
+		addedPeers.clear();
+		items.clear();
+	}
 
-    @Override
-    protected Peer get(int position){
-        sort();
-        return items.get(position);
-    }
+	private boolean add(Peer p) {
+		if (!p.isReachable())
+			return false;
+		if (addedPeers.contains(p.getSubscriber().sid))
+			return false;
+		addedPeers.add(p.getSubscriber().sid);
+		items.add(p);
+		sorted = false;
+		return true;
+	}
 
-    @Override
-    protected int getCount() {
-        return items.size();
-    }
+	@Override
+	protected Peer get(int position) {
+		sort();
+		return items.get(position);
+	}
 
-    private void sort(){
-        if (sorted)
-            return;
-        Collections.sort(items);
-        sorted = true;
-    }
+	@Override
+	protected int getCount() {
+		return items.size();
+	}
 
-    @Override
-    public void added(Peer obj) {
-        if (add(obj))
-            super.added(obj);
-    }
+	private void sort() {
+		if (sorted)
+			return;
+		Collections.sort(items);
+		sorted = true;
+	}
 
-    @Override
-    public void updated(Peer obj) {
-        add(obj);
-        sorted = false;
-        super.updated(obj);
-    }
+	@Override
+	public void added(Peer obj) {
+		if (add(obj))
+			super.added(obj);
+	}
+
+	@Override
+	public void updated(Peer obj) {
+		add(obj);
+		sorted = false;
+		super.updated(obj);
+	}
 
 }

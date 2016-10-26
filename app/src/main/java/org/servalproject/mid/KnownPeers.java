@@ -8,7 +8,6 @@ import org.servalproject.servaldna.MdpDnaLookup;
 import org.servalproject.servaldna.MdpRoutingChanges;
 import org.servalproject.servaldna.RouteLink;
 import org.servalproject.servaldna.ServalDCommand;
-import org.servalproject.servaldna.SigningKey;
 import org.servalproject.servaldna.Subscriber;
 import org.servalproject.servaldna.SubscriberId;
 
@@ -28,25 +27,25 @@ public class KnownPeers {
 	private MdpRoutingChanges routingChanges;
 	private final Serval serval;
 	private final Map<SubscriberId, Peer> peersBySid = new HashMap<>();
-	private int reachableCount=0;
+	private int reachableCount = 0;
 	public final ListObserverSet<Peer> peerListObservers;
 	public final ListObserverSet<Interface> interfaceObservers;
 	public final ObserverSet<KnownPeers> observers;
 
-	KnownPeers(Serval serval){
+	KnownPeers(Serval serval) {
 		this.serval = serval;
 		peerListObservers = new ListObserverSet<>(serval.uiHandler);
 		interfaceObservers = new ListObserverSet<>(serval.uiHandler);
 		observers = new ObserverSet<>(serval.uiHandler, this);
 	}
 
-	public int getReachableCount(){
+	public int getReachableCount() {
 		return reachableCount;
 	}
 
-	public List<Peer> getReachablePeers(){
+	public List<Peer> getReachablePeers() {
 		List<Peer> list = new ArrayList<>();
-		for(Peer p:peersBySid.values()){
+		for (Peer p : peersBySid.values()) {
 			if (p.isReachable())
 				list.add(p);
 		}
@@ -66,9 +65,9 @@ public class KnownPeers {
 	public static final String THEIR_SIGN = "Sign";
 	public static final String THEIR_COMBINED = "Combined";
 
-	public static void saveSubscriber(Subscriber subscriber, Bundle args){
+	public static void saveSubscriber(Subscriber subscriber, Bundle args) {
 		args.putByteArray(THEIR_SID, subscriber.sid.getBinary());
-		if (subscriber.signingKey!=null)
+		if (subscriber.signingKey != null)
 			args.putByteArray(THEIR_SIGN, subscriber.signingKey.getBinary());
 		args.putBoolean(THEIR_COMBINED, subscriber.combined);
 	}
@@ -84,15 +83,15 @@ public class KnownPeers {
 		return getPeer(getSubscriber(args));
 	}
 
-	public Peer getPeer(Subscriber subscriber){
+	public Peer getPeer(Subscriber subscriber) {
 		boolean isNew = false;
 
 		Peer p = peersBySid.get(subscriber.sid);
 
-		if (p == null){
-			synchronized (this){
+		if (p == null) {
+			synchronized (this) {
 				p = peersBySid.get(subscriber.sid);
-				if (p == null){
+				if (p == null) {
 					p = new Peer(serval.uiHandler, subscriber);
 					peersBySid.put(subscriber.sid, p);
 					isNew = true;
@@ -100,8 +99,8 @@ public class KnownPeers {
 			}
 		}
 
-		if (subscriber.signingKey!=null
-			&& p.getSubscriber().signingKey == null){
+		if (subscriber.signingKey != null
+				&& p.getSubscriber().signingKey == null) {
 			p.updateSubscriber(subscriber);
 		}
 
@@ -111,7 +110,7 @@ public class KnownPeers {
 		return p;
 	}
 
-	private void interfaceChange(RouteLink link){
+	private void interfaceChange(RouteLink link) {
 		Interface i = new Interface(link.interface_id, link.interface_name);
 		if (link.interface_up)
 			interfaceObservers.onAdd(i);
@@ -122,8 +121,8 @@ public class KnownPeers {
 	private final AsyncResult<RouteLink> routeResults = new AsyncResult<RouteLink>() {
 		@Override
 		public void result(RouteLink nextResult) {
-			if (nextResult.isSelf()){
-				if (nextResult.interface_id>=0)
+			if (nextResult.isSelf()) {
+				if (nextResult.interface_id >= 0)
 					interfaceChange(nextResult);
 				return;
 			}
@@ -132,14 +131,14 @@ public class KnownPeers {
 			p.update(nextResult);
 			peerListObservers.onUpdate(p);
 			boolean nowReachable = p.isReachable();
-			if (nowReachable != wasReachable){
+			if (nowReachable != wasReachable) {
 				if (nowReachable)
 					reachableCount++;
 				else
 					reachableCount--;
 				observers.onUpdate();
 			}
-			if (p.isReachable() && p.lookup==null)
+			if (p.isReachable() && p.lookup == null)
 				requestRefresh(p);
 		}
 	};
@@ -154,7 +153,7 @@ public class KnownPeers {
 		}
 	}
 
-	public void requestRefresh(Peer p){
+	public void requestRefresh(Peer p) {
 		try {
 			dnaLookup.sendRequest(p.getSubscriber().sid, "");
 		} catch (IOException e) {

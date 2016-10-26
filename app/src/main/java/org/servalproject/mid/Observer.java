@@ -1,5 +1,5 @@
 package org.servalproject.mid;
 
-public interface Observer<T>{
+public interface Observer<T> {
 	void updated(T obj);
 }

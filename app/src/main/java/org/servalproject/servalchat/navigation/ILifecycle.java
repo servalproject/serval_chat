@@ -5,9 +5,9 @@ package org.servalproject.servalchat.navigation;
  */
 public interface ILifecycle {
 
-    void onDetach(boolean configChange);
+	void onDetach(boolean configChange);
 
-    void onVisible();
+	void onVisible();
 
-    void onHidden();
+	void onHidden();
 }

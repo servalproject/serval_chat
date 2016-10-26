@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.net.wifi.WifiManager;
 
 public class WifiNetworkChanges extends BroadcastReceiver {
-	public static final String WIFI_AP_STATE_CHANGED_ACTION="android.net.wifi.WIFI_AP_STATE_CHANGED";
+	public static final String WIFI_AP_STATE_CHANGED_ACTION = "android.net.wifi.WIFI_AP_STATE_CHANGED";
 
 	public WifiNetworkChanges() {
 	}

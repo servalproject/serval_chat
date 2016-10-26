@@ -10,73 +10,74 @@ import android.view.ViewGroup;
  * Created by jeremy on 11/07/16.
  */
 public abstract class SimpleRecyclerView<T, H extends RecyclerView.ViewHolder>
-    extends RecyclerView{
-    protected final ListAdapter listAdapter;
+		extends RecyclerView {
+	protected final ListAdapter listAdapter;
 
-    public SimpleRecyclerView(Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
-        listAdapter = new ListAdapter();
-    }
+	public SimpleRecyclerView(Context context, @Nullable AttributeSet attrs) {
+		super(context, attrs);
+		listAdapter = new ListAdapter();
+	}
 
-    @Override
-    protected void onAttachedToWindow() {
-        setAdapter(listAdapter);
-        super.onAttachedToWindow();
-    }
+	@Override
+	protected void onAttachedToWindow() {
+		setAdapter(listAdapter);
+		super.onAttachedToWindow();
+	}
 
-    protected int getItemType(T item){
-        return 0;
-    }
+	protected int getItemType(T item) {
+		return 0;
+	}
 
-    abstract protected H createHolder(ViewGroup parent, int viewType);
+	abstract protected H createHolder(ViewGroup parent, int viewType);
 
-    abstract protected void bind(H holder, T item);
+	abstract protected void bind(H holder, T item);
 
-    protected void unBind(H holder, T item){}
+	protected void unBind(H holder, T item) {
+	}
 
-    protected long getId(T item){
-        return -1;
-    }
+	protected long getId(T item) {
+		return -1;
+	}
 
-    abstract protected T get(int position);
+	abstract protected T get(int position);
 
-    abstract protected int getCount();
+	abstract protected int getCount();
 
-    protected void notifyChanged(){
-        listAdapter.notifyDataSetChanged();
-    }
+	protected void notifyChanged() {
+		listAdapter.notifyDataSetChanged();
+	}
 
-    public class ListAdapter extends RecyclerView.Adapter<H>{
-        @Override
-        public H onCreateViewHolder(ViewGroup parent, int viewType) {
-            return createHolder(parent, viewType);
-        }
+	public class ListAdapter extends RecyclerView.Adapter<H> {
+		@Override
+		public H onCreateViewHolder(ViewGroup parent, int viewType) {
+			return createHolder(parent, viewType);
+		}
 
-        @Override
-        public void onViewRecycled(H holder) {
-            int position = holder.getAdapterPosition();
-            if (position!=NO_POSITION)
-                unBind(holder, get(position));
-        }
+		@Override
+		public void onViewRecycled(H holder) {
+			int position = holder.getAdapterPosition();
+			if (position != NO_POSITION)
+				unBind(holder, get(position));
+		}
 
-        @Override
-        public void onBindViewHolder(H holder, int position) {
-            bind(holder, get(position));
-        }
+		@Override
+		public void onBindViewHolder(H holder, int position) {
+			bind(holder, get(position));
+		}
 
-        @Override
-        public int getItemCount() {
-            return getCount();
-        }
+		@Override
+		public int getItemCount() {
+			return getCount();
+		}
 
-        public long getItemId(int position) {
-            return getId(get(position));
-        }
+		public long getItemId(int position) {
+			return getId(get(position));
+		}
 
-        @Override
-        public int getItemViewType(int position) {
-            return getItemType(get(position));
-        }
-    }
+		@Override
+		public int getItemViewType(int position) {
+			return getItemType(get(position));
+		}
+	}
 
 }

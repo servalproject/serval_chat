@@ -1,7 +1,6 @@
 package org.servalproject.mid;
 
 import android.os.Handler;
-import android.util.Log;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -14,22 +13,22 @@ public class ObserverSet<T> implements Runnable {
 
 	private final Handler handler;
 	private final T obj;
-	private static final String TAG="ObserverSet";
+	private static final String TAG = "ObserverSet";
 
-	ObserverSet(Handler handler, T obj){
+	ObserverSet(Handler handler, T obj) {
 		this.handler = handler;
 		this.obj = obj;
 	}
 
-	public void add(Observer<T> observer){
+	public void add(Observer<T> observer) {
 		observers.add(observer);
 	}
 
-	public void remove(Observer<T> observer){
+	public void remove(Observer<T> observer) {
 		observers.remove(observer);
 	}
 
-	void onUpdate(){
+	void onUpdate() {
 		if (observers.isEmpty())
 			return;
 		handler.post(this);
@@ -39,7 +38,7 @@ public class ObserverSet<T> implements Runnable {
 	public void run() {
 		if (observers.isEmpty())
 			return;
-		for(Observer<T> observer:observers)
+		for (Observer<T> observer : observers)
 			observer.updated(obj);
 	}
 }

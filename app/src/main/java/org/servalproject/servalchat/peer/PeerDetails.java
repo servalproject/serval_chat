@@ -25,88 +25,88 @@ import org.servalproject.servaldna.AbstractId;
  * Created by jeremy on 1/08/16.
  */
 public class PeerDetails extends LinearLayout
-        implements INavigate, IHaveMenu, MenuItem.OnMenuItemClickListener, ILifecycle, Observer<Peer> {
+		implements INavigate, IHaveMenu, MenuItem.OnMenuItemClickListener, ILifecycle, Observer<Peer> {
 
-    private MainActivity activity;
-    private TextView name;
-    private TextView number;
-    private TextView sid;
-    private Peer peer;
+	private MainActivity activity;
+	private TextView name;
+	private TextView number;
+	private TextView sid;
+	private Peer peer;
 
-    public PeerDetails(Context context, AttributeSet attrs) {
-        super(context, attrs);
-    }
+	public PeerDetails(Context context, AttributeSet attrs) {
+		super(context, attrs);
+	}
 
-    @Override
-    public ILifecycle onAttach(MainActivity activity, Navigation n, Identity id, Bundle args) {
-        this.activity = activity;
-        name = (TextView) findViewById(R.id.name);
-        number = (TextView) findViewById(R.id.number);
-        sid = (TextView) findViewById(R.id.sid);
+	@Override
+	public ILifecycle onAttach(MainActivity activity, Navigation n, Identity id, Bundle args) {
+		this.activity = activity;
+		name = (TextView) findViewById(R.id.name);
+		number = (TextView) findViewById(R.id.number);
+		sid = (TextView) findViewById(R.id.sid);
 
-        try {
-            Serval serval = Serval.getInstance();
-            this.peer = serval.knownPeers.getPeer(args);
-            updated(this.peer);
-        } catch (AbstractId.InvalidBinaryException e) {
-            throw new IllegalStateException();
-        }
+		try {
+			Serval serval = Serval.getInstance();
+			this.peer = serval.knownPeers.getPeer(args);
+			updated(this.peer);
+		} catch (AbstractId.InvalidBinaryException e) {
+			throw new IllegalStateException();
+		}
 
-        return this;
-    }
+		return this;
+	}
 
-    private static final int IGNORE = 1;
-    private static final int BLOCK = 2;
-    private static final int ADD = 3;
+	private static final int IGNORE = 1;
+	private static final int BLOCK = 2;
+	private static final int ADD = 3;
 
-    @Override
-    public void populateItems(Menu menu) {
-        menu.add(Menu.NONE, ADD, Menu.NONE, R.string.add_contact)
-                .setOnMenuItemClickListener(this);
-        menu.add(Menu.NONE, IGNORE, Menu.NONE, R.string.ignore_contact)
-                .setOnMenuItemClickListener(this);
-        menu.add(Menu.NONE, BLOCK, Menu.NONE, R.string.block_contact)
-                .setOnMenuItemClickListener(this);
-    }
+	@Override
+	public void populateItems(Menu menu) {
+		menu.add(Menu.NONE, ADD, Menu.NONE, R.string.add_contact)
+				.setOnMenuItemClickListener(this);
+		menu.add(Menu.NONE, IGNORE, Menu.NONE, R.string.ignore_contact)
+				.setOnMenuItemClickListener(this);
+		menu.add(Menu.NONE, BLOCK, Menu.NONE, R.string.block_contact)
+				.setOnMenuItemClickListener(this);
+	}
 
-    @Override
-    public boolean onMenuItemClick(MenuItem item) {
-        switch (item.getItemId()){
-            case BLOCK:
-                activity.showSnack("TODO, block contact", Snackbar.LENGTH_SHORT);
-                break;
-            case IGNORE:
-                activity.showSnack("TODO, ignore contact", Snackbar.LENGTH_SHORT);
-                break;
-            case ADD:
-                activity.showSnack("TODO, remember contact", Snackbar.LENGTH_SHORT);
-                break;
-            default:
-                return false;
-        }
-        return true;
-    }
+	@Override
+	public boolean onMenuItemClick(MenuItem item) {
+		switch (item.getItemId()) {
+			case BLOCK:
+				activity.showSnack("TODO, block contact", Snackbar.LENGTH_SHORT);
+				break;
+			case IGNORE:
+				activity.showSnack("TODO, ignore contact", Snackbar.LENGTH_SHORT);
+				break;
+			case ADD:
+				activity.showSnack("TODO, remember contact", Snackbar.LENGTH_SHORT);
+				break;
+			default:
+				return false;
+		}
+		return true;
+	}
 
-    @Override
-    public void onDetach(boolean configChange) {
+	@Override
+	public void onDetach(boolean configChange) {
 
-    }
+	}
 
-    @Override
-    public void onVisible() {
-        peer.observers.add(this);
-        updated(peer);
-    }
+	@Override
+	public void onVisible() {
+		peer.observers.add(this);
+		updated(peer);
+	}
 
-    @Override
-    public void onHidden() {
-        peer.observers.remove(this);
-    }
+	@Override
+	public void onHidden() {
+		peer.observers.remove(this);
+	}
 
-    @Override
-    public void updated(Peer obj) {
-        name.setText(peer.getName());
-        number.setText(peer.getDid());
-        sid.setText(peer.getSubscriber().sid.abbreviation());
-    }
+	@Override
+	public void updated(Peer obj) {
+		name.setText(peer.getName());
+		number.setText(peer.getDid());
+		sid.setText(peer.getSubscriber().sid.abbreviation());
+	}
 }

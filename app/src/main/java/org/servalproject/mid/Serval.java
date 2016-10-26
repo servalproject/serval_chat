@@ -54,7 +54,7 @@ public class Serval {
 		backgroundHandler.replaceMessage(START, 0);
 	}
 
-	void startup(){
+	void startup() {
 		try {
 			ServalDCommand.setInstancePath(instancePath.getPath());
 			// if sdcard is available, enable rhizome
@@ -64,14 +64,14 @@ public class Serval {
 			// partly for slightly better security
 			restfulPassword = new BigInteger(130, new SecureRandom()).toString(32);
 			config.set("api.restful.users." + restfulUsername + ".password", restfulPassword);
-			config.set("api.restful.newsince_timeout","3600"); // 1 hour...
+			config.set("api.restful.newsince_timeout", "3600"); // 1 hour...
 			config.set("interfaces.0.match", "eth0,tiwlan0,wlan0,wl0.1,tiap0");
 			config.set("interfaces.0.default_route", "on");
 			config.set("mdp.enable_inet", "on");
 			config.set("log.android.show_pid", "0");
 			config.set("log.android.show_time", "0");
 
-			if (!BuildConfig.DEBUG){
+			if (!BuildConfig.DEBUG) {
 				config.set("log.android.level", "WARN");
 				config.set("log.android.dump_config", "0");
 				config.set("log.file.dump_config", "0");
@@ -84,7 +84,7 @@ public class Serval {
 			throw new IllegalStateException(e);
 		}
 
-		Thread serverThread=new Thread(server, "Servald");
+		Thread serverThread = new Thread(server, "Servald");
 		serverThread.start();
 	}
 
@@ -98,11 +98,11 @@ public class Serval {
 	public final SharedPreferences settings;
 	private final BlockingQueue<Runnable> backgroundQueue;
 	private final ThreadPoolExecutor backgroundThreads;
-	private String restfulUsername="ServalDClient";
+	private String restfulUsername = "ServalDClient";
 	private String restfulPassword;
 	private ServalDClient client;
 	public BlueToothControl blueTooth;
-	final ChannelSelector selector;;
+	final ChannelSelector selector;
 	final File instancePath;
 
 	void onServerStarted() {
@@ -115,33 +115,34 @@ public class Serval {
 		knownPeers.onStart();
 		rhizome.onStart();
 		blueTooth = BlueToothControl.getBlueToothControl(this, selector, server.getMdpPort());
-		if (blueTooth!=null)
+		if (blueTooth != null)
 			blueTooth.onEnableChanged();
 		// TODO trigger other startup here
 		server.onStart();
 	}
 
-	ServalDClient getResultClient(){
-		if (client==null)
+	ServalDClient getResultClient() {
+		if (client == null)
 			throw new IllegalStateException();
 		return client;
 	}
 
-	public void runOnThreadPool(Runnable r){
+	public void runOnThreadPool(Runnable r) {
 		backgroundThreads.execute(r);
 	}
 
-	public void runOnBackground(Runnable r){
+	public void runOnBackground(Runnable r) {
 		backgroundHandler.post(r);
 	}
 
-	public void runDelayed(Runnable r, int delay){
+	public void runDelayed(Runnable r, int delay) {
 		backgroundHandler.postDelayed(r, delay);
 	}
 
 	private static Serval instance;
-	public static Serval start(Context appContext){
-		if (instance!=null)
+
+	public static Serval start(Context appContext) {
+		if (instance != null)
 			throw new IllegalStateException("instance already created!");
 		try {
 			instance = new Serval(appContext.getApplicationContext());
@@ -152,7 +153,7 @@ public class Serval {
 		}
 	}
 
-	public static Serval getInstance(){
+	public static Serval getInstance() {
 		return instance;
 	}
 

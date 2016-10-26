@@ -1,7 +1,5 @@
 package org.servalproject.mid;
 
-import android.util.Log;
-
 import org.servalproject.servaldna.ServalDCommand;
 import org.servalproject.servaldna.ServalDFailureException;
 
@@ -20,25 +18,25 @@ public class Config {
 	private Map<String, String> pending = new HashMap<>();
 	private static final String deleteFlag = "deleteme";
 
-	private static final String TAG="Config";
+	private static final String TAG = "Config";
 
-	void set(String name, String value){
+	void set(String name, String value) {
 		pending.put(name, value);
 	}
 
-	String get(String name){
-		String value=null;
+	String get(String name) {
+		String value = null;
 		if (pending.containsKey(name)) {
 			value = pending.get(name);
-			// don't use equals here
+			// don't use .equals() here
 			if (value == deleteFlag)
 				value = null;
-		}else if(values!=null)
+		} else if (values != null)
 			value = values.get(name);
 		return value;
 	}
 
-	void delete(String name){
+	void delete(String name) {
 		pending.put(name, deleteFlag);
 	}
 
@@ -47,13 +45,13 @@ public class Config {
 			return;
 
 		List<String> changes = new ArrayList<>();
-		for (String key:pending.keySet()) {
+		for (String key : pending.keySet()) {
 			String value = pending.get(key);
 			// don't use .equals() here
 			if (value == deleteFlag) {
 				changes.add("del");
 				changes.add(key);
-			}else{
+			} else {
 				changes.add("set");
 				changes.add(key);
 				changes.add(value);

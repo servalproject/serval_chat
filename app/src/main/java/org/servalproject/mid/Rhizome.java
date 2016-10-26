@@ -17,7 +17,7 @@ import java.io.IOException;
 /**
  * Created by jeremy on 3/05/16.
  */
-public class Rhizome extends BroadcastReceiver{
+public class Rhizome extends BroadcastReceiver {
 	private static final String TAG = "Rhizome";
 
 	private final Context context;
@@ -26,14 +26,14 @@ public class Rhizome extends BroadcastReceiver{
 
 	File rhizomeFolder;
 
-	Rhizome(Serval serval, Context context){
+	Rhizome(Serval serval, Context context) {
 		this.serval = serval;
 		this.context = context;
 		rhizomeFolder = getRhizomePath();
 		observerSet = new ListObserverSet<>(serval.uiHandler);
 	}
 
-	void onStart(){
+	void onStart() {
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(Intent.ACTION_MEDIA_EJECT);
 		filter.addAction(Intent.ACTION_MEDIA_UNMOUNTED);
@@ -78,15 +78,15 @@ public class Rhizome extends BroadcastReceiver{
 					}
 					Thread.sleep(5000);
 				}
-			}catch (IllegalStateException e){
+			} catch (IllegalStateException e) {
 				throw e;
-			}catch (Exception e){
+			} catch (Exception e) {
 				throw new IllegalStateException(e);
 			}
 		}
 	};
 
-	private File getRhizomePath(){
+	private File getRhizomePath() {
 		if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
 			File folder = context.getExternalFilesDir(null);
 			if (folder != null) {
@@ -96,25 +96,25 @@ public class Rhizome extends BroadcastReceiver{
 		return null;
 	}
 
-	void updateRhizomeConfig(){
+	void updateRhizomeConfig() {
 		if (rhizomeFolder == null) {
 			serval.config.set("rhizome.enable", "0");
 			serval.config.delete("rhizome.datastore_path");
-		}else{
+		} else {
 			serval.config.set("rhizome.enable", "1");
 			serval.config.set("rhizome.datastore_path", rhizomeFolder.getPath());
 		}
 	}
 
-	void setRhizomeConfig(){
+	void setRhizomeConfig() {
 		File rhizomeFolder = getRhizomePath();
 
-		if (rhizomeFolder == null && this.rhizomeFolder==null)
+		if (rhizomeFolder == null && this.rhizomeFolder == null)
 			return;
-		if (rhizomeFolder != null && this.rhizomeFolder!=null && rhizomeFolder.equals(rhizomeFolder))
+		if (rhizomeFolder != null && this.rhizomeFolder != null && rhizomeFolder.equals(rhizomeFolder))
 			return;
 
-		if (watchList != null && rhizomeFolder == null){
+		if (watchList != null && rhizomeFolder == null) {
 			RhizomeBundleList list = watchList;
 			watchList = null;
 			try {
@@ -139,7 +139,7 @@ public class Rhizome extends BroadcastReceiver{
 	@Override
 	public void onReceive(Context context, Intent intent) {
 		String action = intent.getAction();
-		if(action.equals(Intent.ACTION_MEDIA_EJECT) ||
+		if (action.equals(Intent.ACTION_MEDIA_EJECT) ||
 				action.equals(Intent.ACTION_MEDIA_UNMOUNTED) ||
 				action.equals(Intent.ACTION_MEDIA_MOUNTED))
 			// redetect sdcard path & availability

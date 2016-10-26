@@ -11,45 +11,45 @@ import android.widget.EditText;
 import android.widget.RelativeLayout;
 
 import org.servalproject.mid.Identity;
+import org.servalproject.servalchat.R;
 import org.servalproject.servalchat.navigation.ILifecycle;
 import org.servalproject.servalchat.navigation.INavigate;
 import org.servalproject.servalchat.navigation.MainActivity;
 import org.servalproject.servalchat.navigation.Navigation;
-import org.servalproject.servalchat.R;
 
 /**
  * Created by jeremy on 27/07/16.
  */
 public class PrivateMessaging extends RelativeLayout
-        implements INavigate, View.OnClickListener {
-    MainActivity activity;
-    EditText message;
-    Button send;
-    RecyclerView list;
-    LinearLayoutManager layoutManager;
-    PrivateMessagingPresenter presenter;
+		implements INavigate, View.OnClickListener {
+	MainActivity activity;
+	EditText message;
+	Button send;
+	RecyclerView list;
+	LinearLayoutManager layoutManager;
+	PrivateMessagingPresenter presenter;
 
-    public PrivateMessaging(Context context, AttributeSet attrs) {
-        super(context, attrs);
-    }
+	public PrivateMessaging(Context context, AttributeSet attrs) {
+		super(context, attrs);
+	}
 
-    @Override
-    public ILifecycle onAttach(MainActivity activity, Navigation n, Identity id, Bundle args) {
-        this.activity = activity;
-        this.message = (EditText)findViewById(R.id.message);
-        this.send = (Button)findViewById(R.id.send);
-        this.list = (RecyclerView)findViewById(R.id.message_list);
-        layoutManager = new LinearLayoutManager(this.getContext());
-        layoutManager.setReverseLayout(true);
-        list.setLayoutManager(layoutManager);
-        send.setOnClickListener(this);
-        presenter = PrivateMessagingPresenter.factory.getPresenter(this, id, args);
-        return presenter;
-    }
+	@Override
+	public ILifecycle onAttach(MainActivity activity, Navigation n, Identity id, Bundle args) {
+		this.activity = activity;
+		this.message = (EditText) findViewById(R.id.message);
+		this.send = (Button) findViewById(R.id.send);
+		this.list = (RecyclerView) findViewById(R.id.message_list);
+		layoutManager = new LinearLayoutManager(this.getContext());
+		layoutManager.setReverseLayout(true);
+		list.setLayoutManager(layoutManager);
+		send.setOnClickListener(this);
+		presenter = PrivateMessagingPresenter.factory.getPresenter(this, id, args);
+		return presenter;
+	}
 
-    @Override
-    public void onClick(View v) {
-        if (v.getId()==R.id.send)
-            presenter.send(message.getText().toString());
-    }
+	@Override
+	public void onClick(View v) {
+		if (v.getId() == R.id.send)
+			presenter.send(message.getText().toString());
+	}
 }

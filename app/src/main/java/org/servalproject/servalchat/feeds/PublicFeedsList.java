@@ -17,20 +17,20 @@ import org.servalproject.servalchat.navigation.Navigation;
  * Created by jeremy on 11/10/16.
  */
 public class PublicFeedsList extends RecyclerView implements INavigate {
-    LinearLayoutManager layoutManager;
-    PublicFeedsPresenter presenter;
-    MainActivity activity;
+	LinearLayoutManager layoutManager;
+	PublicFeedsPresenter presenter;
+	MainActivity activity;
 
-    public PublicFeedsList(Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
-    }
+	public PublicFeedsList(Context context, @Nullable AttributeSet attrs) {
+		super(context, attrs);
+	}
 
-    @Override
-    public ILifecycle onAttach(MainActivity activity, Navigation n, Identity id, Bundle args) {
-        this.activity = activity;
-        layoutManager = new LinearLayoutManager(this.getContext());
-        setLayoutManager(layoutManager);
-        presenter = PublicFeedsPresenter.factory.getPresenter(this, id, args);
-        return presenter;
-    }
+	@Override
+	public ILifecycle onAttach(MainActivity activity, Navigation n, Identity id, Bundle args) {
+		this.activity = activity;
+		layoutManager = new LinearLayoutManager(this.getContext());
+		setLayoutManager(layoutManager);
+		presenter = PublicFeedsPresenter.factory.getPresenter(this, id, args);
+		return presenter;
+	}
 }

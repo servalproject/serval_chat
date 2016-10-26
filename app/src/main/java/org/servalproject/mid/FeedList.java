@@ -1,7 +1,5 @@
 package org.servalproject.mid;
 
-import android.util.Log;
-
 import org.servalproject.servaldna.AbstractJsonList;
 import org.servalproject.servaldna.ServalDInterfaceException;
 import org.servalproject.servaldna.Subscriber;
@@ -15,61 +13,62 @@ import java.io.IOException;
  * Created by jeremy on 11/10/16.
  */
 public class FeedList extends AbstractGrowingList<RhizomeListBundle, IOException> {
-    private String token;
-    private static final String TAG = "FeedList";
-    public FeedList(Serval serval) {
-        super(serval);
-    }
+	private String token;
+	private static final String TAG = "FeedList";
 
-    @Override
-    protected void start() {
-        if (token == null)
-            return;
-        super.start();
-    }
+	public FeedList(Serval serval) {
+		super(serval);
+	}
 
-    @Override
-    protected AbstractJsonList<RhizomeListBundle, IOException> openPast() throws ServalDInterfaceException, IOException {
-        RhizomeBundleList list = new RhizomeBundleList(serval.getResultClient());
-        list.setServiceFilter(MeshMBCommon.SERVICE);
-        list.connect();
-        return list;
-    }
+	@Override
+	protected void start() {
+		if (token == null)
+			return;
+		super.start();
+	}
 
-    @Override
-    protected AbstractJsonList<RhizomeListBundle, IOException> openFuture() throws ServalDInterfaceException, IOException {
-        RhizomeBundleList list = new RhizomeBundleList(serval.getResultClient(), token);
-        list.setServiceFilter(MeshMBCommon.SERVICE);
-        list.connect();
-        return list;
-    }
+	@Override
+	protected AbstractJsonList<RhizomeListBundle, IOException> openPast() throws ServalDInterfaceException, IOException {
+		RhizomeBundleList list = new RhizomeBundleList(serval.getResultClient());
+		list.setServiceFilter(MeshMBCommon.SERVICE);
+		list.connect();
+		return list;
+	}
 
-    private void updatePeer(RhizomeListBundle item){
-        // TODO verify that the sender and id are for the same identity!
-        // for now we can assume this, but we might break this rule in a future version
-        Subscriber subscriber = new Subscriber(
-                item.author != null ? item.author : item.manifest.sender,
-                item.manifest.id, true);
-        Peer p = serval.knownPeers.getPeer(subscriber);
-        p.updateFeedName(item.manifest.name);
-    }
+	@Override
+	protected AbstractJsonList<RhizomeListBundle, IOException> openFuture() throws ServalDInterfaceException, IOException {
+		RhizomeBundleList list = new RhizomeBundleList(serval.getResultClient(), token);
+		list.setServiceFilter(MeshMBCommon.SERVICE);
+		list.connect();
+		return list;
+	}
 
-    @Override
-    protected void addingFutureItem(RhizomeListBundle item) {
-        token = item.token;
-        updatePeer(item);
-        super.addingFutureItem(item);
-    }
+	private void updatePeer(RhizomeListBundle item) {
+		// TODO verify that the sender and id are for the same identity!
+		// for now we can assume this, but we might break this rule in a future version
+		Subscriber subscriber = new Subscriber(
+				item.author != null ? item.author : item.manifest.sender,
+				item.manifest.id, true);
+		Peer p = serval.knownPeers.getPeer(subscriber);
+		p.updateFeedName(item.manifest.name);
+	}
 
-    @Override
-    protected void addingPastItem(RhizomeListBundle item) {
-        if (item!=null)
-            updatePeer(item);
+	@Override
+	protected void addingFutureItem(RhizomeListBundle item) {
+		token = item.token;
+		updatePeer(item);
+		super.addingFutureItem(item);
+	}
 
-        if (token == null) {
-            token = (item == null) ? "" : item.token;
-            start();
-        }
-        super.addingPastItem(item);
-    }
+	@Override
+	protected void addingPastItem(RhizomeListBundle item) {
+		if (item != null)
+			updatePeer(item);
+
+		if (token == null) {
+			token = (item == null) ? "" : item.token;
+			start();
+		}
+		super.addingPastItem(item);
+	}
 }

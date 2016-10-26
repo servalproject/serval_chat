@@ -25,7 +25,7 @@ import java.util.UUID;
 /**
  * Created by jeremy on 9/02/15.
  */
-public class BlueToothControl extends AbstractExternalInterface{
+public class BlueToothControl extends AbstractExternalInterface {
 	final BluetoothAdapter adapter;
 	final Serval serval;
 	private final String myAddress;
@@ -52,14 +52,14 @@ public class BlueToothControl extends AbstractExternalInterface{
 			ChannelSelector selector,
 			int loopbackMdpPort) {
 		BluetoothAdapter a = BluetoothAdapter.getDefaultAdapter();
-		if (a==null) return null;
+		if (a == null) return null;
 
 		try {
 			return new BlueToothControl(
-                    serval,
-                    selector,
-                    loopbackMdpPort,
-                    a);
+					serval,
+					selector,
+					loopbackMdpPort,
+					a);
 		} catch (IOException e) {
 			throw new IllegalStateException(e);
 		}
@@ -75,9 +75,9 @@ public class BlueToothControl extends AbstractExternalInterface{
 		myAddress = adapter.getAddress();
 		state = -1;
 		scanMode = adapter.getScanMode();
-		lastScan = adapter.isDiscovering()?SystemClock.elapsedRealtime():0;
+		lastScan = adapter.isDiscovering() ? SystemClock.elapsedRealtime() : 0;
 		String myName = adapter.getName();
-		if (myName==null || myName.startsWith(SERVAL_PREFIX)){
+		if (myName == null || myName.startsWith(SERVAL_PREFIX)) {
 			myName = serval.settings.getString(BLUETOOTH_NAME, "");
 		}
 		originalName = myName;
@@ -107,7 +107,7 @@ public class BlueToothControl extends AbstractExternalInterface{
 				// MTU = trunc((248 - 7)/8)*7 = 210
 				// on some devices it seems to be (127 - 7)/8*7 = 105
 
-				sb	.append("socket_type=EXTERNAL\n")
+				sb.append("socket_type=EXTERNAL\n")
 						.append("match=bluetooth\n")
 						.append("prefer_unicast=on\n")
 						.append("broadcast.tick_ms=120000\n")
@@ -132,7 +132,7 @@ public class BlueToothControl extends AbstractExternalInterface{
 		public void run() {
 			if (!adapter.isEnabled())
 				return;
-			if (secureListener!=null)
+			if (secureListener != null)
 				return;
 			BluetoothServerSocket secure = null;
 			try {
@@ -160,10 +160,10 @@ public class BlueToothControl extends AbstractExternalInterface{
 		}
 	};
 
-	private final Runnable stopListening = new Runnable(){
+	private final Runnable stopListening = new Runnable() {
 		@Override
 		public void run() {
-			if (secureListener==null)
+			if (secureListener == null)
 				return;
 			setName(originalName);
 			try {
@@ -172,7 +172,7 @@ public class BlueToothControl extends AbstractExternalInterface{
 				Log.e(TAG, e.getMessage(), e);
 			}
 
-			for(PeerState p:peers.values()){
+			for (PeerState p : peers.values()) {
 				p.disconnect();
 			}
 			peers.clear();
@@ -189,27 +189,27 @@ public class BlueToothControl extends AbstractExternalInterface{
 		}
 	};
 
-	public PeerState getPeer(BluetoothDevice device){
+	public PeerState getPeer(BluetoothDevice device) {
 		PeerState s = this.peers.get(device.getAddress());
-		if (s==null){
+		if (s == null) {
 			s = new PeerState(this, device, getAddress(device));
 			this.peers.put(device.getAddress(), s);
 		}
 		return s;
 	}
 
-	private class Listener extends Thread{
+	private class Listener extends Thread {
 		private final BluetoothServerSocket socket;
 		private final boolean secure;
-		private boolean running=true;
+		private boolean running = true;
 
-		private Listener(String name, BluetoothServerSocket socket, boolean secure){
+		private Listener(String name, BluetoothServerSocket socket, boolean secure) {
 			super(name);
 			this.socket = socket;
 			this.secure = secure;
 		}
 
-		public void close(){
+		public void close() {
 			try {
 				running = false;
 				socket.close();
@@ -223,164 +223,164 @@ public class BlueToothControl extends AbstractExternalInterface{
 			while (running && adapter.isEnabled()) {
 				try {
 					BluetoothSocket client = socket.accept();
-					Log.v(TAG, "Incoming connection from "+client.getRemoteDevice().getAddress());
+					Log.v(TAG, "Incoming connection from " + client.getRemoteDevice().getAddress());
 					PeerState peer = getPeer(client.getRemoteDevice());
 					peer.onConnected(client, secure);
-				}catch (Exception e){
+				} catch (Exception e) {
 					Log.e(TAG, e.getMessage(), e);
 				}
 			}
 		}
 	}
 
-	private byte[] getAddress(BluetoothDevice device){
+	private byte[] getAddress(BluetoothDevice device) {
 		// TODO convert mac address string to hex bytes?
 		return device.getAddress().getBytes();
 	}
 
-	private PeerState getDevice(byte[] address){
+	private PeerState getDevice(byte[] address) {
 		// TODO convert mac address string to hex bytes?
 		String addr = new String(address);
 		PeerState ret = peers.get(addr);
-		if (ret==null)
-			Log.v(TAG, "Unable to find bluetooth device for "+addr);
+		if (ret == null)
+			Log.v(TAG, "Unable to find bluetooth device for " + addr);
 		return ret;
 	}
 
-	private String debug(byte[] values){
+	private String debug(byte[] values) {
 		StringBuilder sb = new StringBuilder();
-		for (int i=0;i<values.length;i++)
+		for (int i = 0; i < values.length; i++)
 			sb.append(' ').append(Integer.toBinaryString(values[i] & 0xFF));
 		return sb.toString();
 	}
 
-	private byte[] decodeName(String name){
-		if (name==null)
+	private byte[] decodeName(String name) {
+		if (name == null)
 			return null;
 		if (!name.startsWith(SERVAL_PREFIX))
 			return null;
 		try {
-			byte data[]=name.substring(7).getBytes(UTF8);
+			byte data[] = name.substring(7).getBytes(UTF8);
 			int dataLen = data.length;
 			byte next;
 
-			if (dataLen>=2 && (data[dataLen-2]&0xFF)==0xD4){
-				data[dataLen-2]=0;
+			if (dataLen >= 2 && (data[dataLen - 2] & 0xFF) == 0xD4) {
+				data[dataLen - 2] = 0;
 				dataLen--;
 			}
 			// decode zero bytes
-			for (int i=0;i<dataLen;i++){
-				if ((data[i] & 0xC0) == 0xC0){
+			for (int i = 0; i < dataLen; i++) {
+				if ((data[i] & 0xC0) == 0xC0) {
 					next = (byte) (data[i] & 1);
-					data[i]=0;
-					data[i+1]= (byte) ((data[i+1] & 0x3F) | (next << 6));
+					data[i] = 0;
+					data[i + 1] = (byte) ((data[i + 1] & 0x3F) | (next << 6));
 					i++;
 				}
 			}
 
-			int len = dataLen/8*7;
-			if (dataLen%8!=0)
-				len+=dataLen%8 -1;
-			byte ret[]=new byte[len];
-			int i=0;
-			int j=0;
-			while(j<ret.length){
-				next=data[i++];
-				ret[j] = (byte) (next<< 1);
-				if (i>=dataLen) break;
-				next=data[i++];
-				ret[j] = (byte)(ret[j] | (next>>>6));j++;
-				if (j>=ret.length) break;
-				ret[j] = (byte)(next << 2);
-				if (i>=dataLen) break;
+			int len = dataLen / 8 * 7;
+			if (dataLen % 8 != 0)
+				len += dataLen % 8 - 1;
+			byte ret[] = new byte[len];
+			int i = 0;
+			int j = 0;
+			while (j < ret.length) {
+				next = data[i++];
+				ret[j] = (byte) (next << 1);
+				if (i >= dataLen) break;
+				next = data[i++];
+				ret[j] = (byte) (ret[j++] | (next >>> 6));
+				if (j >= ret.length) break;
+				ret[j] = (byte) (next << 2);
+				if (i >= dataLen) break;
 
-				next=data[i++];
-				ret[j] = (byte)(ret[j] | (next>>>5));j++;
-				if (j>=ret.length) break;
-				ret[j] = (byte)(next << 3);
-				if (i>=dataLen) break;
+				next = data[i++];
+				ret[j] = (byte) (ret[j++] | (next >>> 5));
+				if (j >= ret.length) break;
+				ret[j] = (byte) (next << 3);
+				if (i >= dataLen) break;
 
-				next=data[i++];
-				ret[j] = (byte)(ret[j] | (next>>>4));j++;
-				if (j>=ret.length) break;
-				ret[j] = (byte)(next << 4);
-				if (i>=dataLen) break;
+				next = data[i++];
+				ret[j] = (byte) (ret[j++] | (next >>> 4));
+				if (j >= ret.length) break;
+				ret[j] = (byte) (next << 4);
+				if (i >= dataLen) break;
 
-				next=data[i++];
-				ret[j] = (byte)(ret[j] | (next>>>3));j++;
-				if (j>=ret.length) break;
-				ret[j] = (byte)(next << 5);
-				if (i>=dataLen) break;
+				next = data[i++];
+				ret[j] = (byte) (ret[j++] | (next >>> 3));
+				if (j >= ret.length) break;
+				ret[j] = (byte) (next << 5);
+				if (i >= dataLen) break;
 
-				next=data[i++];
-				ret[j] = (byte)(ret[j] | (next>>>2));j++;
-				if (j>=ret.length) break;
-				ret[j] = (byte)(next << 6);
-				if (i>=dataLen) break;
+				next = data[i++];
+				ret[j] = (byte) (ret[j++] | (next >>> 2));
+				if (j >= ret.length) break;
+				ret[j] = (byte) (next << 6);
+				if (i >= dataLen) break;
 
-				next=data[i++];
-				ret[j] = (byte)(ret[j] | (next>>>1));j++;
-				if (j>=ret.length) break;
-				ret[j] = (byte)(next << 7);
-				if (i>=dataLen) break;
+				next = data[i++];
+				ret[j] = (byte) (ret[j++] | (next >>> 1));
+				if (j >= ret.length) break;
+				ret[j] = (byte) (next << 7);
+				if (i >= dataLen) break;
 
-				next=data[i++];
-				ret[j] = (byte)(ret[j] | next);j++;
+				next = data[i++];
+				ret[j] = (byte) (ret[j++] | next);
 			}
 			return ret;
-		}catch(java.lang.ArrayIndexOutOfBoundsException e){
-			Log.e(TAG, "Failed to decode "+name+"\n"+e.getMessage(), e);
+		} catch (java.lang.ArrayIndexOutOfBoundsException e) {
+			Log.e(TAG, "Failed to decode " + name + "\n" + e.getMessage(), e);
 			throw e;
 		}
 	}
 
 	private static Charset UTF8 = Charset.forName("UTF-8");
 
-	private String encodeName(byte[] data){
-		int len = data.length/7*8;
-		if (data.length%7!=0)
-			len+=data.length%7 +1;
-		byte[] ret = new byte[len+1];
-		byte next=0;
-		int j=0;
-		int i=0;
+	private String encodeName(byte[] data) {
+		int len = data.length / 7 * 8;
+		if (data.length % 7 != 0)
+			len += data.length % 7 + 1;
+		byte[] ret = new byte[len + 1];
+		byte next = 0;
+		int j = 0;
+		int i = 0;
 
-		while(i<data.length){
-			ret[j++]=(byte)((data[i]&0xFF) >>> 1);
-			next=(byte)(data[i++] << 6 & 0x7F);
-			if (i>=data.length) break;
-			ret[j++]=(byte)(next | ((data[i]&0xFF) >>> 2));
-			next=(byte)(data[i++] << 5 & 0x7F);
-			if (i>=data.length) break;
-			ret[j++]=(byte)(next | ((data[i]&0xFF) >>> 3));
-			next=(byte)(data[i++] << 4 & 0x7F);
-			if (i>=data.length) break;
-			ret[j++]=(byte)(next | ((data[i]&0xFF) >>> 4));
-			next=(byte)(data[i++] << 3 & 0x7F);
-			if (i>=data.length) break;
-			ret[j++]=(byte)(next | ((data[i]&0xFF) >>> 5));
-			next=(byte)(data[i++] << 2 & 0x7F);
-			if (i>=data.length) break;
-			ret[j++]=(byte)(next | ((data[i]&0xFF) >>> 6));
-			next=(byte)(data[i++] << 1 & 0x7F);
-			if (i>=data.length) break;
-			ret[j++]=(byte)(next | ((data[i]&0xFF) >>> 7));
-			ret[j++]=(byte)(data[i++] & 0x7F);
+		while (i < data.length) {
+			ret[j++] = (byte) ((data[i] & 0xFF) >>> 1);
+			next = (byte) (data[i++] << 6 & 0x7F);
+			if (i >= data.length) break;
+			ret[j++] = (byte) (next | ((data[i] & 0xFF) >>> 2));
+			next = (byte) (data[i++] << 5 & 0x7F);
+			if (i >= data.length) break;
+			ret[j++] = (byte) (next | ((data[i] & 0xFF) >>> 3));
+			next = (byte) (data[i++] << 4 & 0x7F);
+			if (i >= data.length) break;
+			ret[j++] = (byte) (next | ((data[i] & 0xFF) >>> 4));
+			next = (byte) (data[i++] << 3 & 0x7F);
+			if (i >= data.length) break;
+			ret[j++] = (byte) (next | ((data[i] & 0xFF) >>> 5));
+			next = (byte) (data[i++] << 2 & 0x7F);
+			if (i >= data.length) break;
+			ret[j++] = (byte) (next | ((data[i] & 0xFF) >>> 6));
+			next = (byte) (data[i++] << 1 & 0x7F);
+			if (i >= data.length) break;
+			ret[j++] = (byte) (next | ((data[i] & 0xFF) >>> 7));
+			ret[j++] = (byte) (data[i++] & 0x7F);
 		}
-		if (j%8!=0)
-			ret[j++]=next;
+		if (j % 8 != 0)
+			ret[j++] = next;
 		// escape zero bytes
-		for (i=0;i<j-1;i++){
-			if (ret[i]==0){
+		for (i = 0; i < j - 1; i++) {
+			if (ret[i] == 0) {
 				next = ret[i + 1];
-				ret[i+1] = (byte) (0x80 | (next & 0x3F));
+				ret[i + 1] = (byte) (0x80 | (next & 0x3F));
 				ret[i] = (byte) (0xD0 | (next >> 6));
 				i++;
 			}
 		}
-		if (ret[j-1]==0){
-			ret[j-1] = (byte) 0xD4;
-			ret[j++]= (byte) 0x80;
+		if (ret[j - 1] == 0) {
+			ret[j - 1] = (byte) 0xD4;
+			ret[j++] = (byte) 0x80;
 		}
 		return SERVAL_PREFIX + new String(ret, 0, j, UTF8);
 	}
@@ -392,33 +392,33 @@ public class BlueToothControl extends AbstractExternalInterface{
 		// check for broken bluetooth state...
 		long now = SystemClock.elapsedRealtime();
 
-		if (this.lastScan!=0 && this.lastScan + 240000 < now && adapter.isDiscovering()){
+		if (this.lastScan != 0 && this.lastScan + 240000 < now && adapter.isDiscovering()) {
 			Log.v(TAG, "Last scan started " + (SystemClock.elapsedRealtime() - this.lastScan) + "ms ago, probably need to restart bluetooth");
 		}
 
 		byte payloadBytes[] = new byte[payload.remaining()];
 		payload.get(payloadBytes);
-		if (addr==null || addr.length==0) {
+		if (addr == null || addr.length == 0) {
 			String name = encodeName(payloadBytes);
 			setName(name);
 			startDiscovery();
-		}else{
+		} else {
 			PeerState peer = getDevice(addr);
-			if (peer==null)
+			if (peer == null)
 				return;
 			peer.queuePacket(payloadBytes);
 		}
 	}
 
-	public void onFound(Intent intent){
+	public void onFound(Intent intent) {
 		onRemoteNameChanged(intent);
 	}
 
-	public void onRemoteNameChanged(Intent intent){
+	public void onRemoteNameChanged(Intent intent) {
 		BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 		final PeerState peer = getPeer(device);
 		peer.lastScan = new Date();
-		final byte packet[]=decodeName(peer.device.getName());
+		final byte packet[] = decodeName(peer.device.getName());
 		if (packet != null)
 			serval.runOnThreadPool(new Runnable() {
 				@Override
@@ -432,21 +432,21 @@ public class BlueToothControl extends AbstractExternalInterface{
 			});
 	}
 
-	public void onScanModeChanged(Intent intent){
+	public void onScanModeChanged(Intent intent) {
 		scanMode = intent.getIntExtra(BluetoothAdapter.EXTRA_SCAN_MODE, 0);
-		Log.v(TAG, "Scan mode changed; "+scanMode+" "+adapter.isEnabled());
+		Log.v(TAG, "Scan mode changed; " + scanMode + " " + adapter.isEnabled());
 		if (adapter.isEnabled())
 			serval.runOnThreadPool(up);
 	}
 
-	public void onDiscoveryStarted(){
+	public void onDiscoveryStarted() {
 		this.lastScan = SystemClock.elapsedRealtime();
 		Log.v(TAG, "Discovery Started");
 		// TODO set alarm to cancel / restart bluetooth
 	}
 
-	private void startDiscovery(){
-		if (state!=BluetoothAdapter.STATE_ON || !adapter.isEnabled())
+	private void startDiscovery() {
+		if (state != BluetoothAdapter.STATE_ON || !adapter.isEnabled())
 			return;
 
 		if (Connector.connecting || adapter.isDiscovering()) {
@@ -459,18 +459,18 @@ public class BlueToothControl extends AbstractExternalInterface{
 		scanAgain = false;
 	}
 
-	public void onConnectionFinished(){
+	public void onConnectionFinished() {
 		if (scanAgain)
 			startDiscovery();
 	}
 
-	public void onDiscoveryFinished(){
+	public void onDiscoveryFinished() {
 		Log.v(TAG, "Discovery Finished");
 		if (scanAgain)
 			startDiscovery();
 	}
 
-	private void setState(int state){
+	private void setState(int state) {
 		if (this.state != state) {
 			this.state = state;
 			Log.v(TAG, "State changed; " + state);
@@ -478,49 +478,49 @@ public class BlueToothControl extends AbstractExternalInterface{
 		scanMode = adapter.getScanMode();
 		if (state == BluetoothAdapter.STATE_ON) {
 			serval.runOnThreadPool(listen);
-		}else{
+		} else {
 			serval.runOnThreadPool(stopListening);
 		}
 	}
 
-	public void onEnableChanged(){
+	public void onEnableChanged() {
 		setState(adapter.getState());
 	}
 
-	public void onStateChange(Intent intent){
+	public void onStateChange(Intent intent) {
 		// on / off etc
 		setState(intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, 0));
 	}
 
 	// pull the interface up / down
-	public void setEnabled(boolean enabled){
-		if (state==BluetoothAdapter.STATE_ON && !enabled)
+	public void setEnabled(boolean enabled) {
+		if (state == BluetoothAdapter.STATE_ON && !enabled)
 			adapter.disable();
-		if (state==BluetoothAdapter.STATE_OFF && enabled)
+		if (state == BluetoothAdapter.STATE_OFF && enabled)
 			adapter.enable();
 	}
 
-	public void onNameChanged(Intent intent){
+	public void onNameChanged(Intent intent) {
 		String name = intent.getStringExtra(BluetoothAdapter.EXTRA_LOCAL_NAME);
-		if (name!=null && !name.startsWith(SERVAL_PREFIX) && !name.equals(originalName)){
+		if (name != null && !name.startsWith(SERVAL_PREFIX) && !name.equals(originalName)) {
 			originalName = name;
 			SharedPreferences.Editor e = serval.settings.edit();
 			e.putString(BLUETOOTH_NAME, name);
 			e.apply();
-		}else if (name==null || !name.equals(currentName)){
-			Log.v(TAG, "name ("+name+")!= currentName ("+currentName+")!? ");
+		} else if (name == null || !name.equals(currentName)) {
+			Log.v(TAG, "name (" + name + ")!= currentName (" + currentName + ")!? ");
 		}
 	}
 
-	public boolean isDiscoverable(){
+	public boolean isDiscoverable() {
 		return adapter.getScanMode() == BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE;
 	}
 
-	public boolean isEnabled(){
+	public boolean isEnabled() {
 		return adapter.isEnabled();
 	}
 
-	public void requestDiscoverable(Context context){
+	public void requestDiscoverable(Context context) {
 		if (isDiscoverable())
 			return;
 
@@ -530,13 +530,13 @@ public class BlueToothControl extends AbstractExternalInterface{
 		context.startActivity(discoverableIntent);
 	}
 
-	public void setName(String name){
+	public void setName(String name) {
 		// fails if the adapter is off...
 		currentName = name;
 		adapter.setName(name);
 	}
 
-	public void cancelDiscovery(){
+	public void cancelDiscovery() {
 		if (adapter.isDiscovering())
 			adapter.cancelDiscovery();
 	}

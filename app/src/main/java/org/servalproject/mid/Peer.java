@@ -10,13 +10,13 @@ import org.servalproject.servaldna.Subscriber;
 /**
  * Created by jeremy on 4/05/16.
  */
-public final class Peer implements Comparable<Peer>{
-	private static final String TAG ="Peer";
+public final class Peer implements Comparable<Peer> {
+	private static final String TAG = "Peer";
 
-	private static long nextId=0;
+	private static long nextId = 0;
 	private final long id;
 
-	Peer(Handler handler, Subscriber subscriber){
+	Peer(Handler handler, Subscriber subscriber) {
 		this.subscriber = subscriber;
 		observers = new ObserverSet<>(handler, this);
 		id = nextId++;
@@ -24,10 +24,12 @@ public final class Peer implements Comparable<Peer>{
 
 	public final ObserverSet<Peer> observers;
 	private Subscriber subscriber;
-	public Subscriber getSubscriber(){
+
+	public Subscriber getSubscriber() {
 		return subscriber;
 	}
-	public void updateSubscriber(Subscriber subscriber){
+
+	public void updateSubscriber(Subscriber subscriber) {
 		if (this.subscriber.sid.equals(subscriber.sid)
 				&& this.subscriber.signingKey == null) {
 			this.subscriber = subscriber;
@@ -35,35 +37,38 @@ public final class Peer implements Comparable<Peer>{
 	}
 
 	ServalDCommand.LookupResult lookup;
-	public String getDid(){
-		return lookup==null?null:lookup.did;
-	}
-	public String getName(){
-		return lookup==null?null:lookup.name;
+
+	public String getDid() {
+		return lookup == null ? null : lookup.did;
 	}
 
-	void update(ServalDCommand.LookupResult result){
+	public String getName() {
+		return lookup == null ? null : lookup.name;
+	}
+
+	void update(ServalDCommand.LookupResult result) {
 		lookup = result;
-		Log.v(TAG, "Updated details "+result.toString());
+		Log.v(TAG, "Updated details " + result.toString());
 		observers.onUpdate();
 	}
 
 	RouteLink link;
-	public boolean isReachable(){
-		return link!=null;
+
+	public boolean isReachable() {
+		return link != null;
 	}
 
-	public boolean isContact(){
+	public boolean isContact() {
 		return false;
 	}
 
-	public boolean isBlocked(){
+	public boolean isBlocked() {
 		return false;
 	}
 
-	void update(RouteLink route){
+	void update(RouteLink route) {
 		link = route.isReachable() ? route : null;
-		Log.v(TAG, "Updated route "+route.toString());
+		Log.v(TAG, "Updated route " + route.toString());
 		observers.onUpdate();
 	}
 
@@ -83,7 +88,7 @@ public final class Peer implements Comparable<Peer>{
 
 	private String feedName;
 
-	public String displayName(){
+	public String displayName() {
 		String n = feedName;
 		if (n == null || "".equals(n))
 			n = getName();
@@ -94,17 +99,17 @@ public final class Peer implements Comparable<Peer>{
 		return n;
 	}
 
-	public void updateFeedName(String name){
+	public void updateFeedName(String name) {
 		if (feedName == null && name == null)
 			return;
-		if (name!=null && name.equals(feedName))
+		if (name != null && name.equals(feedName))
 			return;
 		feedName = name;
 		observers.onUpdate();
 	}
 
-	public MessageFeed getFeed(){
-		if (subscriber.signingKey==null)
+	public MessageFeed getFeed() {
+		if (subscriber.signingKey == null)
 			return null;
 		return new MessageFeed(Serval.getInstance(), this);
 	}

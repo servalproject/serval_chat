@@ -6,9 +6,9 @@ import android.util.Log;
 import java.io.IOException;
 
 /**
-* Created by jeremy on 7/04/15.
-*/
-class Connector implements Runnable{
+ * Created by jeremy on 7/04/15.
+ */
+class Connector implements Runnable {
 	private final BlueToothControl control;
 	private final BluetoothAdapter adapter;
 	private final PeerReader reader;
@@ -17,7 +17,8 @@ class Connector implements Runnable{
 	static boolean connecting = false;
 
 	private static final String TAG = "Connector";
-	Connector(BlueToothControl control, PeerState peer, PeerReader reader){
+
+	Connector(BlueToothControl control, PeerState peer, PeerReader reader) {
 		this.control = control;
 		this.adapter = control.adapter;
 		this.peer = peer;
@@ -30,10 +31,10 @@ class Connector implements Runnable{
 
 	@Override
 	public void run() {
-		try{
+		try {
 			connecting = true;
 			control.cancelDiscovery();
-			Log.v(reader.name, "Connecting to " + peer.device.getAddress() +" ("+reader.secure+")");
+			Log.v(reader.name, "Connecting to " + peer.device.getAddress() + " (" + reader.secure + ")");
 			reader.socket.connect();
 
 			peer.onConnected(reader);
@@ -41,9 +42,10 @@ class Connector implements Runnable{
 			Log.e(TAG, e.getMessage(), e);
 			try {
 				reader.socket.close();
-			} catch (IOException e1){}
+			} catch (IOException e1) {
+			}
 			peer.onConnectionFailed();
-		} finally{
+		} finally {
 			connecting = false;
 			control.onConnectionFinished();
 		}

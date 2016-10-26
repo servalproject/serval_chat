@@ -23,51 +23,51 @@ import org.servalproject.servalchat.navigation.Navigation;
  * Created by jeremy on 3/08/16.
  */
 public class PeerFeed extends LinearLayout
-    implements INavigate, IHaveMenu, MenuItem.OnMenuItemClickListener {
+		implements INavigate, IHaveMenu, MenuItem.OnMenuItemClickListener {
 
-    RecyclerView list;
-    PeerFeedPresenter presenter;
-    MainActivity activity;
-    LinearLayoutManager layoutManager;
+	RecyclerView list;
+	PeerFeedPresenter presenter;
+	MainActivity activity;
+	LinearLayoutManager layoutManager;
 
-    public PeerFeed(Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
-    }
+	public PeerFeed(Context context, @Nullable AttributeSet attrs) {
+		super(context, attrs);
+	}
 
-    private static final int FOLLOW = 1;
-    private static final int IGNORE = 2;
+	private static final int FOLLOW = 1;
+	private static final int IGNORE = 2;
 
-    @Override
-    public void populateItems(Menu menu) {
-        menu.add(Menu.NONE, FOLLOW, Menu.NONE, R.string.follow_feed)
-                .setOnMenuItemClickListener(this);
-        menu.add(Menu.NONE, IGNORE, Menu.NONE, R.string.ignore_feed)
-                .setOnMenuItemClickListener(this);
-    }
+	@Override
+	public void populateItems(Menu menu) {
+		menu.add(Menu.NONE, FOLLOW, Menu.NONE, R.string.follow_feed)
+				.setOnMenuItemClickListener(this);
+		menu.add(Menu.NONE, IGNORE, Menu.NONE, R.string.ignore_feed)
+				.setOnMenuItemClickListener(this);
+	}
 
-    @Override
-    public boolean onMenuItemClick(MenuItem item) {
-        switch (item.getItemId()){
-            case FOLLOW:
+	@Override
+	public boolean onMenuItemClick(MenuItem item) {
+		switch (item.getItemId()) {
+			case FOLLOW:
 
-                activity.showSnack("TODO, follow feed", Snackbar.LENGTH_SHORT);
-                break;
-            case IGNORE:
-                activity.showSnack("TODO, ignore feed", Snackbar.LENGTH_SHORT);
-                break;
-            default:
-                return false;
-        }
-        return true;
-    }
+				activity.showSnack("TODO, follow feed", Snackbar.LENGTH_SHORT);
+				break;
+			case IGNORE:
+				activity.showSnack("TODO, ignore feed", Snackbar.LENGTH_SHORT);
+				break;
+			default:
+				return false;
+		}
+		return true;
+	}
 
-    @Override
-    public ILifecycle onAttach(MainActivity activity, Navigation n, Identity id, Bundle args) {
-        this.activity = activity;
-        this.list = (RecyclerView) findViewById(R.id.list);
-        layoutManager = new LinearLayoutManager(this.getContext());
-        list.setLayoutManager(layoutManager);
-        return presenter = PeerFeedPresenter.factory.getPresenter(this, id, args);
-    }
+	@Override
+	public ILifecycle onAttach(MainActivity activity, Navigation n, Identity id, Bundle args) {
+		this.activity = activity;
+		this.list = (RecyclerView) findViewById(R.id.list);
+		layoutManager = new LinearLayoutManager(this.getContext());
+		list.setLayoutManager(layoutManager);
+		return presenter = PeerFeedPresenter.factory.getPresenter(this, id, args);
+	}
 
 }

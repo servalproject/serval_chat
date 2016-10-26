@@ -8,10 +8,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.PowerManager;
 import android.os.SystemClock;
-import android.util.Log;
 
 import org.servalproject.servaldna.IJniServer;
-import org.servalproject.servaldna.ServalDClient;
 import org.servalproject.servaldna.ServalDCommand;
 
 /**
@@ -113,18 +111,20 @@ public class Server extends BroadcastReceiver implements IJniServer, Runnable {
 		}
 	}
 
-	private int mdpPort =-1;
-	public int getMdpPort(){
+	private int mdpPort = -1;
+
+	public int getMdpPort() {
 		return mdpPort;
 	}
 
 	private int httpPort;
-	public int getHttpPort(){
+
+	public int getHttpPort() {
 		return httpPort;
 	}
 
-	public boolean isRunning(){
-		return mdpPort>0;
+	public boolean isRunning() {
+		return mdpPort > 0;
 	}
 
 	@Override
@@ -135,7 +135,7 @@ public class Server extends BroadcastReceiver implements IJniServer, Runnable {
 		serval.backgroundHandler.replaceMessage(Serval.SERVER_UP, 0);
 	}
 
-	void onStart(){
+	void onStart() {
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(WAKE_INTENT);
 		context.registerReceiver(this, filter);

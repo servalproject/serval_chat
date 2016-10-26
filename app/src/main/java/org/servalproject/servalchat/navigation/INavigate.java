@@ -8,5 +8,5 @@ import org.servalproject.mid.Identity;
  * Created by jeremy on 14/06/16.
  */
 public interface INavigate {
-    ILifecycle onAttach(MainActivity activity, Navigation n, Identity id, Bundle args);
+	ILifecycle onAttach(MainActivity activity, Navigation n, Identity id, Bundle args);
 }

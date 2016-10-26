@@ -17,61 +17,61 @@ import org.servalproject.servaldna.Subscriber;
  */
 public class PeerFeedPresenter extends Presenter<PeerFeed> {
 
-    private FeedAdapter adapter;
-    private MessageFeed feed;
+	private FeedAdapter adapter;
+	private MessageFeed feed;
 
-    protected PeerFeedPresenter(PresenterFactory<PeerFeed, ?> factory, String key, Identity identity) {
-        super(factory, key, identity);
-    }
+	protected PeerFeedPresenter(PresenterFactory<PeerFeed, ?> factory, String key, Identity identity) {
+		super(factory, key, identity);
+	}
 
-    public static PresenterFactory<PeerFeed, PeerFeedPresenter> factory
-            = new PresenterFactory<PeerFeed, PeerFeedPresenter>() {
+	public static PresenterFactory<PeerFeed, PeerFeedPresenter> factory
+			= new PresenterFactory<PeerFeed, PeerFeedPresenter>() {
 
-        @Override
-        protected String getKey(Identity id, Bundle savedState) {
-            try {
-                Subscriber them = KnownPeers.getSubscriber(savedState);
-                return id.subscriber.sid.toHex()+":"+them.sid.toHex();
-            } catch (AbstractId.InvalidBinaryException e) {
-                throw new IllegalStateException(e);
-            }
-        }
+		@Override
+		protected String getKey(Identity id, Bundle savedState) {
+			try {
+				Subscriber them = KnownPeers.getSubscriber(savedState);
+				return id.subscriber.sid.toHex() + ":" + them.sid.toHex();
+			} catch (AbstractId.InvalidBinaryException e) {
+				throw new IllegalStateException(e);
+			}
+		}
 
-        @Override
-        protected PeerFeedPresenter create(String key, Identity id) {
-            return new PeerFeedPresenter(this, key, id);
-        }
+		@Override
+		protected PeerFeedPresenter create(String key, Identity id) {
+			return new PeerFeedPresenter(this, key, id);
+		}
 
-    };
+	};
 
-    @Override
-    protected void bind() {
-        PeerFeed feed = getView();
-        feed.list.setAdapter(adapter);
-    }
+	@Override
+	protected void bind() {
+		PeerFeed feed = getView();
+		feed.list.setAdapter(adapter);
+	}
 
-    @Override
-    protected void restore(Bundle config) {
-        try {
-            Serval serval = Serval.getInstance();
-            Peer peer = serval.knownPeers.getPeer(config);
-            feed = peer.getFeed();
-            adapter = new FeedAdapter(feed);
+	@Override
+	protected void restore(Bundle config) {
+		try {
+			Serval serval = Serval.getInstance();
+			Peer peer = serval.knownPeers.getPeer(config);
+			feed = peer.getFeed();
+			adapter = new FeedAdapter(feed);
 
-        } catch (AbstractId.InvalidBinaryException e) {
-            throw new IllegalStateException(e);
-        }
-    }
+		} catch (AbstractId.InvalidBinaryException e) {
+			throw new IllegalStateException(e);
+		}
+	}
 
-    @Override
-    public void onVisible() {
-        super.onVisible();
-        adapter.onVisible();
-    }
+	@Override
+	public void onVisible() {
+		super.onVisible();
+		adapter.onVisible();
+	}
 
-    @Override
-    public void onHidden() {
-        super.onHidden();
-        adapter.onHidden();
-    }
+	@Override
+	public void onHidden() {
+		super.onHidden();
+		adapter.onHidden();
+	}
 }

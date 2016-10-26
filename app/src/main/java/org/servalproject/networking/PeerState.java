@@ -13,31 +13,31 @@ import java.util.LinkedList;
 import java.util.ListIterator;
 
 /**
-* Created by jeremy on 7/04/15.
-*/
-public class PeerState implements Runnable{
+ * Created by jeremy on 7/04/15.
+ */
+public class PeerState implements Runnable {
 	private final BlueToothControl control;
 	public final BluetoothDevice device;
 	private Connector connector;
 	public Date lastScan;
-	public int runningServal=-1;
+	public int runningServal = -1;
 
 	LinkedList<PeerReader> readers = new LinkedList<PeerReader>();
 	Thread writerThread;
 
 	private LinkedList<byte[]> queue = new LinkedList<byte[]>();
 	public final byte[] addrBytes;
-	private static final String TAG="PeerState";
+	private static final String TAG = "PeerState";
 
 	private Runnable expireConnections = new Runnable() {
 		@Override
 		public void run() {
-			synchronized (readers){
+			synchronized (readers) {
 				ListIterator<PeerReader> i = readers.listIterator();
-				while(i.hasNext()){
+				while (i.hasNext()) {
 					PeerReader r = i.next();
 					if (SystemClock.elapsedRealtime() - r.lastReceived > 10000) {
-						Log.v(TAG, "Closing expired connection to "+device.getAddress());
+						Log.v(TAG, "Closing expired connection to " + device.getAddress());
 						i.remove();
 						onClosed(r);
 					}
@@ -50,24 +50,24 @@ public class PeerState implements Runnable{
 		}
 	};
 
-	PeerState(BlueToothControl control, BluetoothDevice device, byte[] addrBytes){
+	PeerState(BlueToothControl control, BluetoothDevice device, byte[] addrBytes) {
 		this.control = control;
 		this.device = device;
 		this.addrBytes = addrBytes;
 	}
 
 	public void connect() throws IOException {
-		if (connector!=null || (!readers.isEmpty()) || (!control.adapter.isEnabled()))
+		if (connector != null || (!readers.isEmpty()) || (!control.adapter.isEnabled()))
 			return;
 		int bondState = device.getBondState();
 		if (bondState == BluetoothDevice.BOND_BONDING)
 			return;
 		boolean paired = (bondState == BluetoothDevice.BOND_BONDED);
-		if (!paired && Build.VERSION.SDK_INT <10)
+		if (!paired && Build.VERSION.SDK_INT < 10)
 			return;
 
 		synchronized (this) {
-			if (connector!=null)
+			if (connector != null)
 				return;
 
 			BluetoothSocket socket = null;
@@ -80,20 +80,21 @@ public class PeerState implements Runnable{
 				}
 			}
 
-			int bias = device.getAddress().toLowerCase().compareTo(control.adapter.getAddress().toLowerCase())*500;
+			int bias = device.getAddress().toLowerCase().compareTo(control.adapter.getAddress().toLowerCase()) * 500;
 
 			PeerReader r = new PeerReader(control, this, socket, paired, bias);
 			connector = new Connector(control, this, r);
 		}
 	}
 
-	public void onConnected(BluetoothSocket socket, boolean secure){
+	public void onConnected(BluetoothSocket socket, boolean secure) {
 		onConnected(new PeerReader(control, this, socket, secure, 0));
 	}
-	public synchronized void onConnected(PeerReader reader){
+
+	public synchronized void onConnected(PeerReader reader) {
 		connector = null;
 		synchronized (readers) {
-			boolean notify = readers.isEmpty() && writerThread!=null;
+			boolean notify = readers.isEmpty() && writerThread != null;
 			readers.addFirst(reader);
 			Collections.sort(readers);
 			if (notify)
@@ -101,19 +102,19 @@ public class PeerState implements Runnable{
 		}
 		reader.start();
 
-		if (writerThread==null) {
+		if (writerThread == null) {
 			writerThread = new Thread(this, "Writer" + device.getAddress());
 			writerThread.start();
-			control.serval.runDelayed(expireConnections,5000);
+			control.serval.runDelayed(expireConnections, 5000);
 		}
 	}
 
-	public void queuePacket(byte payload[]){
+	public void queuePacket(byte payload[]) {
 		if (!control.adapter.isEnabled())
 			return;
 
 		synchronized (queue) {
-			boolean notify = queue.isEmpty() && writerThread!=null;
+			boolean notify = queue.isEmpty() && writerThread != null;
 			queue.addLast(payload);
 			if (notify)
 				queue.notify();
@@ -127,7 +128,7 @@ public class PeerState implements Runnable{
 		}
 	}
 
-	public synchronized void disconnect(){
+	public synchronized void disconnect() {
 		closeWriter();
 		synchronized (readers) {
 			for (PeerReader r : readers) {
@@ -141,10 +142,10 @@ public class PeerState implements Runnable{
 		}
 	}
 
-	private void closeWriter(){
+	private void closeWriter() {
 		Thread t = writerThread;
 		writerThread = null;
-		if (t!=null)
+		if (t != null)
 			t.interrupt();
 	}
 
@@ -153,9 +154,9 @@ public class PeerState implements Runnable{
 			readers.remove(peerReader);
 			if (readers.isEmpty())
 				closeWriter();
-			try{
+			try {
 				peerReader.socket.close();
-			}catch (IOException e){
+			} catch (IOException e) {
 				Log.e(peerReader.name, e.getMessage(), e);
 			}
 		}
@@ -173,7 +174,7 @@ public class PeerState implements Runnable{
 						queue.wait();
 					payload = queue.removeFirst();
 				}
-				if (payload==null)
+				if (payload == null)
 					continue;
 
 				if (payload.length + 2 > buff.length)
@@ -183,26 +184,26 @@ public class PeerState implements Runnable{
 				System.arraycopy(payload, 0, buff, 2, payload.length);
 
 				PeerReader reader = null;
-				synchronized (readers){
+				synchronized (readers) {
 					if (readers.isEmpty())
 						readers.wait();
 					reader = readers.peekFirst();
 				}
-				if (reader==null)
+				if (reader == null)
 					continue;
 
 				try {
 					// try to write in one go or the blutooth layer will waste bandwidth sending fragments
 					reader.socket.getOutputStream().write(buff, 0, payload.length + 2);
 					reader.lastWritten = SystemClock.elapsedRealtime();
-				}catch (IOException e){
+				} catch (IOException e) {
 					Log.e(reader.name, e.getMessage(), e);
 					onClosed(reader);
 				}
 			}
-		}catch (InterruptedException e){
+		} catch (InterruptedException e) {
 			Log.e(TAG, e.getMessage(), e);
-		}catch (Exception e){
+		} catch (Exception e) {
 			Log.e(TAG, e.getMessage(), e);
 		}
 

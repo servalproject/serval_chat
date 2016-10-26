@@ -9,11 +9,11 @@ import org.servalproject.mid.Serval;
  */
 public class App extends Application {
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        // always start our daemon thread
-        Serval serval = Serval.start(this);
-        Notifications.onStart(serval, this);
-    }
+	@Override
+	public void onCreate() {
+		super.onCreate();
+		// always start our daemon thread
+		Serval serval = Serval.start(this);
+		Notifications.onStart(serval, this);
+	}
 }
