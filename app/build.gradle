@@ -1,17 +1,5 @@
 apply plugin: 'com.android.application'
 
-def computeVersionName() {
-    def cmd = "git describe --long --always --dirty --tags"
-    def proc = cmd.execute()
-    return proc.text.trim();
-}
-
-def computeVersionCode() {
-    def cmd = "git rev-list --count HEAD"
-    def proc = cmd.execute()
-    return proc.text.toInteger();
-}
-
 def readPassword(String fmt) {
     if (System.console() == null)
         return null;
@@ -27,8 +15,11 @@ android {
         applicationId "org.servalproject.servalchat"
         minSdkVersion 9
         targetSdkVersion 25
-        versionCode computeVersionCode()
-        versionName computeVersionName()
+        versionCode "git rev-list --count HEAD".execute().text.toInteger();
+        versionName "git describe --always --dirty --tags".execute().text.trim();
+        resValue "string", "commit_sha", "git rev-parse HEAD".execute().text;
+        setProperty("archivesBaseName", "ServalChat-$versionName");
+        println "Bulding ServalChat-$versionName ($versionCode)";
     }
 
     /* something like this?
