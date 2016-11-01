@@ -16,6 +16,7 @@ public class MessageList extends AbstractGrowingList<MeshMSMessage, MeshMSExcept
 	public final Subscriber self;
 	public final Subscriber peer;
 	private String token;
+	private MeshMSMessage last;
 
 	MessageList(Serval serval, Messaging messaging, Subscriber self, Subscriber peer) {
 		super(serval);
@@ -43,13 +44,17 @@ public class MessageList extends AbstractGrowingList<MeshMSMessage, MeshMSExcept
 
 	@Override
 	protected void addingFutureItem(MeshMSMessage item) {
-		token = item.token;
+		if (last == null || last.compareTo(item)<0) {
+			last = item;
+			token = item.token;
+		}
 		super.addingFutureItem(item);
 	}
 
 	@Override
 	protected void addingPastItem(MeshMSMessage item) {
-		if (token == null) {
+		if (last == null) {
+			last = item;
 			token = (item == null) ? "" : item.token;
 			start();
 		}
@@ -60,6 +65,10 @@ public class MessageList extends AbstractGrowingList<MeshMSMessage, MeshMSExcept
 		if (serval.uiHandler.isUiThread())
 			throw new IllegalStateException();
 		serval.getResultClient().meshmsSendMessage(self.sid, peer.sid, message);
+	}
+
+	public boolean isRead(){
+		return messaging.getPrivateConversation(peer).isRead;
 	}
 
 	public void markRead() throws ServalDInterfaceException, MeshMSException, IOException {

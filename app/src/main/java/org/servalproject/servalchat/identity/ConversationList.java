@@ -61,7 +61,7 @@ public class ConversationList
 
 	@Override
 	protected MeshMSConversation get(int position) {
-		if (messaging == null)
+		if (position >= getCount())
 			return null;
 		return messaging.conversations.get(position);
 	}

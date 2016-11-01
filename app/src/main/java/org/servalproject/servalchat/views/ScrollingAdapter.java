@@ -8,6 +8,7 @@ import org.servalproject.mid.IObservableList;
 import org.servalproject.mid.ListObserver;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -35,15 +36,33 @@ public abstract class ScrollingAdapter<T, VH extends RecyclerView.ViewHolder>
 		bind(holder, getItem(position));
 	}
 
+	// override to track where it was inserted
+	protected void insertedItem(T item, int position){
+		notifyItemInserted(position);
+		if (layoutManager != null && position == 0)
+			layoutManager.scrollToPosition(0);
+	}
+
+	// override to filter items out
 	protected void addItem(T item, boolean inPast) {
 		if (inPast) {
 			past.add(item);
-			notifyItemInserted(past.size() + future.size() - 1);
+			insertedItem(item, past.size() + future.size() - 1);
 		} else {
-			future.add(item);
-			notifyItemInserted(0);
-			if (layoutManager != null)
-				layoutManager.scrollToPosition(0);
+			int size = future.size();
+			int i = size;
+
+			if (size>0 && item instanceof Comparable<?>){
+				// if the item is comparable, find where we should insert it
+				Comparable<T> comparable = (Comparable<T>)item;
+				while(i>0){
+					if (comparable.compareTo(future.get(i - 1))>0)
+						break;
+					i--;
+				}
+			}
+			future.add(i, item);
+			insertedItem(item, size - i);
 		}
 	}
 

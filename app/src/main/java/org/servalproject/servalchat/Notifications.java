@@ -149,6 +149,7 @@ public class Notifications {
 
 			NotificationCompat.Builder builder =
 					new NotificationCompat.Builder(context)
+							.setAutoCancel(true)
 							.setSmallIcon(R.mipmap.ic_launcher)
 							.setContentTitle(context.getString(R.string.private_messaging_title))
 							.setContentText(context.getResources().getQuantityString(R.plurals.private_messages, unreadCount, id.getName(), unreadCount))

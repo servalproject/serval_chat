@@ -50,6 +50,6 @@ public class PrivateMessaging extends RelativeLayout
 	@Override
 	public void onClick(View v) {
 		if (v.getId() == R.id.send)
-			presenter.send(message.getText().toString());
+			presenter.send();
 	}
 }

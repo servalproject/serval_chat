@@ -57,7 +57,6 @@ public final class PrivateMessagingPresenter extends Presenter<PrivateMessaging>
 	@Override
 	protected void bind() {
 		PrivateMessaging view = getView();
-		view.message.setEnabled(!sending);
 		view.send.setEnabled(!sending);
 		view.list.setAdapter(adapter);
 	}
@@ -90,7 +89,6 @@ public final class PrivateMessagingPresenter extends Presenter<PrivateMessaging>
 						// TODO display "delivered" marker
 						return;
 					}
-					// TODO sort future messages that arrive in a burst!
 					super.addItem(item, inPast);
 				}
 
@@ -120,19 +118,25 @@ public final class PrivateMessagingPresenter extends Presenter<PrivateMessaging>
 		}
 	}
 
+	private void markRead(){
+		if (!messages.isRead()) {
+			Serval.getInstance().runOnThreadPool(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						messages.markRead();
+					} catch (Exception e) {
+						throw new IllegalStateException(e);
+					}
+				}
+			});
+		}
+	}
+
 	@Override
 	protected void onDestroy() {
 		adapter.clear();
-		Serval.getInstance().runOnThreadPool(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					messages.markRead();
-				} catch (Exception e) {
-					throw new IllegalStateException(e);
-				}
-			}
-		});
+		markRead();
 	}
 
 	@Override
@@ -147,7 +151,13 @@ public final class PrivateMessagingPresenter extends Presenter<PrivateMessaging>
 		adapter.onHidden();
 	}
 
-	public void send(final String message) {
+	public void send() {
+		PrivateMessaging view = getView();
+		if (view == null)
+			return;
+		final String message = view.message.getText().toString();
+		view.message.setText("");
+
 		AsyncTask<Void, Void, Void> sender = new AsyncTask<Void, Void, Void>() {
 			private Exception e;
 
@@ -156,8 +166,8 @@ public final class PrivateMessagingPresenter extends Presenter<PrivateMessaging>
 				super.onPreExecute();
 				sending = true;
 				PrivateMessaging view = getView();
-				view.message.setEnabled(false);
 				view.send.setEnabled(false);
+				markRead();
 			}
 
 			@Override
@@ -168,10 +178,7 @@ public final class PrivateMessagingPresenter extends Presenter<PrivateMessaging>
 					return;
 				if (e != null) {
 					view.activity.showError(e);
-				} else {
-					view.message.setText("");
 				}
-				view.message.setEnabled(true);
 				view.send.setEnabled(true);
 				sending = false;
 			}

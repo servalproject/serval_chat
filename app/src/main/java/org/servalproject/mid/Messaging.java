@@ -1,11 +1,13 @@
 package org.servalproject.mid;
 
 import org.servalproject.servaldna.Subscriber;
+import org.servalproject.servaldna.SubscriberId;
 import org.servalproject.servaldna.meshms.MeshMSConversation;
 import org.servalproject.servaldna.meshms.MeshMSConversationList;
 import org.servalproject.servaldna.rhizome.RhizomeListBundle;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -17,8 +19,10 @@ public class Messaging {
 	private final Identity identity;
 	private int hashCode;
 	private int unreadCount;
+	private RhizomeListBundle last;
 	private static final String TAG = "Messaging";
 	public final List<MeshMSConversation> conversations = new ArrayList<>();
+	public final HashMap<SubscriberId, MeshMSConversation> hashmap = new HashMap<>();
 	public final ListObserverSet<MeshMSConversation> observers;
 
 	public int getHashCode() {
@@ -43,9 +47,11 @@ public class Messaging {
 		@Override
 		public void added(RhizomeListBundle obj) {
 			if (obj.manifest.service.equals(SERVICE)
-					&& (obj.manifest.recipient.equals(identity.subscriber.sid)
-					|| obj.manifest.sender.equals(identity.subscriber.sid)))
+					&& obj.manifest.recipient.equals(identity.subscriber.sid)
+					&& (last == null || last.compareTo(obj) < 0)) {
+				last = obj;
 				refresh();
+			}
 		}
 
 		@Override
@@ -105,6 +111,8 @@ public class Messaging {
 						return;
 					conversations.clear();
 					conversations.addAll(replace);
+					for(MeshMSConversation c:replace)
+						hashmap.put(c.them.sid, c);
 					Messaging.this.hashCode = hashCode;
 					Messaging.this.unreadCount = unreadCount;
 				}
@@ -118,6 +126,10 @@ public class Messaging {
 				}
 			}
 		}
+	}
+
+	public MeshMSConversation getPrivateConversation(Subscriber peer){
+		return hashmap.get(peer.sid);
 	}
 
 	public MessageList getPrivateMessages(Subscriber peer) {

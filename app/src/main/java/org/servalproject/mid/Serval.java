@@ -18,6 +18,7 @@ import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -39,8 +40,8 @@ public class Serval {
 		uiHandler = new UIHandler(context.getMainLooper());
 		backgroundHandler = BackgroundHandler.create(this);
 
-		backgroundQueue = new LinkedBlockingQueue<>();
-		backgroundThreads = new ThreadPoolExecutor(3, 10, 5, TimeUnit.SECONDS, backgroundQueue);
+		backgroundQueue = new SynchronousQueue<>();
+		backgroundThreads = new ThreadPoolExecutor(3, Integer.MAX_VALUE, 5, TimeUnit.SECONDS, backgroundQueue);
 
 		server = new Server(this, context);
 		rhizome = new Rhizome(this, context);

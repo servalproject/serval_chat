@@ -40,6 +40,16 @@ public class Config {
 		pending.put(name, deleteFlag);
 	}
 
+	void load() throws ServalDFailureException {
+		ServalDCommand.ConfigItems items = ServalDCommand.getConfig();
+		values = items.values;
+	}
+
+	void reset(){
+		for(String key : values.keySet())
+			delete(key);
+	}
+
 	public void sync() throws ServalDFailureException {
 		if (pending.isEmpty())
 			return;
@@ -59,8 +69,7 @@ public class Config {
 		}
 		changes.add("sync");
 		ServalDCommand.configActions(changes.toArray(new Object[changes.size()]));
-		ServalDCommand.ConfigItems items = ServalDCommand.getConfig();
-		values = items.values;
+		load();
 		pending.clear();
 	}
 }

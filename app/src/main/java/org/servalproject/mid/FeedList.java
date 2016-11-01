@@ -13,6 +13,7 @@ import java.io.IOException;
  * Created by jeremy on 11/10/16.
  */
 public class FeedList extends AbstractGrowingList<RhizomeListBundle, IOException> {
+	private RhizomeListBundle last;
 	private String token;
 	private static final String TAG = "FeedList";
 
@@ -55,7 +56,10 @@ public class FeedList extends AbstractGrowingList<RhizomeListBundle, IOException
 
 	@Override
 	protected void addingFutureItem(RhizomeListBundle item) {
-		token = item.token;
+		if (last == null || last.compareTo(item)<0){
+			last = item;
+			token = item.token;
+		}
 		updatePeer(item);
 		super.addingFutureItem(item);
 	}
@@ -66,6 +70,7 @@ public class FeedList extends AbstractGrowingList<RhizomeListBundle, IOException
 			updatePeer(item);
 
 		if (token == null) {
+			last = item;
 			token = (item == null) ? "" : item.token;
 			start();
 		}

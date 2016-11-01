@@ -14,6 +14,7 @@ import java.io.IOException;
 public class MessageFeed extends AbstractGrowingList<PlyMessage, IOException> {
 	private final SigningKey id;
 	private String token;
+	private PlyMessage last;
 	private Peer peer;
 	private String name;
 
@@ -56,14 +57,17 @@ public class MessageFeed extends AbstractGrowingList<PlyMessage, IOException> {
 
 	@Override
 	protected void addingFutureItem(PlyMessage item) {
-		// TODO if we hear a burst of items, we need to keep the first token, not the last one
-		token = item.token;
+		if (last == null || last.compareTo(item)<0) {
+			last = item;
+			token = item.token;
+		}
 		super.addingFutureItem(item);
 	}
 
 	@Override
 	protected void addingPastItem(PlyMessage item) {
 		if (token == null) {
+			last = item;
 			token = (item == null) ? "" : item.token;
 			start();
 		}
