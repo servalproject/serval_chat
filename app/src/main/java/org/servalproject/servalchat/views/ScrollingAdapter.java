@@ -8,7 +8,6 @@ import org.servalproject.mid.IObservableList;
 import org.servalproject.mid.ListObserver;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -54,6 +53,7 @@ public abstract class ScrollingAdapter<T, VH extends RecyclerView.ViewHolder>
 
 			if (size>0 && item instanceof Comparable<?>){
 				// if the item is comparable, find where we should insert it
+				@SuppressWarnings("unchecked")
 				Comparable<T> comparable = (Comparable<T>)item;
 				while(i>0){
 					if (comparable.compareTo(future.get(i - 1))>0)
@@ -105,12 +105,13 @@ public abstract class ScrollingAdapter<T, VH extends RecyclerView.ViewHolder>
 
 		fetching = true;
 
-		final AsyncTask<Void, T, Void> fetch = new AsyncTask<Void, T, Void>() {
+		final AsyncTask<Void, Object, Void> fetch = new AsyncTask<Void, Object, Void>() {
 			@Override
 			protected Void doInBackground(Void... params) {
 				try {
 					for (int i = 0; i < fetchCount; i++) {
 						T msg = list.next();
+						//noinspection unchecked
 						publishProgress(msg);
 						if (msg == null)
 							break;
@@ -129,9 +130,10 @@ public abstract class ScrollingAdapter<T, VH extends RecyclerView.ViewHolder>
 			}
 
 			@Override
-			protected void onProgressUpdate(T... values) {
+			protected final void onProgressUpdate(Object... values) {
 				super.onProgressUpdate(values);
-				T msg = values[0];
+				@SuppressWarnings("unchecked")
+				T msg = (T)values[0];
 				if (msg == null) {
 					hasMore = false;
 					notifyItemRemoved(past.size() + future.size());

@@ -55,7 +55,7 @@ public class Rhizome extends BroadcastReceiver {
 					if (token == null) {
 						RhizomeBundleList lastList = serval.getResultClient().rhizomeListBundles();
 						try {
-							RhizomeListBundle lastBundle = lastList.nextBundle();
+							RhizomeListBundle lastBundle = lastList.next();
 							token = (lastBundle == null) ? "" : lastBundle.token;
 						} finally {
 							lastList.close();
@@ -64,7 +64,7 @@ public class Rhizome extends BroadcastReceiver {
 					RhizomeBundleList list = watchList = serval.getResultClient().rhizomeListBundlesSince(token);
 					try {
 						RhizomeListBundle bundle;
-						while ((bundle = list.nextBundle()) != null) {
+						while ((bundle = list.next()) != null) {
 							token = bundle.token;
 							observerSet.onAdd(bundle);
 						}
@@ -111,7 +111,7 @@ public class Rhizome extends BroadcastReceiver {
 
 		if (rhizomeFolder == null && this.rhizomeFolder == null)
 			return;
-		if (rhizomeFolder != null && this.rhizomeFolder != null && rhizomeFolder.equals(rhizomeFolder))
+		if (rhizomeFolder != null && this.rhizomeFolder != null && this.rhizomeFolder.equals(rhizomeFolder))
 			return;
 
 		if (watchList != null && rhizomeFolder == null) {
