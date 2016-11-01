@@ -177,12 +177,12 @@ public class MainActivity extends AppCompatActivity implements IContainerView {
 		// Spawn new task
 		Intent intent = new Intent();
 		Class<?> activity = MainActivity.class;
-		if (Build.VERSION.SDK_INT >= 21) {
-			// Untested!
-			intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
-			intent.setDataAndType(Uri.parse("sid:" + identity.subscriber.sid.toHex()), "application/org.servalproject.sid");
-		} else {
-			if (identity != null) {
+		if (identity != null) {
+			if (Build.VERSION.SDK_INT >= 21) {
+				// Untested!
+				intent.setFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
+				intent.setDataAndType(Uri.parse("sid:" + identity.subscriber.sid.toHex()), "application/org.servalproject.sid");
+			} else {
 				// TODO use & persist some kind of MRU ordering?
 				switch ((int) identity.getId() % 4) {
 					default:
@@ -199,8 +199,8 @@ public class MainActivity extends AppCompatActivity implements IContainerView {
 						break;
 				}
 			}
-			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
 		}
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
 		intent.setClass(context, activity);
 		intent.putExtras(NavHistory.prepareNew(identity == null ? null : identity.subscriber.sid, key, args));
 		return intent;
