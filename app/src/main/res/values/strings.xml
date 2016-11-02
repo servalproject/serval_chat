@@ -36,6 +36,7 @@
     <string name="share_app">Share App</string>
     <string name="foreground_title">Keep alive</string>
     <string name="foreground_text">We have a network, don\'t kill us android</string>
+    <string name="networking">Networks</string>
     <plurals name="private_messages">
         <item quantity="one">%1$s has %2$d unread conversation</item>
         <item quantity="other">%1$s has %2$d unread conversations</item>

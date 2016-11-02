@@ -26,7 +26,7 @@ public class ForegroundService extends Service {
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		if (intent.getBooleanExtra("foreground", false)) {
 			// TODO open network info / control view
-			Intent navIntent = MainActivity.getIntentFor(this, null, Navigation.IdentityList, null);
+			Intent navIntent = MainActivity.getIntentFor(this, null, Navigation.Networking, null);
 			PendingIntent pending = PendingIntent.getActivity(this, 0, navIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
 			NotificationCompat.Builder builder =

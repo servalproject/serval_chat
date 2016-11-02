@@ -24,9 +24,10 @@ import org.servalproject.mid.ListObserver;
 import org.servalproject.mid.Serval;
 import org.servalproject.servalchat.R;
 
+import java.io.File;
 import java.util.Stack;
 
-public class MainActivity extends AppCompatActivity implements IContainerView {
+public class MainActivity extends AppCompatActivity implements IContainerView, MenuItem.OnMenuItemClickListener {
 
 	private static final String TAG = "Activity";
 	private LinearLayout rootLayout;
@@ -276,6 +277,28 @@ public class MainActivity extends AppCompatActivity implements IContainerView {
 		return super.onOptionsItemSelected(item);
 	}
 
+	private static final int SHARE = 1;
+
+	@Override
+	public boolean onMenuItemClick(MenuItem item) {
+		switch (item.getItemId()) {
+			case SHARE:
+				try {
+					File apk = new File(getApplicationInfo().sourceDir);
+					Intent intent = new Intent(Intent.ACTION_SEND);
+					intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(apk));
+					intent.setType("image/apk");
+					intent.addCategory(Intent.CATEGORY_DEFAULT);
+					intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+					startActivity(intent);
+				} catch (Exception e) {
+					showError(e);
+				}
+				break;
+		}
+		return false;
+	}
+
 	private void populateMenu(Menu menu, View v) {
 		if (v == null)
 			return;
@@ -291,6 +314,8 @@ public class MainActivity extends AppCompatActivity implements IContainerView {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
+		menu.add(Menu.NONE, SHARE, Menu.NONE, R.string.share_app)
+				.setOnMenuItemClickListener(this);
 		populateMenu(menu, viewStack.peek().view);
 		super.onCreateOptionsMenu(menu);
 		return true;
