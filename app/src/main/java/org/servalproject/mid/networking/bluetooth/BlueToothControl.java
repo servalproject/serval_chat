@@ -1,7 +1,8 @@
-package org.servalproject.networking;
+package org.servalproject.mid.networking.bluetooth;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
@@ -12,6 +13,8 @@ import android.os.SystemClock;
 import android.util.Log;
 
 import org.servalproject.mid.Serval;
+import org.servalproject.mid.networking.NetworkInfo;
+import org.servalproject.servalchat.R;
 import org.servalproject.servaldna.AbstractExternalInterface;
 import org.servalproject.servaldna.ChannelSelector;
 
@@ -28,8 +31,6 @@ import java.util.UUID;
 public class BlueToothControl extends AbstractExternalInterface {
 	final BluetoothAdapter adapter;
 	final Serval serval;
-	private final String myAddress;
-	private int state;
 	private int scanMode;
 	private String currentName;
 	private String originalName;
@@ -42,6 +43,7 @@ public class BlueToothControl extends AbstractExternalInterface {
 	private static final String TAG = "BlueToothControl";
 	private static final String SERVAL_PREFIX = "Serval:";
 	private static final String BLUETOOTH_NAME = "bluetoothName";
+	public final BlueToothInfo networkInfo;
 
 	// chosen by fair dice roll (otherwise known as UUID.randomUUID())
 	static final UUID SECURE_UUID = UUID.fromString("85d832c2-b7e9-4166-a65f-695b925485aa");
@@ -51,7 +53,12 @@ public class BlueToothControl extends AbstractExternalInterface {
 			Serval serval,
 			ChannelSelector selector,
 			int loopbackMdpPort) {
-		BluetoothAdapter a = BluetoothAdapter.getDefaultAdapter();
+		BluetoothAdapter a;
+		if (Build.VERSION.SDK_INT>=18) {
+			BluetoothManager bm = (BluetoothManager)serval.context.getSystemService(Context.BLUETOOTH_SERVICE);
+			a = bm.getAdapter();
+		}else
+			a = BluetoothAdapter.getDefaultAdapter();
 		if (a == null) return null;
 
 		try {
@@ -65,15 +72,13 @@ public class BlueToothControl extends AbstractExternalInterface {
 		}
 	}
 
-	private BlueToothControl(Serval serval,
+	private BlueToothControl(final Serval serval,
 							 ChannelSelector selector,
 							 int loopbackMdpPort,
 							 BluetoothAdapter a) throws IOException {
 		super(selector, loopbackMdpPort);
 		this.serval = serval;
 		adapter = a;
-		myAddress = adapter.getAddress();
-		state = -1;
 		scanMode = adapter.getScanMode();
 		lastScan = adapter.isDiscovering() ? SystemClock.elapsedRealtime() : 0;
 		String myName = adapter.getName();
@@ -81,6 +86,9 @@ public class BlueToothControl extends AbstractExternalInterface {
 			myName = serval.settings.getString(BLUETOOTH_NAME, "");
 		}
 		originalName = myName;
+
+		networkInfo = new BlueToothInfo(this, serval);
+		networkInfo.setState(adapter.getState());
 	}
 
 	private final Runnable up = new Runnable() {
@@ -446,7 +454,7 @@ public class BlueToothControl extends AbstractExternalInterface {
 	}
 
 	private void startDiscovery() {
-		if (state != BluetoothAdapter.STATE_ON || !adapter.isEnabled())
+		if (networkInfo.getState() != NetworkInfo.State.On || !adapter.isEnabled())
 			return;
 
 		if (Connector.connecting || adapter.isDiscovering()) {
@@ -471,12 +479,9 @@ public class BlueToothControl extends AbstractExternalInterface {
 	}
 
 	private void setState(int state) {
-		if (this.state != state) {
-			this.state = state;
-			Log.v(TAG, "State changed; " + state);
-		}
+		networkInfo.setState(state);
 		scanMode = adapter.getScanMode();
-		if (state == BluetoothAdapter.STATE_ON) {
+		if (networkInfo.getState() == NetworkInfo.State.On) {
 			serval.runOnThreadPool(listen);
 		} else {
 			serval.runOnThreadPool(stopListening);
@@ -494,9 +499,10 @@ public class BlueToothControl extends AbstractExternalInterface {
 
 	// pull the interface up / down
 	public void setEnabled(boolean enabled) {
-		if (state == BluetoothAdapter.STATE_ON && !enabled)
+		NetworkInfo.State state = networkInfo.getState();
+		if (state == NetworkInfo.State.On && !enabled)
 			adapter.disable();
-		if (state == BluetoothAdapter.STATE_OFF && enabled)
+		if (state == NetworkInfo.State.Off && enabled)
 			adapter.enable();
 	}
 
@@ -513,7 +519,7 @@ public class BlueToothControl extends AbstractExternalInterface {
 	}
 
 	public boolean isDiscoverable() {
-		return adapter.getScanMode() == BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE;
+		return isEnabled() && adapter.getScanMode() == BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE;
 	}
 
 	public boolean isEnabled() {
@@ -526,7 +532,6 @@ public class BlueToothControl extends AbstractExternalInterface {
 
 		Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
 		discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 3600);
-		// TODO notify user .... ?
 		context.startActivity(discoverableIntent);
 	}
 

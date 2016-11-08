@@ -66,7 +66,7 @@ public class Navigation {
 	// launcher..
 	public static final Navigation Launcher = new Navigation("Launcher", false, R.string.app_name, R.layout.main_tabs, null, null);
 	public static final Navigation IdentityList = new Navigation("IdentityList", false, R.string.my_details, R.layout.identity_list, null, Launcher);
-	public static final Navigation Networking = new Navigation("Networking", false, R.string.networking, R.layout.placeholder, null, Launcher);
+	public static final Navigation Networking = new Navigation("Networking", false, R.string.networking, R.layout.networking, null, Launcher);
 	public static final Navigation NewIdentityDetails = new Navigation("NewDetails", false, R.string.identity_details, R.layout.identity_details, IdentityList, null);
 
 	// main screen

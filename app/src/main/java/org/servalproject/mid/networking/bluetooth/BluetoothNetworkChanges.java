@@ -1,4 +1,4 @@
-package org.servalproject.networking;
+package org.servalproject.mid.networking.bluetooth;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -9,15 +9,12 @@ import android.content.Intent;
 import org.servalproject.mid.Serval;
 
 public class BluetoothNetworkChanges extends BroadcastReceiver {
-	public BluetoothNetworkChanges() {
-	}
-
 	@Override
 	public void onReceive(Context context, Intent intent) {
 		Serval serval = Serval.getInstance();
 		if (serval == null)
 			return;
-		BlueToothControl blueTooth = serval.blueTooth;
+		BlueToothControl blueTooth = serval.networks.blueTooth;
 		if (blueTooth == null)
 			return;
 		String action = intent.getAction();

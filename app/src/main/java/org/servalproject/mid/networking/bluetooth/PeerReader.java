@@ -1,4 +1,4 @@
-package org.servalproject.networking;
+package org.servalproject.mid.networking.bluetooth;
 
 import android.bluetooth.BluetoothSocket;
 import android.os.SystemClock;

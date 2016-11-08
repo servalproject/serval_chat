@@ -15,7 +15,7 @@ public class ObserverSet<T> implements Runnable {
 	private final T obj;
 	private static final String TAG = "ObserverSet";
 
-	ObserverSet(Handler handler, T obj) {
+	public ObserverSet(Handler handler, T obj) {
 		this.handler = handler;
 		this.obj = obj;
 	}
@@ -28,7 +28,7 @@ public class ObserverSet<T> implements Runnable {
 		observers.remove(observer);
 	}
 
-	void onUpdate() {
+	public void onUpdate() {
 		if (observers.isEmpty())
 			return;
 		handler.post(this);

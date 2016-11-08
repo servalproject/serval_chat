@@ -19,7 +19,7 @@ public class ListObserverSet<T> implements UIHandler.MessageHandler<T> {
 
 	private final UIHandler uiHandler;
 
-	ListObserverSet(UIHandler uiHandler) {
+	public ListObserverSet(UIHandler uiHandler) {
 		this.uiHandler = uiHandler;
 	}
 
@@ -37,28 +37,28 @@ public class ListObserverSet<T> implements UIHandler.MessageHandler<T> {
 		return !observers.isEmpty();
 	}
 
-	void onAdd(T t) {
+	public void onAdd(T t) {
 		generation++;
 		if (observers.isEmpty())
 			return;
 		uiHandler.sendMessage(this, t, ADD);
 	}
 
-	void onRemove(T t) {
+	public void onRemove(T t) {
 		generation++;
 		if (observers.isEmpty())
 			return;
 		uiHandler.sendMessage(this, t, REMOVE);
 	}
 
-	void onUpdate(T t) {
+	public void onUpdate(T t) {
 		generation++;
 		if (observers.isEmpty())
 			return;
 		uiHandler.sendMessage(this, t, UPDATE);
 	}
 
-	void onReset() {
+	public void onReset() {
 		generation++;
 		if (observers.isEmpty())
 			return;
@@ -69,7 +69,7 @@ public class ListObserverSet<T> implements UIHandler.MessageHandler<T> {
 	public void handleMessage(T obj, int what) {
 		if (observers.isEmpty())
 			return;
-		// clone the list so we can remove while iterating
+		// clone the list so handlers can remove while we are iterating
 		List<ListObserver<T>> notify = new ArrayList<>(observers);
 		for (ListObserver<T> observer : notify) {
 			switch (what) {

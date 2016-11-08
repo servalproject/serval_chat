@@ -4,7 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
-import org.servalproject.networking.BlueToothControl;
+import org.servalproject.mid.networking.Networks;
 import org.servalproject.servalchat.BuildConfig;
 import org.servalproject.servaldna.ChannelSelector;
 import org.servalproject.servaldna.ServalDClient;
@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -34,6 +33,7 @@ public class Serval {
 	static final int SERVER_UP = 3;
 
 	private Serval(Context context) throws IOException {
+		this.context = context;
 		settings = PreferenceManager.getDefaultSharedPreferences(context);
 		File appFolder = context.getFilesDir().getParentFile();
 		instancePath = new File(appFolder, "instance");
@@ -46,6 +46,7 @@ public class Serval {
 		server = new Server(this, context);
 		rhizome = new Rhizome(this, context);
 		config = new Config();
+		networks = new Networks(this);
 
 		selector = new ChannelSelector();
 		knownPeers = new KnownPeers(this);
@@ -89,8 +90,9 @@ public class Serval {
 		serverThread.start();
 	}
 
-	final UIHandler uiHandler;
+	public final UIHandler uiHandler;
 	final BackgroundHandler backgroundHandler;
+	public final Context context;
 	public final Server server;
 	public final Rhizome rhizome;
 	public final Config config;
@@ -102,8 +104,8 @@ public class Serval {
 	private String restfulUsername = "ServalDClient";
 	private String restfulPassword;
 	private ServalDClient client;
-	public BlueToothControl blueTooth;
-	final ChannelSelector selector;
+	public final Networks networks;
+	public final ChannelSelector selector;
 	final File instancePath;
 
 	void onServerStarted() {
@@ -112,12 +114,10 @@ public class Serval {
 		} catch (ServalDInterfaceException e) {
 			throw new IllegalStateException(e);
 		}
+		networks.onStart();
 		identities.onStart();
 		knownPeers.onStart();
 		rhizome.onStart();
-		blueTooth = BlueToothControl.getBlueToothControl(this, selector, server.getMdpPort());
-		if (blueTooth != null)
-			blueTooth.onEnableChanged();
 		// TODO trigger other startup here
 		server.onStart();
 	}
