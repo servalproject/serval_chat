@@ -16,6 +16,7 @@ import org.servalproject.servalchat.navigation.ILifecycle;
 import org.servalproject.servalchat.navigation.INavigate;
 import org.servalproject.servalchat.navigation.MainActivity;
 import org.servalproject.servalchat.navigation.Navigation;
+import org.servalproject.servalchat.views.RecyclerHelper;
 
 /**
  * Created by jeremy on 27/07/16.
@@ -26,7 +27,6 @@ public class PrivateMessaging extends RelativeLayout
 	EditText message;
 	Button send;
 	RecyclerView list;
-	LinearLayoutManager layoutManager;
 	PrivateMessagingPresenter presenter;
 
 	public PrivateMessaging(Context context, AttributeSet attrs) {
@@ -39,9 +39,7 @@ public class PrivateMessaging extends RelativeLayout
 		this.message = (EditText) findViewById(R.id.message);
 		this.send = (Button) findViewById(R.id.send);
 		this.list = (RecyclerView) findViewById(R.id.message_list);
-		layoutManager = new LinearLayoutManager(this.getContext());
-		layoutManager.setReverseLayout(true);
-		list.setLayoutManager(layoutManager);
+		RecyclerHelper.createLayoutManager(list, true, true);
 		send.setOnClickListener(this);
 		presenter = PrivateMessagingPresenter.factory.getPresenter(this, id, args);
 		return presenter;

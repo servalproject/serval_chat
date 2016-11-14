@@ -3,6 +3,7 @@ package org.servalproject.mid;
 import org.servalproject.servaldna.AbstractJsonList;
 import org.servalproject.servaldna.ServalDInterfaceException;
 import org.servalproject.servaldna.Subscriber;
+import org.servalproject.servaldna.meshms.MeshMSConversation;
 import org.servalproject.servaldna.meshms.MeshMSException;
 import org.servalproject.servaldna.meshms.MeshMSMessage;
 
@@ -68,7 +69,8 @@ public class MessageList extends AbstractGrowingList<MeshMSMessage, MeshMSExcept
 	}
 
 	public boolean isRead(){
-		return messaging.getPrivateConversation(peer).isRead;
+		MeshMSConversation conv = messaging.getPrivateConversation(peer);
+		return conv == null || conv.isRead;
 	}
 
 	public void markRead() throws ServalDInterfaceException, MeshMSException, IOException {

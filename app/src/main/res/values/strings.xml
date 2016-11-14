@@ -2,6 +2,11 @@
     <string name="app_name">Serval Chat</string>
     <string name="my_details">Identity</string>
 
+    <string name="placeholder">Placeholder</string>
+    <string name="crash">Crash!</string>
+
+    <string name="share_app">Share App</string>
+
     <string name="peer_list">Nearby</string>
     <string name="my_feed">Feed</string>
     <string name="my_news">Activity</string>
@@ -18,7 +23,6 @@
     <string name="sid_label">Public key</string>
     <string name="identity_update">Update</string>
     <string name="add_identity">Add</string>
-    <string name="crash">Crash!</string>
 
     <string name="block_contact">Block</string>
     <string name="ignore_contact">Ignore</string>
@@ -33,25 +37,33 @@
     <string name="peer_feed">Feed</string>
     <string name="peer_details">Details</string>
     <string name="post">Post</string>
-    <string name="share_app">Share App</string>
-    <string name="foreground_title">Keep alive</string>
-    <string name="foreground_text">We have a network, don\'t kill us android</string>
-    <string name="networking">Networks</string>
-    <string name="bluetooth">Bluetooth</string>
-    <string name="SSID">ap.servalproject.org</string>
-    <string name="hotspot">Personal Hotspot</string>
-    <string name="wifi_client">Wi-Fi</string>
-    <string name="placeholder">Placeholder</string>
-    <string name="starting">Turning On</string>
-    <string name="stopping">Turning Off</string>
-    <string name="started">On</string>
-    <string name="unknown_error">Unknown Error</string>
-    <string name="stopped"/>
-    <string name="not_discoverable">On, but not discoverable</string>
-    <string name="restore_hotspot">Restoring your configuration</string>
-    <string name="queued">Queued</string>
     <plurals name="private_messages">
         <item quantity="one">%1$s has %2$d unread conversation</item>
         <item quantity="other">%1$s has %2$d unread conversations</item>
     </plurals>
+
+    <string name="foreground_title">Keep alive</string>
+    <string name="foreground_text">We have a network, don\'t kill us android</string>
+
+    <string name="networking">Networks</string>
+    <string name="starting">Turning On</string>
+    <string name="stopping">Turning Off</string>
+    <string name="started">On</string>
+    <string name="stopped"/>
+    <string name="on_switch">On</string>
+    <string name="off_switch">Off</string>
+    <string name="unknown_error">Unknown Error</string>
+    <string name="queued">Queued</string>
+    <string name="network_allowed">Permitted (name?)</string>
+
+    <string name="bluetooth">Bluetooth</string>
+    <string name="not_discoverable">On, but not discoverable</string>
+
+    <string name="hotspot">Personal Hotspot</string>
+    <string name="SSID">ap.servalproject.org</string>
+    <string name="restore_hotspot">Restoring your configuration</string>
+    <string name="hotspot_open">On (%1$s, Open)</string>
+    <string name="hotspot_closed">On (%1$s, Closed)</string>
+
+    <string name="wifi_client">Wi-Fi</string>
 </resources>

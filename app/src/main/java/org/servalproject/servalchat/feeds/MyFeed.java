@@ -16,6 +16,7 @@ import org.servalproject.servalchat.navigation.ILifecycle;
 import org.servalproject.servalchat.navigation.INavigate;
 import org.servalproject.servalchat.navigation.MainActivity;
 import org.servalproject.servalchat.navigation.Navigation;
+import org.servalproject.servalchat.views.RecyclerHelper;
 
 /**
  * Created by jeremy on 8/08/16.
@@ -27,7 +28,6 @@ public class MyFeed extends RelativeLayout
 	RecyclerView list;
 	MyFeedPresenter presenter;
 	MainActivity activity;
-	LinearLayoutManager layoutManager;
 
 	public MyFeed(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -40,8 +40,7 @@ public class MyFeed extends RelativeLayout
 		this.post.setOnClickListener(this);
 		this.message = (EditText) findViewById(R.id.message);
 		this.list = (RecyclerView) findViewById(R.id.feed_list);
-		layoutManager = new LinearLayoutManager(this.getContext());
-		list.setLayoutManager(layoutManager);
+		RecyclerHelper.createLayoutManager(list, true, false);
 		return presenter = MyFeedPresenter.factory.getPresenter(this, id, args);
 	}
 

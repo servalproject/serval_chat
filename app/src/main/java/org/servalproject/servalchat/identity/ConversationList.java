@@ -23,6 +23,7 @@ import org.servalproject.servalchat.navigation.INavigate;
 import org.servalproject.servalchat.navigation.MainActivity;
 import org.servalproject.servalchat.navigation.Navigation;
 import org.servalproject.servalchat.views.ObservedRecyclerView;
+import org.servalproject.servalchat.views.RecyclerHelper;
 import org.servalproject.servaldna.meshms.MeshMSConversation;
 
 /**
@@ -40,8 +41,10 @@ public class ConversationList
 		super(null, context, attrs);
 		this.serval = Serval.getInstance();
 		setHasFixedSize(true);
-		setLayoutManager(new LinearLayoutManager(getContext()));
+		RecyclerHelper.createLayoutManager(this, true, false);
+		RecyclerHelper.createDivider(this);
 	}
+
 
 	@Override
 	protected ConversationHolder createHolder(ViewGroup parent, int viewType) {

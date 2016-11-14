@@ -18,6 +18,7 @@ import org.servalproject.mid.Serval;
 import org.servalproject.servalchat.R;
 import org.servalproject.servalchat.navigation.Navigation;
 import org.servalproject.servalchat.views.ObservedRecyclerView;
+import org.servalproject.servalchat.views.RecyclerHelper;
 import org.servalproject.servaldna.SubscriberId;
 
 import java.util.ArrayList;
@@ -51,7 +52,8 @@ public class PeerList extends ObservedRecyclerView<Peer, PeerList.PeerHolder> {
 	protected void onFinishInflate() {
 		super.onFinishInflate();
 		setHasFixedSize(true);
-		setLayoutManager(new LinearLayoutManager(getContext()));
+		RecyclerHelper.createLayoutManager(this, true, false);
+		RecyclerHelper.createDivider(this);
 	}
 
 	@Override

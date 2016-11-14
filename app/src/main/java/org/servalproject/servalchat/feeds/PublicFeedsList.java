@@ -12,6 +12,7 @@ import org.servalproject.servalchat.navigation.ILifecycle;
 import org.servalproject.servalchat.navigation.INavigate;
 import org.servalproject.servalchat.navigation.MainActivity;
 import org.servalproject.servalchat.navigation.Navigation;
+import org.servalproject.servalchat.views.RecyclerHelper;
 
 /**
  * Created by jeremy on 11/10/16.
@@ -28,8 +29,8 @@ public class PublicFeedsList extends RecyclerView implements INavigate {
 	@Override
 	public ILifecycle onAttach(MainActivity activity, Navigation n, Identity id, Bundle args) {
 		this.activity = activity;
-		layoutManager = new LinearLayoutManager(this.getContext());
-		setLayoutManager(layoutManager);
+		RecyclerHelper.createLayoutManager(this, true, false);
+		RecyclerHelper.createDivider(this);
 		presenter = PublicFeedsPresenter.factory.getPresenter(this, id, args);
 		return presenter;
 	}

@@ -23,6 +23,7 @@ import org.servalproject.servalchat.R;
 import org.servalproject.servalchat.navigation.IHaveMenu;
 import org.servalproject.servalchat.navigation.Navigation;
 import org.servalproject.servalchat.views.ObservedRecyclerView;
+import org.servalproject.servalchat.views.RecyclerHelper;
 import org.servalproject.servaldna.keyring.KeyringIdentity;
 import org.servalproject.servaldna.keyring.KeyringIdentityList;
 
@@ -62,13 +63,9 @@ public class IdentityList
 			identities = serval.identities.getIdentities();
 		}
 		listAdapter.setHasStableIds(true);
-	}
-
-	@Override
-	protected void onFinishInflate() {
-		super.onFinishInflate();
 		setHasFixedSize(true);
-		setLayoutManager(new LinearLayoutManager(getContext()));
+		RecyclerHelper.createLayoutManager(this, true, false);
+		RecyclerHelper.createDivider(this);
 	}
 
 	@Override
@@ -85,8 +82,6 @@ public class IdentityList
 		if (name == null)
 			name = getContext().getString(R.string.no_name);
 		holder.name.setText(name);
-		boolean primary = false;//(item==serval.identities.getSelected());
-		holder.name.setTypeface(holder.name.getTypeface(), primary ? Typeface.BOLD : Typeface.NORMAL);
 	}
 
 	@Override

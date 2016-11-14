@@ -47,6 +47,11 @@ public class WifiClient extends NetworkInfo{
 		serval.networks.setWifiGoal(Networks.WifiGoal.Off);
 	}
 
+	@Override
+	public Intent getIntent(Context context) {
+		return new Intent(WifiManager.ACTION_PICK_WIFI_NETWORK);
+	}
+
 	public static State statusToState(int state) {
 		switch (state) {
 			case WifiManager.WIFI_STATE_DISABLED:

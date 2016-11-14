@@ -3,6 +3,8 @@ package org.servalproject.mid.networking;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.util.Log;
@@ -212,16 +214,28 @@ public class Hotspot extends NetworkInfo {
 	public String getStatus(Context context) {
 		if (restoring)
 			return context.getString(R.string.restore_hotspot);
-		Networks.WifiGoal goal = serval.networks.getGoal();
-		if (getState()==State.Off
-				&& (goal == Networks.WifiGoal.HotspotOn || goal == Networks.WifiGoal.HotspotOnServalConfig))
-			return context.getString(R.string.queued);
+
+		switch (getState()){
+			case Off:
+				Networks.WifiGoal goal = serval.networks.getGoal();
+				if (goal == Networks.WifiGoal.HotspotOn || goal == Networks.WifiGoal.HotspotOnServalConfig)
+					return context.getString(R.string.queued);
+				break;
+
+			case On:
+				return context.getString(
+						(getKeyType(current) & ~1) == 0 ?
+						R.string.hotspot_open : R.string.hotspot_closed,
+						current.SSID);
+		}
+
 		return super.getStatus(context);
 	}
 
 	@Override
 	public void enable(Context context) {
-		serval.networks.setWifiGoal(Networks.WifiGoal.HotspotOnServalConfig);
+		boolean useConfig = serval.settings.getBoolean("hotspot_serval_config", true);
+		serval.networks.setWifiGoal(useConfig ? Networks.WifiGoal.HotspotOnServalConfig : Networks.WifiGoal.HotspotOn);
 	}
 
 	@Override
@@ -230,10 +244,36 @@ public class Hotspot extends NetworkInfo {
 	}
 
 	@Override
-	public void toggle(Context context) {
-		if (isWifiApEnabled() && isServalConfig())
-			serval.networks.setWifiGoal(Networks.WifiGoal.Off);
-		else
-			serval.networks.setWifiGoal(Networks.WifiGoal.HotspotOnServalConfig);
+	public Intent getIntent(Context context) {
+		PackageManager packageManager = context.getPackageManager();
+
+		Intent i = new Intent();
+		// Android 4(-ish)
+		i.setClassName("com.android.settings", "com.android.settings.TetherSettings");
+		ResolveInfo r = packageManager.resolveActivity(i, 0);
+		if (r!=null){
+			i.setClassName(r.activityInfo.packageName, r.activityInfo.name);
+			return i;
+		}
+		// HTC roms
+		i.setClassName("com.htc.WifiRouter", "com.htc.WifiRouter.WifiRouter");
+		r = packageManager.resolveActivity(i, 0);
+		if (r!=null){
+			i.setClassName(r.activityInfo.packageName, r.activityInfo.name);
+			return i;
+		}
+		// AOSP v2(-ish)
+		i.setClassName("com.android.settings", "com.android.settings.wifi.WifiApSettings");
+		r = packageManager.resolveActivity(i, 0);
+		if (r!=null){
+			i.setClassName(r.activityInfo.packageName, r.activityInfo.name);
+			return i;
+		}
+		return null;
+	}
+
+	@Override
+	public boolean isUsable(){
+		return isOn() && isServalConfig();
 	}
 }

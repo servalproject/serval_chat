@@ -43,19 +43,26 @@ public abstract class NetworkInfo {
 	public abstract String getName(Context context);
 	public abstract void enable(Context context);
 	public abstract void disable(Context context);
+	public abstract Intent getIntent(Context context);
 
-	public void toggle(Context context){
+	public boolean isUsable(){
+		return isOn();
+	}
+
+	public boolean isOn(){
 		switch (getState()){
 			case On:
-			case Starting:
-			case Error:
-				disable(context);
-				break;
-			case Off:
-			case Stopping:
-				enable(context);
-				break;
+				return true;
+			default:
+				return false;
 		}
+	}
+
+	public void toggle(Context context){
+		if (isUsable())
+			disable(context);
+		else
+			enable(context);
 	}
 
 	public String getStatus(Context context){

@@ -18,6 +18,7 @@ import org.servalproject.servalchat.navigation.ILifecycle;
 import org.servalproject.servalchat.navigation.INavigate;
 import org.servalproject.servalchat.navigation.MainActivity;
 import org.servalproject.servalchat.navigation.Navigation;
+import org.servalproject.servalchat.views.RecyclerHelper;
 
 /**
  * Created by jeremy on 3/08/16.
@@ -28,7 +29,6 @@ public class PeerFeed extends LinearLayout
 	RecyclerView list;
 	PeerFeedPresenter presenter;
 	MainActivity activity;
-	LinearLayoutManager layoutManager;
 
 	public PeerFeed(Context context, @Nullable AttributeSet attrs) {
 		super(context, attrs);
@@ -65,8 +65,7 @@ public class PeerFeed extends LinearLayout
 	public ILifecycle onAttach(MainActivity activity, Navigation n, Identity id, Bundle args) {
 		this.activity = activity;
 		this.list = (RecyclerView) findViewById(R.id.list);
-		layoutManager = new LinearLayoutManager(this.getContext());
-		list.setLayoutManager(layoutManager);
+		RecyclerHelper.createLayoutManager(list, true, false);
 		return presenter = PeerFeedPresenter.factory.getPresenter(this, id, args);
 	}
 

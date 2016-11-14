@@ -2,6 +2,8 @@ package org.servalproject.mid.networking.bluetooth;
 
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
+import android.content.Intent;
+import android.provider.Settings;
 
 import org.servalproject.mid.Serval;
 import org.servalproject.mid.networking.NetworkInfo;
@@ -42,11 +44,13 @@ public class BlueToothInfo extends NetworkInfo {
 	}
 
 	@Override
-	public void toggle(Context context) {
-		if (!control.isDiscoverable())
-			enable(context);
-		else
-			disable(context);
+	public Intent getIntent(Context context) {
+		return new Intent(Settings.ACTION_BLUETOOTH_SETTINGS);
+	}
+
+	@Override
+	public boolean isUsable() {
+		return control.isDiscoverable();
 	}
 
 	static State statusToState(int status){
