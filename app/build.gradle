@@ -50,7 +50,7 @@ android {
 
     // built in ndk support isn't quite ready for what we need, call the old make based ndk-build
     sourceSets.main {
-        java.srcDirs += 'src/main/jni/serval-dna/java'
+        java.srcDirs += 'src/main/jni/serval-dna/java-api/src'
         jni.srcDirs = [] // prevent autogen of Android.mk
         jniLibs.srcDirs = ['src/main/libs'] // ndk-build output
     }
@@ -73,16 +73,10 @@ android {
 
 }
 
-
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:25.0.0'
     compile 'com.android.support:design:25.0.0'
-    compile 'com.android.support:support-v4:25.0.0'
     compile 'com.android.support:recyclerview-v7:25.0.0'
 }
-
-
-
-
