@@ -31,7 +31,7 @@ public class ForegroundService extends Service {
 
 			NotificationCompat.Builder builder =
 					new NotificationCompat.Builder(this)
-							.setSmallIcon(R.mipmap.ic_launcher)
+							.setSmallIcon(R.mipmap.serval_head)
 							.setContentTitle(getString(R.string.foreground_title))
 							.setContentText(getString(R.string.foreground_text))
 							.setContentIntent(pending);

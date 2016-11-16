@@ -150,7 +150,7 @@ public class Notifications {
 			NotificationCompat.Builder builder =
 					new NotificationCompat.Builder(context)
 							.setAutoCancel(true)
-							.setSmallIcon(R.mipmap.ic_launcher)
+							.setSmallIcon(R.mipmap.serval_head)
 							.setContentTitle(context.getString(R.string.private_messaging_title))
 							.setContentText(context.getResources().getQuantityString(R.plurals.private_messages, unreadCount, id.getName(), unreadCount))
 							.setContentIntent(pending);
