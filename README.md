@@ -12,41 +12,28 @@ While hooking up any features that already exist in the Serval Mesh (aka batphon
 Status
 ------
 
-Networking
-- TODO; On / Off / Status (whatever that means...)
-- TODO; Migrate bluetooth support from batphone
 
-Identity handling
-- Create multiple identities
-- Each identity should open in a separate android task (pre 5.0, max of 4 tasks)
-- activating android task may display a spinner before back end has started, after process killed
-- TODO, entry pin support
+You can;
+- Create multiple local identities
+- Post to your own broadcast message feed (the current name of your identity will be copied to the name of the feed)
+- Connect to other users over Wi-Fi or bluetooth to syncrhonize content
+- List other reachable identities
+- See some details of each identity
+- List every broadcast feed with names, currently in your local rhizome store
+- List the messages of any broadcast feed
+- Reply privately to the author of any feed
+- List incoming private conversations
+- List private conversation threads
+- Be notified of incoming private messages
 
-Outgoing Public Message Feed
-- TODO
 
-Private Message Inbox
-- Shows each conversation with PK of each peer
-- TODO; Display peer name from ID card
-- TODO; Preview of last sent / received message?
-
-Private Messages List
-- Send and receive private messages, including batphone peers
-- infinite scrolling, fetching old messages on demand
-- restful newsince api to fetch new messages without refetching entire list
-- per-identity unread message notification, launches correct task
-- TODO; highlight undelivered & unread messages
-
-Peer List
-- displays routable peers and response to DNA name / number queries
-- can be used to initiate a private conversation
-
-Peer Details
-- ugly display of sid / name / number from DNA queries
-- TODO; Block, Ignore, Add contact ...
-
-Block List
-- TODO
-
-Unsolicited Inbox
-- TODO
+You can't (yet or ever?);
+- Create multiple feeds for the same identity. You can create multiple identities, but nobody else can tell they are from the same person.
+- Protect identities with a PIN
+- Control which of your identities are usable / visible to others nearby
+- Block, follow or provide your own local name for any broadcast feeds
+- List the messages of all feeds you are following in a single view
+- Be notified of incoming broadcast messages
+- See timestamp, delivery or last read markers
+- Disable the app. If you are connected to wifi or bluetooth is enabled, the app will attempt to find other nearby users, there is no off switch.
+- Reliably match incoming private messages with any broadcast message feed from the same identity. This matching may occur, but isn't reliable.
