@@ -1,12 +1,15 @@
 package org.servalproject.servalchat.feeds;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 
 import org.servalproject.mid.Identity;
 import org.servalproject.mid.KnownPeers;
 import org.servalproject.mid.MessageFeed;
 import org.servalproject.mid.Peer;
 import org.servalproject.mid.Serval;
+import org.servalproject.servalchat.R;
 import org.servalproject.servalchat.views.Presenter;
 import org.servalproject.servalchat.views.PresenterFactory;
 import org.servalproject.servaldna.AbstractId;
@@ -17,8 +20,11 @@ import org.servalproject.servaldna.Subscriber;
  */
 public class PeerFeedPresenter extends Presenter<PeerFeed> {
 
+	private Serval serval;
 	private FeedAdapter adapter;
+	private Peer peer;
 	private MessageFeed feed;
+	private boolean busy;
 
 	protected PeerFeedPresenter(PresenterFactory<PeerFeed, ?> factory, String key, Identity identity) {
 		super(factory, key, identity);
@@ -53,8 +59,8 @@ public class PeerFeedPresenter extends Presenter<PeerFeed> {
 	@Override
 	protected void restore(Bundle config) {
 		try {
-			Serval serval = Serval.getInstance();
-			Peer peer = serval.knownPeers.getPeer(config);
+			serval = Serval.getInstance();
+			peer = serval.knownPeers.getPeer(config);
 			feed = peer.getFeed();
 			adapter = new FeedAdapter(feed);
 
@@ -73,5 +79,42 @@ public class PeerFeedPresenter extends Presenter<PeerFeed> {
 	public void onHidden() {
 		super.onHidden();
 		adapter.onHidden();
+	}
+
+	public void subscribe(final boolean subscribe){
+		busy = true;
+		new AsyncTask<Void, Void, Void>(){
+			private Exception e;
+
+			@Override
+			protected void onPostExecute(Void aVoid) {
+				super.onPostExecute(aVoid);
+				busy = false;
+				PeerFeed view = getView();
+				if (view == null)
+					return;
+
+				if (e != null)
+					view.activity.showError(e);
+				else
+					view.activity.showSnack(
+							subscribe ? R.string.followed : R.string.ignored,
+							Snackbar.LENGTH_SHORT);
+			}
+
+			@Override
+			protected Void doInBackground(Void... voids) {
+				try {
+					if (subscribe) {
+						identity.follow(feed.id);
+					} else {
+						identity.ignore(feed.id);
+					}
+				} catch (Exception e) {
+					this.e = e;
+				}
+				return null;
+			}
+		}.execute();
 	}
 }

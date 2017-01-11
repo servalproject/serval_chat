@@ -1,7 +1,12 @@
 package org.servalproject.mid;
 
+import org.servalproject.servaldna.ServalDInterfaceException;
+import org.servalproject.servaldna.SigningKey;
 import org.servalproject.servaldna.Subscriber;
 import org.servalproject.servaldna.keyring.KeyringIdentity;
+import org.servalproject.servaldna.meshmb.MeshMBSubscriptionList;
+
+import java.io.IOException;
 
 /**
  * Created by jeremy on 6/06/16.
@@ -36,6 +41,14 @@ public class Identity {
 
 	public FeedList getAllFeeds() {
 		return new FeedList(serval);
+	}
+
+	public void follow(SigningKey feed) throws ServalDInterfaceException, IOException {
+		serval.getResultClient().meshmbFollow(subscriber, feed);
+	}
+
+	public void ignore(SigningKey feed) throws ServalDInterfaceException, IOException {
+		serval.getResultClient().meshmbIgnore(subscriber, feed);
 	}
 
 	public void update(KeyringIdentity id) {

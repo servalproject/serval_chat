@@ -407,6 +407,10 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 		this.showSnack(message, length, null, null);
 	}
 
+	public void showSnack(int messageRes, int length) {
+		this.showSnack(getString(messageRes), length, null, null);
+	}
+
 	public void showSnack(CharSequence message, int length, CharSequence actionLabel, View.OnClickListener action) {
 		Snackbar s = Snackbar.make(coordinator, message, length);
 		if (action != null && actionLabel != null)

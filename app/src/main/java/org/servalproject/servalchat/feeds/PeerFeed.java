@@ -49,11 +49,10 @@ public class PeerFeed extends LinearLayout
 	public boolean onMenuItemClick(MenuItem item) {
 		switch (item.getItemId()) {
 			case FOLLOW:
-
-				activity.showSnack("TODO, follow feed", Snackbar.LENGTH_SHORT);
+				presenter.subscribe(true);
 				break;
 			case IGNORE:
-				activity.showSnack("TODO, ignore feed", Snackbar.LENGTH_SHORT);
+				presenter.subscribe(false);
 				break;
 			default:
 				return false;

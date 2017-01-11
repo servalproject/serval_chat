@@ -12,7 +12,7 @@ import java.io.IOException;
  * Created by jeremy on 3/08/16.
  */
 public class MessageFeed extends AbstractGrowingList<PlyMessage, IOException> {
-	private final SigningKey id;
+	public final SigningKey id;
 	private String token;
 	private PlyMessage last;
 	private Peer peer;

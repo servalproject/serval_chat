@@ -30,6 +30,8 @@
 
     <string name="follow_feed">Follow</string>
     <string name="ignore_feed">Ignore</string>
+    <string name="followed">Followed</string>
+    <string name="ignored">Ignored</string>
 
     <string name="private_messaging_title">New messages</string>
     <string name="message_list">Messages</string>

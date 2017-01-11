@@ -18,8 +18,6 @@ android {
         versionCode "git rev-list --count HEAD".execute().text.toInteger();
         versionName "git describe --always --dirty --tags".execute().text.trim();
         resValue "string", "commit_sha", "git rev-parse HEAD".execute().text;
-        setProperty("archivesBaseName", "ServalChat-$versionName");
-        println "Bulding ServalChat-$versionName ($versionCode)";
     }
 
     /* something like this?
@@ -44,6 +42,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles.add(file('proguard-android.txt'))
+            setProperty("archivesBaseName", "ServalChat-$defaultConfig.versionName");
             //signingConfig signingConfigs.release
         }
     }
@@ -76,7 +75,7 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:25.0.0'
-    compile 'com.android.support:design:25.0.0'
-    compile 'com.android.support:recyclerview-v7:25.0.0'
+    compile 'com.android.support:appcompat-v7:25.0.1'
+    compile 'com.android.support:design:25.0.1'
+    compile 'com.android.support:recyclerview-v7:25.0.1'
 }
