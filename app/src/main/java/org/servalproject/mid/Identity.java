@@ -43,6 +43,10 @@ public class Identity {
 		return new FeedList(serval);
 	}
 
+	public ActivityList getActivity() {
+		return new ActivityList(serval, this);
+	}
+
 	public void follow(SigningKey feed) throws ServalDInterfaceException, IOException {
 		serval.getResultClient().meshmbFollow(subscriber, feed);
 	}

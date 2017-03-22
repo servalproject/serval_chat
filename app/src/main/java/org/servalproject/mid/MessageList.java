@@ -12,12 +12,10 @@ import java.io.IOException;
 /**
  * Created by jeremy on 11/07/16.
  */
-public class MessageList extends AbstractGrowingList<MeshMSMessage, MeshMSException> {
+public class MessageList extends AbstractFutureList<MeshMSMessage, MeshMSException> {
 	private final Messaging messaging;
 	public final Subscriber self;
 	public final Subscriber peer;
-	private String token;
-	private MeshMSMessage last;
 
 	MessageList(Serval serval, Messaging messaging, Subscriber self, Subscriber peer) {
 		super(serval);
@@ -28,7 +26,7 @@ public class MessageList extends AbstractGrowingList<MeshMSMessage, MeshMSExcept
 
 	@Override
 	protected void start() {
-		if (token == null)
+		if (last == null && hasMore)
 			return;
 		super.start();
 	}
@@ -40,26 +38,7 @@ public class MessageList extends AbstractGrowingList<MeshMSMessage, MeshMSExcept
 
 	@Override
 	protected AbstractJsonList<MeshMSMessage, MeshMSException> openFuture() throws ServalDInterfaceException, MeshMSException, IOException {
-		return serval.getResultClient().meshmsListMessagesSince(self.sid, peer.sid, token);
-	}
-
-	@Override
-	protected void addingFutureItem(MeshMSMessage item) {
-		if (last == null || last.compareTo(item)<0) {
-			last = item;
-			token = item.token;
-		}
-		super.addingFutureItem(item);
-	}
-
-	@Override
-	protected void addingPastItem(MeshMSMessage item) {
-		if (last == null) {
-			last = item;
-			token = (item == null) ? "" : item.token;
-			start();
-		}
-		super.addingPastItem(item);
+		return serval.getResultClient().meshmsListMessagesSince(self.sid, peer.sid, last==null?"":last.token);
 	}
 
 	public void sendMessage(String message) throws ServalDInterfaceException, MeshMSException, IOException {

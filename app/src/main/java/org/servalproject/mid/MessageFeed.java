@@ -11,10 +11,8 @@ import java.io.IOException;
 /**
  * Created by jeremy on 3/08/16.
  */
-public class MessageFeed extends AbstractGrowingList<PlyMessage, IOException> {
+public class MessageFeed extends AbstractFutureList<PlyMessage, IOException> {
 	public final SigningKey id;
-	private String token;
-	private PlyMessage last;
 	private Peer peer;
 	private String name;
 
@@ -32,7 +30,7 @@ public class MessageFeed extends AbstractGrowingList<PlyMessage, IOException> {
 
 	@Override
 	protected void start() {
-		if (token == null)
+		if (last == null && hasMore)
 			return;
 		super.start();
 	}
@@ -48,30 +46,10 @@ public class MessageFeed extends AbstractGrowingList<PlyMessage, IOException> {
 
 	@Override
 	protected AbstractJsonList<PlyMessage, IOException> openFuture() throws ServalDInterfaceException, IOException {
-		MessagePlyList list = serval.getResultClient().meshmbListMessagesSince(id, token);
+		MessagePlyList list = serval.getResultClient().meshmbListMessagesSince(id, last==null?"":last.token);
 		this.name = list.getName();
 		if (peer != null)
 			peer.updateFeedName(name);
 		return list;
 	}
-
-	@Override
-	protected void addingFutureItem(PlyMessage item) {
-		if (last == null || last.compareTo(item)<0) {
-			last = item;
-			token = item.token;
-		}
-		super.addingFutureItem(item);
-	}
-
-	@Override
-	protected void addingPastItem(PlyMessage item) {
-		if (token == null) {
-			last = item;
-			token = (item == null) ? "" : item.token;
-			start();
-		}
-		super.addingPastItem(item);
-	}
-
 }

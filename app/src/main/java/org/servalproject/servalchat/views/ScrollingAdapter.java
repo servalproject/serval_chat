@@ -3,24 +3,22 @@ package org.servalproject.servalchat.views;
 import android.os.AsyncTask;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.ViewGroup;
 
 import org.servalproject.mid.IObservableList;
 import org.servalproject.mid.ListObserver;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Created by jeremy on 8/08/16.
  */
-public abstract class ScrollingAdapter<T, VH extends RecyclerView.ViewHolder>
-		extends RecyclerView.Adapter<VH> implements ListObserver<T> {
+public abstract class ScrollingAdapter<T, VH extends BasicViewHolder>
+		extends RecyclerView.Adapter<BasicViewHolder> implements ListObserver<T> {
 	private LinearLayoutManager layoutManager;
 	private IObservableList<T, ?> list;
-	protected List<T> past = new ArrayList<>();
-	protected List<T> future = new ArrayList<>();
+	protected final FutureList<T> items = new FutureList<>(this);
 	private boolean hasMore = true;
 	private boolean fetching = false;
+	private static final int SPINNER = 0;
 
 	public ScrollingAdapter(IObservableList<T, ?> list) {
 		this.list = list;
@@ -29,68 +27,72 @@ public abstract class ScrollingAdapter<T, VH extends RecyclerView.ViewHolder>
 	}
 
 	protected abstract void bind(VH holder, T item);
+	protected abstract VH create(ViewGroup parent, int viewType);
 
 	@Override
-	public void onBindViewHolder(VH holder, int position) {
-		bind(holder, getItem(position));
+	public void onBindViewHolder(BasicViewHolder holder, int position) {
+		if (holder instanceof SpinnerViewHolder)
+			return; // nothing to bind
+		bind((VH)holder, getItem(position));
+	}
+
+	@Override
+	public BasicViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+		if (viewType==SPINNER)
+			return new SpinnerViewHolder(parent);
+		return create(parent, viewType - 1);
 	}
 
 	// override to track where it was inserted
-	protected void insertedItem(T item, int position){
+	public void insertedItem(T item, int position){
 		notifyItemInserted(position);
 		if (layoutManager != null && position == 0)
 			layoutManager.scrollToPosition(0);
 	}
 
-	// override to filter items out
-	protected void addItem(T item, boolean inPast) {
-		if (inPast) {
-			past.add(item);
-			insertedItem(item, past.size() + future.size() - 1);
-		} else {
-			int size = future.size();
-			int i = size;
+	private void addPast(T item){
+		addItem(items.size(), item);
+	}
 
-			if (size>0 && item instanceof Comparable<?>){
-				// if the item is comparable, find where we should insert it
-				@SuppressWarnings("unchecked")
-				Comparable<T> comparable = (Comparable<T>)item;
-				while(i>0){
-					if (comparable.compareTo(future.get(i - 1))>0)
-						break;
-					i--;
-				}
-			}
-			future.add(i, item);
-			insertedItem(item, size - i);
-		}
+	private void addFuture(T item){
+		int index=0;
+		// reading future items, usually returns a burst of items in reverse order.
+		if (item instanceof Comparable<?>)
+			index = items.find(item);
+		addItem(index, item);
+	}
+
+	// override to filter items out
+	protected void addItem(int index, T item) {
+		items.add(index, item);
 	}
 
 	@Override
 	public int getItemCount() {
-		int count = past.size() + future.size();
+		int count = items.size();
 		if (hasMore)
 			count++;
 		return count;
 	}
 
-	protected abstract int getItemType(T item);
+	protected int getItemType(T item){
+		return 0;
+	};
 
 	protected T getItem(int position) {
 		if (position < 0)
 			return null;
-		int futureSize = future.size();
-		if (position < futureSize)
-			return future.get(futureSize - 1 - position);
-		position -= futureSize;
-		if (position < past.size())
-			return past.get(position);
+		if (position < items.size())
+			return items.get(position);
 		return null;
 	}
 
 	@Override
 	public int getItemViewType(int position) {
-		return getItemType(getItem(position));
+		T item = getItem(position);
+		if (item == null)
+			return SPINNER;
+		return getItemType(getItem(position)) + 1;
 	}
 
 	private void testPosition() {
@@ -98,7 +100,7 @@ public abstract class ScrollingAdapter<T, VH extends RecyclerView.ViewHolder>
 			return;
 
 		int lastVisible = layoutManager.findLastVisibleItemPosition();
-		final int fetchCount = lastVisible + 15 - (past.size() + future.size());
+		final int fetchCount = lastVisible + 15 - (items.size());
 
 		if (fetchCount <= 0)
 			return;
@@ -136,9 +138,9 @@ public abstract class ScrollingAdapter<T, VH extends RecyclerView.ViewHolder>
 				T msg = (T)values[0];
 				if (msg == null) {
 					hasMore = false;
-					notifyItemRemoved(past.size() + future.size());
+					notifyItemRemoved(items.size());
 				} else
-					addItem(msg, true);
+					addPast(msg);
 			}
 		};
 		fetch.execute();
@@ -171,14 +173,12 @@ public abstract class ScrollingAdapter<T, VH extends RecyclerView.ViewHolder>
 	}
 
 	public void onHidden() {
-		if (list == null)
-			return;
 		list.stopObserving(this);
 	}
 
 	@Override
 	public void added(T obj) {
-		addItem(obj, false);
+		addFuture(obj);
 	}
 
 	@Override
@@ -197,10 +197,8 @@ public abstract class ScrollingAdapter<T, VH extends RecyclerView.ViewHolder>
 	}
 
 	public void clear() {
-		if (list == null)
-			return;
-		list.close();
-		past.clear();
-		future.clear();
+		items.clear();
+		if (list != null)
+			list.close();
 	}
 }

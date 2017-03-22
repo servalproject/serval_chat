@@ -12,9 +12,7 @@ import java.io.IOException;
 /**
  * Created by jeremy on 11/10/16.
  */
-public class FeedList extends AbstractGrowingList<RhizomeListBundle, IOException> {
-	private RhizomeListBundle last;
-	private String token;
+public class FeedList extends AbstractFutureList<RhizomeListBundle, IOException> {
 	private static final String TAG = "FeedList";
 
 	public FeedList(Serval serval) {
@@ -23,7 +21,7 @@ public class FeedList extends AbstractGrowingList<RhizomeListBundle, IOException
 
 	@Override
 	protected void start() {
-		if (token == null)
+		if (last == null && hasMore)
 			return;
 		super.start();
 	}
@@ -38,7 +36,7 @@ public class FeedList extends AbstractGrowingList<RhizomeListBundle, IOException
 
 	@Override
 	protected AbstractJsonList<RhizomeListBundle, IOException> openFuture() throws ServalDInterfaceException, IOException {
-		RhizomeBundleList list = new RhizomeBundleList(serval.getResultClient(), token);
+		RhizomeBundleList list = new RhizomeBundleList(serval.getResultClient(), last == null? "" : last.token);
 		list.setServiceFilter(MeshMBCommon.SERVICE);
 		list.connect();
 		return list;
@@ -56,10 +54,6 @@ public class FeedList extends AbstractGrowingList<RhizomeListBundle, IOException
 
 	@Override
 	protected void addingFutureItem(RhizomeListBundle item) {
-		if (last == null || last.compareTo(item)<0){
-			last = item;
-			token = item.token;
-		}
 		updatePeer(item);
 		super.addingFutureItem(item);
 	}
@@ -68,12 +62,6 @@ public class FeedList extends AbstractGrowingList<RhizomeListBundle, IOException
 	protected void addingPastItem(RhizomeListBundle item) {
 		if (item != null)
 			updatePeer(item);
-
-		if (token == null) {
-			last = item;
-			token = (item == null) ? "" : item.token;
-			start();
-		}
 		super.addingPastItem(item);
 	}
 }

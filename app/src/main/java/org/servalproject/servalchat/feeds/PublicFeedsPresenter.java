@@ -41,7 +41,6 @@ public class PublicFeedsPresenter extends Presenter<PublicFeedsList> {
 		adapter = new FeedListAdapter(feedList, this);
 	}
 
-
 	public void openFeed(Subscriber subscriber) {
 		PublicFeedsList list = getView();
 		if (list == null)

@@ -18,7 +18,7 @@ public class NavHistory {
 
 	public HistoryItem getTop() {
 		if (history.size() == 0)
-			history.add(new HistoryItem(identity == null ? Navigation.IdentityList : Navigation.MyNews, null));
+			history.add(new HistoryItem(identity == null ? Navigation.IdentityList : Navigation.Activity, null));
 		return history.get(history.size() - 1);
 	}
 

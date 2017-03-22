@@ -13,6 +13,7 @@ import org.servalproject.mid.KnownPeers;
 import org.servalproject.mid.MessageList;
 import org.servalproject.mid.Serval;
 import org.servalproject.servalchat.R;
+import org.servalproject.servalchat.views.BasicViewHolder;
 import org.servalproject.servalchat.views.Presenter;
 import org.servalproject.servalchat.views.PresenterFactory;
 import org.servalproject.servalchat.views.ScrollingAdapter;
@@ -75,21 +76,19 @@ public final class PrivateMessagingPresenter extends Presenter<PrivateMessaging>
 			messages = identity.messaging.getPrivateMessages(peer);
 			adapter = new ScrollingAdapter<MeshMSMessage, ItemHolder>(messages) {
 				@Override
-				public ItemHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+				public ItemHolder create(ViewGroup parent, int viewType) {
 					LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-					if (viewType == 4)
-						return new SpinnerHolder(inflater, parent);
 					boolean mine = MeshMSMessage.Type.values()[viewType] == MeshMSMessage.Type.MESSAGE_SENT;
 					return new MessageHolder(inflater, parent, mine);
 				}
 
 				@Override
-				protected void addItem(MeshMSMessage item, boolean inPast) {
+				protected void addItem(int index, MeshMSMessage item) {
 					if (item.type == MeshMSMessage.Type.ACK_RECEIVED) {
 						// TODO display "delivered" marker
 						return;
 					}
-					super.addItem(item, inPast);
+					super.addItem(index, item);
 				}
 
 				@Override
@@ -99,8 +98,6 @@ public final class PrivateMessagingPresenter extends Presenter<PrivateMessaging>
 
 				@Override
 				protected int getItemType(MeshMSMessage item) {
-					if (item == null)
-						return 4;
 					return item.type.ordinal();
 				}
 
@@ -198,7 +195,7 @@ public final class PrivateMessagingPresenter extends Presenter<PrivateMessaging>
 	}
 
 
-	public abstract class ItemHolder extends RecyclerView.ViewHolder {
+	public abstract class ItemHolder extends BasicViewHolder {
 		public ItemHolder(LayoutInflater inflater, ViewGroup parent, int layoutResource) {
 			super(inflater.inflate(layoutResource, parent, false));
 		}
@@ -221,9 +218,4 @@ public final class PrivateMessagingPresenter extends Presenter<PrivateMessaging>
 		}
 	}
 
-	public class SpinnerHolder extends ItemHolder {
-		public SpinnerHolder(LayoutInflater inflater, ViewGroup parent) {
-			super(inflater, parent, R.layout.progress);
-		}
-	}
 }

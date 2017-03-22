@@ -1,12 +1,8 @@
 package org.servalproject.servalchat.identity;
 
 import android.content.Context;
-import android.content.Intent;
-import android.graphics.Typeface;
-import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.support.v4.view.MenuItemCompat;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -27,7 +23,6 @@ import org.servalproject.servalchat.views.RecyclerHelper;
 import org.servalproject.servaldna.keyring.KeyringIdentity;
 import org.servalproject.servaldna.keyring.KeyringIdentityList;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -131,7 +126,7 @@ public class IdentityList
 
 		@Override
 		public void onClick(View v) {
-			activity.go(id, Navigation.MyNews, null);
+			activity.go(id, Navigation.Activity, null);
 		}
 	}
 }

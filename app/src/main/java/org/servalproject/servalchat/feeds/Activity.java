@@ -3,7 +3,6 @@ package org.servalproject.servalchat.feeds;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 
@@ -15,13 +14,14 @@ import org.servalproject.servalchat.navigation.Navigation;
 import org.servalproject.servalchat.views.RecyclerHelper;
 
 /**
- * Created by jeremy on 11/10/16.
+ * Created by jeremy on 30/01/17.
  */
-public class PublicFeedsList extends RecyclerView implements INavigate {
-	PublicFeedsPresenter presenter;
+
+public class Activity  extends RecyclerView implements INavigate {
+	ActivityPresenter presenter;
 	MainActivity activity;
 
-	public PublicFeedsList(Context context, @Nullable AttributeSet attrs) {
+	public Activity(Context context, @Nullable AttributeSet attrs) {
 		super(context, attrs);
 	}
 
@@ -30,7 +30,7 @@ public class PublicFeedsList extends RecyclerView implements INavigate {
 		this.activity = activity;
 		RecyclerHelper.createLayoutManager(this, true, false);
 		RecyclerHelper.createDivider(this);
-		presenter = PublicFeedsPresenter.factory.getPresenter(this, id, args);
+		presenter = ActivityPresenter.factory.getPresenter(this, id, args);
 		return presenter;
 	}
 }

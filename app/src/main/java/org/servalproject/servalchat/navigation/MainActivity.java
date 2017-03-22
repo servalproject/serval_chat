@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 	protected void onCreate(@Nullable Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		serval = Serval.getInstance();
-		setContentView(R.layout.activity);
+		setContentView(R.layout.main);
 		rootLayout = (LinearLayout) findViewById(R.id.root_layout);
 		Toolbar toolbar = (Toolbar) findViewById(R.id.app_toolbar);
 		coordinator = (CoordinatorLayout) findViewById(R.id.coordinator);

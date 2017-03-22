@@ -96,7 +96,7 @@ public class ConversationList
 		public ConversationHolder(View itemView) {
 			super(itemView);
 			name = (TextView) this.itemView.findViewById(R.id.name);
-			name.setOnClickListener(this);
+			itemView.setOnClickListener(this);
 		}
 
 		public void setConversation(MeshMSConversation conversation) {

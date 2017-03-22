@@ -8,6 +8,7 @@ import android.widget.TextView;
 
 import org.servalproject.mid.MessageFeed;
 import org.servalproject.servalchat.R;
+import org.servalproject.servalchat.views.BasicViewHolder;
 import org.servalproject.servalchat.views.ScrollingAdapter;
 import org.servalproject.servaldna.meshmb.PlyMessage;
 
@@ -19,18 +20,10 @@ public class FeedAdapter extends ScrollingAdapter<PlyMessage, FeedAdapter.Messag
 		super(feed);
 	}
 
-	private static final int SPINNER = 0;
-	private static final int MESSAGE = 1;
-
 	@Override
-	public MessageHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+	public MessageHolder create(ViewGroup parent, int viewType) {
 		LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-		switch (viewType) {
-			case 0:
-				return new SpinnerHolder(inflater.inflate(R.layout.progress, parent, false));
-			default:
-				return new TextHolder(inflater.inflate(R.layout.my_message, parent, false));
-		}
+		return new TextHolder(inflater.inflate(R.layout.my_message, parent, false));
 	}
 
 	@Override
@@ -38,23 +31,12 @@ public class FeedAdapter extends ScrollingAdapter<PlyMessage, FeedAdapter.Messag
 		holder.bind(item);
 	}
 
-	@Override
-	protected int getItemType(PlyMessage item) {
-		return (item == null) ? SPINNER : MESSAGE;
-	}
-
-	public abstract class MessageHolder extends RecyclerView.ViewHolder {
+	public abstract class MessageHolder extends BasicViewHolder {
 		public MessageHolder(View itemView) {
 			super(itemView);
 		}
 
 		public void bind(PlyMessage item) {
-		}
-	}
-
-	public class SpinnerHolder extends MessageHolder {
-		public SpinnerHolder(View itemView) {
-			super(itemView);
 		}
 	}
 
