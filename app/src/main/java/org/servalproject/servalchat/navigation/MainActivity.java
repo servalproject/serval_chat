@@ -393,12 +393,18 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 		return ret;
 	}
 
+	private class CrashReportException extends RuntimeException{
+		public CrashReportException(Exception e) {
+			super(e);
+		}
+	}
+
 	public void showError(final Exception e) {
 		showSnack(e.getMessage(), Snackbar.LENGTH_LONG, getString(R.string.crash),
 				new View.OnClickListener() {
 					@Override
 					public void onClick(View v) {
-						throw new IllegalStateException(e);
+						throw new CrashReportException(e);
 					}
 				});
 	}
