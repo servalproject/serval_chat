@@ -29,11 +29,15 @@ public abstract class ScrollingAdapter<T, VH extends BasicViewHolder>
 	protected abstract void bind(VH holder, T item);
 	protected abstract VH create(ViewGroup parent, int viewType);
 
+	protected void bindItem(VH holder, int position){
+		bind(holder, getItem(position));
+	}
+
 	@Override
 	public void onBindViewHolder(BasicViewHolder holder, int position) {
 		if (holder instanceof SpinnerViewHolder)
 			return; // nothing to bind
-		bind((VH)holder, getItem(position));
+		bindItem((VH)holder, position);
 	}
 
 	@Override
