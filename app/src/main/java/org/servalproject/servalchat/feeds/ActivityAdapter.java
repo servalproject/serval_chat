@@ -4,13 +4,13 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.servalproject.mid.IObservableList;
 import org.servalproject.servalchat.R;
 import org.servalproject.servalchat.views.BasicViewHolder;
 import org.servalproject.servalchat.views.ScrollingAdapter;
+import org.servalproject.servalchat.views.TimestampView;
 import org.servalproject.servaldna.Subscriber;
 import org.servalproject.servaldna.meshmb.MeshMBActivityMessage;
 
@@ -34,15 +34,12 @@ public class ActivityAdapter extends ScrollingAdapter<MeshMBActivityMessage, Act
 	protected void bindItem(MessageHolder holder, int position) {
 		MeshMBActivityMessage prev = (position>0) ? getItem(position -1) : null;
 		MeshMBActivityMessage item = getItem(position);
-		MeshMBActivityMessage next = (position+1<getItemCount()) ? getItem(position +1) : null;
-		holder.bind(prev, item, next);
+		holder.bind(prev, item);
 	}
 
 	@Override
 	public void insertedItem(MeshMBActivityMessage item, int position) {
 		super.insertedItem(item, position);
-		if (position>0)
-			notifyItemChanged(position -1);
 		if (position+1<getItemCount())
 			notifyItemChanged(position +1);
 	}
@@ -55,7 +52,7 @@ public class ActivityAdapter extends ScrollingAdapter<MeshMBActivityMessage, Act
 	@Override
 	public MessageHolder create(ViewGroup parent, int viewType) {
 		LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-		return new MessageHolder(inflater.inflate(R.layout.feed_message, parent, false));
+		return new MessageHolder(inflater.inflate(R.layout.activity_message, parent, false));
 	}
 
 	private int padding;
@@ -68,6 +65,7 @@ public class ActivityAdapter extends ScrollingAdapter<MeshMBActivityMessage, Act
 	public class MessageHolder extends BasicViewHolder implements View.OnClickListener {
 		private TextView message;
 		private TextView name;
+		private TimestampView age;
 		private Subscriber subscriber;
 		private long offset;
 
@@ -75,19 +73,22 @@ public class ActivityAdapter extends ScrollingAdapter<MeshMBActivityMessage, Act
 			super(itemView);
 			this.message = (TextView) this.itemView.findViewById(R.id.message);
 			this.name = (TextView) this.itemView.findViewById(R.id.name);
+			this.age = (TimestampView) this.itemView.findViewById(R.id.age);
 			this.itemView.setOnClickListener(this);
 		}
 
-		public void bind(MeshMBActivityMessage prev, MeshMBActivityMessage item, MeshMBActivityMessage next) {
+		public void bind(MeshMBActivityMessage prev, MeshMBActivityMessage item) {
 			this.subscriber = item.subscriber;
 			this.offset = item.offset;
 			message.setText(item.text);
 			name.setText(item.name);
+
 			boolean prevDifferent = prev==null || !prev.subscriber.equals(item.subscriber);
+			age.setDates(item.date, prev==null ? null : prev.date);
+
 			name.setVisibility( prevDifferent ? View.VISIBLE : View.GONE);
 			RecyclerView.LayoutParams parms = (RecyclerView.LayoutParams) itemView.getLayoutParams();
 			parms.topMargin = prevDifferent ? padding : 0;
-			parms.bottomMargin = (next == null || !next.subscriber.equals(item.subscriber) ? padding : 0);
 		}
 
 		@Override

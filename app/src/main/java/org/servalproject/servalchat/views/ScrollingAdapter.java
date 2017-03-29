@@ -177,6 +177,8 @@ public abstract class ScrollingAdapter<T, VH extends BasicViewHolder>
 	}
 
 	public void onHidden() {
+		if (list == null)
+			return;
 		list.stopObserving(this);
 	}
 

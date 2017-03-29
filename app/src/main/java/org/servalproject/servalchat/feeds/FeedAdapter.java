@@ -10,6 +10,7 @@ import org.servalproject.mid.MessageFeed;
 import org.servalproject.servalchat.R;
 import org.servalproject.servalchat.views.BasicViewHolder;
 import org.servalproject.servalchat.views.ScrollingAdapter;
+import org.servalproject.servalchat.views.TimestampView;
 import org.servalproject.servaldna.meshmb.PlyMessage;
 
 /**
@@ -23,33 +24,37 @@ public class FeedAdapter extends ScrollingAdapter<PlyMessage, FeedAdapter.Messag
 	@Override
 	public MessageHolder create(ViewGroup parent, int viewType) {
 		LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-		return new TextHolder(inflater.inflate(R.layout.my_message, parent, false));
+		return new MessageHolder(inflater.inflate(R.layout.feed_message, parent, false));
 	}
 
 	@Override
 	protected void bind(MessageHolder holder, PlyMessage item) {
-		holder.bind(item);
 	}
 
-	public abstract class MessageHolder extends BasicViewHolder {
+	@Override
+	protected void bindItem(MessageHolder holder, int position) {
+		holder.bind(getItem(position), position>0?getItem(position - 1):null);
+	}
+
+	@Override
+	public void insertedItem(PlyMessage item, int position) {
+		super.insertedItem(item, position);
+		if (position+1<getItemCount())
+			notifyItemChanged(position +1);
+	}
+
+	public class MessageHolder extends BasicViewHolder {
+		private TextView message;
+		private TimestampView age;
 		public MessageHolder(View itemView) {
 			super(itemView);
-		}
-
-		public void bind(PlyMessage item) {
-		}
-	}
-
-	public class TextHolder extends MessageHolder {
-		private TextView message;
-
-		public TextHolder(View itemView) {
-			super(itemView);
 			this.message = (TextView) this.itemView.findViewById(R.id.message);
+			this.age = (TimestampView) this.itemView.findViewById(R.id.age);
 		}
 
-		public void bind(PlyMessage item) {
+		public void bind(PlyMessage item, PlyMessage prev) {
 			message.setText(item.text);
+			age.setDates(item.date, prev==null?null:prev.date);
 		}
 	}
 }

@@ -17,6 +17,7 @@ import org.servalproject.servalchat.views.BasicViewHolder;
 import org.servalproject.servalchat.views.Presenter;
 import org.servalproject.servalchat.views.PresenterFactory;
 import org.servalproject.servalchat.views.ScrollingAdapter;
+import org.servalproject.servalchat.views.TimestampView;
 import org.servalproject.servaldna.AbstractId;
 import org.servalproject.servaldna.Subscriber;
 import org.servalproject.servaldna.meshms.MeshMSMessage;
@@ -79,7 +80,7 @@ public final class PrivateMessagingPresenter extends Presenter<PrivateMessaging>
 				public ItemHolder create(ViewGroup parent, int viewType) {
 					LayoutInflater inflater = LayoutInflater.from(parent.getContext());
 					boolean mine = MeshMSMessage.Type.values()[viewType] == MeshMSMessage.Type.MESSAGE_SENT;
-					return new MessageHolder(inflater, parent, mine);
+					return new ItemHolder(inflater, parent, mine);
 				}
 
 				@Override
@@ -93,7 +94,18 @@ public final class PrivateMessagingPresenter extends Presenter<PrivateMessaging>
 
 				@Override
 				protected void bind(ItemHolder holder, MeshMSMessage item) {
-					holder.bind(item);
+				}
+
+				@Override
+				public void insertedItem(MeshMSMessage item, int position) {
+					super.insertedItem(item, position);
+					if (position+1<getItemCount())
+						notifyItemChanged(position +1);
+				}
+
+				@Override
+				protected void bindItem(ItemHolder holder, int position) {
+					holder.bind(getItem(position), position>0?getItem(position -1):null);
 				}
 
 				@Override
@@ -195,27 +207,18 @@ public final class PrivateMessagingPresenter extends Presenter<PrivateMessaging>
 	}
 
 
-	public abstract class ItemHolder extends BasicViewHolder {
-		public ItemHolder(LayoutInflater inflater, ViewGroup parent, int layoutResource) {
-			super(inflater.inflate(layoutResource, parent, false));
-		}
-
-		public void bind(MeshMSMessage item) {
-		}
-	}
-
-	public class MessageHolder extends ItemHolder {
+	public class ItemHolder extends BasicViewHolder {
 		TextView message;
-
-		public MessageHolder(LayoutInflater inflater, ViewGroup parent, boolean myMessage) {
-			super(inflater, parent, myMessage ? R.layout.my_message : R.layout.their_message);
+		TimestampView age;
+		public ItemHolder(LayoutInflater inflater, ViewGroup parent, boolean myMessage) {
+			super(inflater.inflate(myMessage ? R.layout.my_message : R.layout.their_message, parent, false));
 			this.message = (TextView) this.itemView.findViewById(R.id.message);
+			this.age = (TimestampView) this.itemView.findViewById(R.id.age);
 		}
 
-		@Override
-		public void bind(MeshMSMessage item) {
+		public void bind(MeshMSMessage item, MeshMSMessage previous) {
 			message.setText(item.text);
+			age.setDates(item.date, previous==null?null:previous.date);
 		}
 	}
-
 }
