@@ -37,10 +37,11 @@ public abstract class AbstractFutureList<T, E extends Exception>
 	public void stopObserving(ListObserver<T> observer) {
 		observeFuture.remove(observer);
 		if (!observeFuture.hasObservers()) {
+			AbstractJsonList<T, E> list = futureList;
 			polling = false;
-			if (futureList != null) {
+			if (list != null) {
 				try {
-					futureList.close();
+					list.close();
 				} catch (IOException e) {
 				}
 				futureList = null;

@@ -42,7 +42,6 @@ android {
         release {
             minifyEnabled false
             proguardFiles.add(file('proguard-android.txt'))
-            setProperty("archivesBaseName", "ServalChat-$defaultConfig.versionName");
             //signingConfig signingConfigs.release
         }
     }
