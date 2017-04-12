@@ -23,6 +23,7 @@ public class Rhizome extends BroadcastReceiver {
 	private final Context context;
 	private final Serval serval;
 	public final ListObserverSet<RhizomeListBundle> observerSet;
+	public final ObserverSet<Rhizome> observers;
 
 	File rhizomeFolder;
 
@@ -30,7 +31,12 @@ public class Rhizome extends BroadcastReceiver {
 		this.serval = serval;
 		this.context = context;
 		rhizomeFolder = getRhizomePath();
-		observerSet = new ListObserverSet<>(serval.uiHandler);
+		observerSet = new ListObserverSet<>(serval);
+		observers = new ObserverSet<>(serval, this);
+	}
+
+	public boolean isEnabled(){
+		return rhizomeFolder!=null;
 	}
 
 	void onStart() {
@@ -40,7 +46,8 @@ public class Rhizome extends BroadcastReceiver {
 		filter.addAction(Intent.ACTION_MEDIA_MOUNTED);
 		context.registerReceiver(this, filter);
 
-		if (rhizomeFolder != null)
+		observers.onUpdate();
+		if (isEnabled())
 			serval.runOnThreadPool(watchBundles);
 	}
 
@@ -50,7 +57,7 @@ public class Rhizome extends BroadcastReceiver {
 		@Override
 		public void run() {
 			try {
-				while (rhizomeFolder != null) {
+				while (isEnabled()) {
 					// TODO add a magic token for the current end of list
 					if (token == null) {
 						RhizomeBundleList lastList = serval.getResultClient().rhizomeListBundles();
@@ -131,8 +138,9 @@ public class Rhizome extends BroadcastReceiver {
 		} catch (ServalDFailureException e) {
 			Log.e(TAG, e.getMessage(), e);
 		}
+		observers.onUpdate();
 
-		if (rhizomeFolder != null)
+		if (isEnabled())
 			serval.runOnThreadPool(watchBundles);
 	}
 

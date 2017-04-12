@@ -37,7 +37,7 @@ public abstract class NetworkInfo {
 
 	public NetworkInfo(Serval serval){
 		this.serval = serval;
-		observers = new ObserverSet<>(serval.uiHandler, this);
+		observers = new ObserverSet<>(serval, this);
 	}
 
 	public abstract String getName(Context context);

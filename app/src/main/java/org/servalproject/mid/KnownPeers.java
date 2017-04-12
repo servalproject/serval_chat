@@ -34,9 +34,9 @@ public class KnownPeers {
 
 	KnownPeers(Serval serval) {
 		this.serval = serval;
-		peerListObservers = new ListObserverSet<>(serval.uiHandler);
-		interfaceObservers = new ListObserverSet<>(serval.uiHandler);
-		observers = new ObserverSet<>(serval.uiHandler, this);
+		peerListObservers = new ListObserverSet<>(serval);
+		interfaceObservers = new ListObserverSet<>(serval);
+		observers = new ObserverSet<>(serval, this);
 	}
 
 	public int getReachableCount() {
@@ -92,7 +92,7 @@ public class KnownPeers {
 			synchronized (this) {
 				p = peersBySid.get(subscriber.sid);
 				if (p == null) {
-					p = new Peer(serval.uiHandler, subscriber);
+					p = new Peer(serval, subscriber);
 					peersBySid.put(subscriber.sid, p);
 					isNew = true;
 				}

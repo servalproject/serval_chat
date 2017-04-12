@@ -30,7 +30,7 @@ public class Identity {
 			messaging = null;
 			observers = null;
 		} else {
-			observers = new ObserverSet<>(serval.uiHandler, this);
+			observers = new ObserverSet<>(serval, this);
 			this.messaging = new Messaging(serval, this);
 		}
 	}

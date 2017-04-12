@@ -74,6 +74,8 @@ android {
         targetSdkVersion 25
         versionCode commitCount
         versionName gitDescribe
+        // unique, deterministic identifier for an apk compiled from this source code
+        buildConfigField "String", "BuildStamp", ("\""+commitSha+(cleanBuild?"":"-"+new Date().getTime())+"\"");
         buildConfigField "String", "CommitSha", ("\""+commitSha+"\"");
     }
 
@@ -94,13 +96,13 @@ android {
     buildTypes {
         debug{
             def manifestId = project.findProperty("debug.manifest.id")
-            buildConfigField "String", "ManifestId", "\"$manifestId\"";
+            buildConfigField "String", "ManifestId", manifestId==null?"null":"\"$manifestId\"";
         }
         release {
             minifyEnabled false
             proguardFiles.add(file('proguard-android.txt'))
             def manifestId = project.findProperty("${releaseType}.manifest.id")
-            buildConfigField "String", "ManifestId", "\"$manifestId\"";
+            buildConfigField "String", "ManifestId", manifestId==null?"null":"\"$manifestId\"";
             // leave the apk unsigned for a release build if config is missing
             if (signingConfigs.release.storeFile)
                 signingConfig signingConfigs.release
@@ -175,26 +177,6 @@ afterEvaluate{
         // Prompt for key passwords, if the signing config came from this build file
         // (Android studio gui has a way to trigger this from an external singing config)
         if (project.tasks.findByName("install$variantName")){
-            if (variant.buildType.name != "debug"
-                    && variant.signingConfig
-                    && variant.signingConfig.storeFile
-                    && android.signingConfigs.findByName(variant.signingConfig.name)!=null
-            ){
-                def promptTask = "prompt${variantName}Pwd"
-                task "$promptTask"{
-                    doLast{
-                        def signConfig = android.signingConfigs[variant.signingConfig.name];
-                        if (signConfig.storeFile != null && signConfig.storeFile.exists()){
-                            if (!signConfig.storePassword)
-                                signConfig.storePassword=readPassword("Enter password for jar signing keystore:")
-                            if (!signConfig.keyPassword)
-                                signConfig.keyPassword=readPassword("Enter password for jar signing key:")
-                        }
-                    }
-                }
-                tasks["validateSigning${variantName}"].dependsOn "$promptTask"
-            }
-
             // add a manifest to any built apk, based on user config
             def confType = "debug"
             if (variant.name == "release")
@@ -204,6 +186,31 @@ afterEvaluate{
             def secret = project.findProperty("${confType}.manifest.secret");
             def author = project.findProperty("${confType}.manifest.author");
             def bk = project.findProperty("${confType}.manifest.bk");
+
+            def promptTask = "prompt${variantName}Pwd"
+            task "$promptTask"{
+                doLast{
+                    if (variant.buildType.name != "debug"
+                            && variant.signingConfig
+                            && variant.signingConfig.storeFile
+                    ){
+                        def signConfig = android.signingConfigs.findByName([variant.signingConfig.name]);
+                        if (signConfig!=null){
+                            if (signConfig.storeFile != null && signConfig.storeFile.exists()){
+                                if (!signConfig.storePassword)
+                                    signConfig.storePassword=readPassword("Enter password for jar signing keystore:")
+                                if (!signConfig.keyPassword)
+                                    signConfig.keyPassword=readPassword("Enter password for jar signing key:")
+                            }
+                        }
+                    }
+                    if (keyringFile!=null && author!=null && entryPin == null)
+                        entryPin = readPassword("Enter serval keyring entry pin:")
+                }
+            }
+            tasks["validateSigning${variantName}"].dependsOn "$promptTask"
+            // run the prompt task first as it doesn't work well with other parallel tasks
+            preBuild.mustRunAfter "$promptTask"
 
             // TODO supported method to seed this id?
             if (manifestId && (secret || (author && keyring))){
@@ -218,11 +225,8 @@ afterEvaluate{
                         executable = hostServald.outputs.files[0]
                         doFirst{
                             args = ['rhizome', 'add', 'file']
-                            if (keyringFile!=null && author!=null){
-                                if (entryPin == null)
-                                    entryPin = readPassword("Enter serval keyring entry pin:")
+                            if (keyringFile!=null && author!=null && entryPin)
                                 args+="--entry-pin=$entryPin"
-                            }
                             args += [
                                     '--zip-comment',
                                     author?:"",

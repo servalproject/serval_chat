@@ -28,7 +28,7 @@ public class Notifications {
 	private static final String NotificationTag = "PrivateMessaging";
 
 	static void onStart(final Serval serval, final Context context) {
-		serval.identities.listObservers.add(new ListObserver<Identity>() {
+		serval.identities.listObservers.addBackground(new ListObserver<Identity>() {
 			@Override
 			public void added(Identity obj) {
 				new Notifications(context, obj);
@@ -48,7 +48,7 @@ public class Notifications {
 		});
 
 		// track which interfaces are running, start a foreground service whenever an interface is up
-		serval.knownPeers.interfaceObservers.add(new ListObserver<Interface>() {
+		serval.knownPeers.interfaceObservers.addBackground(new ListObserver<Interface>() {
 			private Interface interfaces[] = new Interface[16];
 			private int count = 0;
 			private boolean serviceStarted = false;
@@ -95,7 +95,7 @@ public class Notifications {
 		this.context = context;
 		this.id = id;
 		notificationId = ++nextId;
-		id.messaging.observers.add(new ListObserver<MeshMSConversation>() {
+		id.messaging.observers.addBackground(new ListObserver<MeshMSConversation>() {
 			@Override
 			public void added(MeshMSConversation obj) {
 			}

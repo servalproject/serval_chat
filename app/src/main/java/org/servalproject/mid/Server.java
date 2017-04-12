@@ -6,6 +6,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Message;
 import android.os.PowerManager;
 import android.os.SystemClock;
 
@@ -15,7 +18,7 @@ import org.servalproject.servaldna.ServalDCommand;
 /**
  * Created by jeremy on 3/05/16.
  */
-public class Server extends BroadcastReceiver implements IJniServer, Runnable {
+public class Server extends BroadcastReceiver implements IJniServer, Runnable, Handler.Callback {
 	private static final String TAG = "Server";
 
 	Server(Serval serval, Context context) {
@@ -25,7 +28,10 @@ public class Server extends BroadcastReceiver implements IJniServer, Runnable {
 
 		PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
 		cpuLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Services");
-		observers = new ObserverSet<>(serval.uiHandler, this);
+		observers = new ObserverSet<>(serval, this);
+		HandlerThread handlerThread = new HandlerThread("LockHandler");
+		handlerThread.start();
+		handler = new Handler(handlerThread.getLooper(), this);
 	}
 
 	/*
@@ -38,6 +44,7 @@ public class Server extends BroadcastReceiver implements IJniServer, Runnable {
 	 */
 	private final Serval serval;
 	private final Context context;
+	private final Handler handler;
 	private final PowerManager.WakeLock cpuLock;
 	private final AlarmManager am;
 	public final ObserverSet<Server> observers;
@@ -58,13 +65,25 @@ public class Server extends BroadcastReceiver implements IJniServer, Runnable {
 		// (all times are using the same clock as System.currentTimeMillis())
 		synchronized (this) {
 			this.wakeAt = SystemClock.elapsedRealtime() + (nextWake - now);
-			serval.backgroundHandler.replaceMessage(Serval.CPU_LOCK, 1);
+			handler.sendEmptyMessageDelayed(CPU_LOCK, 1);
 		}
 		return nextWake;
 	}
 
+	private static final int CPU_LOCK = 1;
+
+	@Override
+	public boolean handleMessage(Message message) {
+		switch (message.what){
+			case CPU_LOCK:
+				onCpuLock();
+				return true;
+		}
+		return false;
+	}
+
 	// called from event handler thread
-	void onCpuLock() {
+	private void onCpuLock() {
 		synchronized (this) {
 			long delay = this.wakeAt - SystemClock.elapsedRealtime();
 
@@ -131,8 +150,13 @@ public class Server extends BroadcastReceiver implements IJniServer, Runnable {
 	public void started(String instancePath, int pid, int mdpPort, int httpPort) {
 		this.mdpPort = mdpPort;
 		this.httpPort = httpPort;
-		// don't let observers block this thread!
-		serval.backgroundHandler.replaceMessage(Serval.SERVER_UP, 0);
+
+		serval.runOnBackground(new Runnable() {
+			@Override
+			public void run() {
+				serval.onServerStarted();
+			}
+		});
 	}
 
 	void onStart() {

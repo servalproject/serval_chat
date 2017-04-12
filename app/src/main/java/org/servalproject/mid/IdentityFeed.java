@@ -17,7 +17,7 @@ public class IdentityFeed extends MessageFeed {
 	}
 
 	public void sendMessage(String message) throws ServalDInterfaceException, IOException, MeshMSException {
-		if (serval.uiHandler.isUiThread())
+		if (serval.uiHandler.isOnThread())
 			throw new IllegalStateException();
 		serval.getResultClient().meshmbSendMessage(id.subscriber.signingKey, message);
 	}

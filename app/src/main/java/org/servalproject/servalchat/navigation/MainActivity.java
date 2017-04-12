@@ -284,9 +284,8 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 		switch (item.getItemId()) {
 			case SHARE:
 				try {
-					File apk = new File(getApplicationInfo().sourceDir);
 					Intent intent = new Intent(Intent.ACTION_SEND);
-					intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(apk));
+					intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(serval.apkFile));
 					intent.setType("image/apk");
 					intent.addCategory(Intent.CATEGORY_DEFAULT);
 					intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

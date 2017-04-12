@@ -2,6 +2,7 @@ package org.servalproject.mid;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.HandlerThread;
 import android.preference.PreferenceManager;
 
 import org.servalproject.mid.networking.Networks;
@@ -34,11 +35,15 @@ public class Serval {
 
 	private Serval(Context context) throws IOException {
 		this.context = context;
+		this.apkFile = new File(context.getPackageCodePath());
 		settings = PreferenceManager.getDefaultSharedPreferences(context);
 		File appFolder = context.getFilesDir().getParentFile();
 		instancePath = new File(appFolder, "instance");
-		uiHandler = new UIHandler(context.getMainLooper());
-		backgroundHandler = BackgroundHandler.create(this);
+		uiHandler = new CallbackHandler(context.getMainLooper());
+
+		HandlerThread handlerThread = new HandlerThread("BackgroundHandler");
+		handlerThread.start();
+		backgroundHandler = new CallbackHandler(handlerThread.getLooper());
 
 		backgroundQueue = new SynchronousQueue<>();
 		backgroundThreads = new ThreadPoolExecutor(3, Integer.MAX_VALUE, 5, TimeUnit.SECONDS, backgroundQueue);
@@ -52,11 +57,18 @@ public class Serval {
 		knownPeers = new KnownPeers(this);
 		identities = new Identities(this);
 
-		// Do the rest of our startup process on the eventhandler thread
-		backgroundHandler.replaceMessage(START, 0);
+		selfUpdater = SelfUpdater.getSelfUpdater(this);
+
+		// Do the rest of our startup process on a background thread
+		backgroundHandler.post(new Runnable() {
+			@Override
+			public void run() {
+				startup();
+			}
+		});
 	}
 
-	void startup() {
+	private void startup() {
 		try {
 			ServalDCommand.setInstancePath(instancePath.getPath());
 			// if sdcard is available, enable rhizome
@@ -90,15 +102,17 @@ public class Serval {
 		serverThread.start();
 	}
 
-	public final UIHandler uiHandler;
-	final BackgroundHandler backgroundHandler;
+	public final CallbackHandler uiHandler;
+	public final CallbackHandler backgroundHandler;
 	public final Context context;
+	public final File apkFile;
 	public final Server server;
 	public final Rhizome rhizome;
 	public final Config config;
 	public final KnownPeers knownPeers;
 	public final Identities identities;
 	public final SharedPreferences settings;
+	private final SelfUpdater selfUpdater;
 	private final BlockingQueue<Runnable> backgroundQueue;
 	private final ThreadPoolExecutor backgroundThreads;
 	private String restfulUsername = "ServalDClient";

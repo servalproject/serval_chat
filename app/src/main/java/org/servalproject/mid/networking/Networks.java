@@ -5,7 +5,6 @@ import android.util.Log;
 
 import org.servalproject.mid.ListObserverSet;
 import org.servalproject.mid.Observer;
-import org.servalproject.mid.ObserverSet;
 import org.servalproject.mid.Serval;
 import org.servalproject.mid.networking.bluetooth.BlueToothControl;
 
@@ -27,13 +26,13 @@ public class Networks implements Observer<NetworkInfo> {
 
 	public Networks(Serval serval){
 		this.serval = serval;
-		observers = new ListObserverSet<>(serval.uiHandler);
+		observers = new ListObserverSet<>(serval);
 		this.wifiClient = new WifiClient(serval);
 		this.wifiHotspot = Hotspot.getHotspot(serval);
 
-		wifiClient.observers.add(this);
+		wifiClient.observers.addBackground(this);
 		if (wifiHotspot!=null)
-			wifiHotspot.observers.add(this);
+			wifiHotspot.observers.addBackground(this);
 	}
 
 	public void onStart(){
@@ -41,7 +40,7 @@ public class Networks implements Observer<NetworkInfo> {
 		if (blueTooth != null) {
 			blueTooth.onEnableChanged();
 			networks.add(blueTooth.networkInfo);
-			blueTooth.networkInfo.observers.add(this);
+			blueTooth.networkInfo.observers.addBackground(this);
 			observers.onAdd(blueTooth.networkInfo);
 		}
 		networks.add(wifiClient);

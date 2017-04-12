@@ -94,13 +94,13 @@ public class PeerDetails extends LinearLayout
 
 	@Override
 	public void onVisible() {
-		peer.observers.add(this);
+		peer.observers.addUI(this);
 		updated(peer);
 	}
 
 	@Override
 	public void onHidden() {
-		peer.observers.remove(this);
+		peer.observers.removeUI(this);
 	}
 
 	@Override

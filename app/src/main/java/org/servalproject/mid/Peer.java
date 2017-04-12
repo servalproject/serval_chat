@@ -16,9 +16,9 @@ public final class Peer implements Comparable<Peer> {
 	private static long nextId = 0;
 	private final long id;
 
-	Peer(Handler handler, Subscriber subscriber) {
+	Peer(Serval serval, Subscriber subscriber) {
 		this.subscriber = subscriber;
-		observers = new ObserverSet<>(handler, this);
+		observers = new ObserverSet<>(serval, this);
 		id = nextId++;
 	}
 

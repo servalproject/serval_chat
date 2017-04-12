@@ -26,7 +26,7 @@ public class Identities {
 
 	Identities(Serval serval) {
 		this.serval = serval;
-		listObservers = new ListObserverSet<>(serval.uiHandler);
+		listObservers = new ListObserverSet<>(serval);
 	}
 
 	void onStart() {

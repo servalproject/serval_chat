@@ -19,7 +19,7 @@ public abstract class AbstractFutureList<T, E extends Exception>
 
 	protected AbstractFutureList(Serval serval) {
 		super(serval);
-		this.observeFuture = new ListObserverSet<>(serval.uiHandler);
+		this.observeFuture = new ListObserverSet<>(serval);
 	}
 	protected void start() {
 		if (polling || !observeFuture.hasObservers())

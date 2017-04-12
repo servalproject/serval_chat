@@ -3,7 +3,6 @@ package org.servalproject.servalchat.identity;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -106,10 +105,10 @@ public class ConversationList
 				p = serval.knownPeers.getPeer(conversation.them);
 			if (this.peer != p) {
 				if (this.peer != null)
-					this.peer.observers.remove(this);
+					this.peer.observers.removeUI(this);
 				this.peer = p;
 				if (p != null)
-					this.peer.observers.add(this);
+					this.peer.observers.addUI(this);
 			}
 			if (p != null)
 				updated(p);

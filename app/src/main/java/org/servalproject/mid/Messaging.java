@@ -36,10 +36,10 @@ public class Messaging {
 	Messaging(Serval serval, Identity identity) {
 		this.serval = serval;
 		this.identity = identity;
-		this.observers = new ListObserverSet<>(serval.uiHandler);
+		this.observers = new ListObserverSet<>(serval);
 
 		// TODO add restful api for conversation list updates?
-		serval.rhizome.observerSet.add(rhizomeObserver);
+		serval.rhizome.observerSet.addBackground(rhizomeObserver);
 		refresh();
 	}
 

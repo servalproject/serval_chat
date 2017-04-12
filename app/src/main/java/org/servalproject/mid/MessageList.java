@@ -42,7 +42,7 @@ public class MessageList extends AbstractFutureList<MeshMSMessage, MeshMSExcepti
 	}
 
 	public void sendMessage(String message) throws ServalDInterfaceException, MeshMSException, IOException {
-		if (serval.uiHandler.isUiThread())
+		if (serval.uiHandler.isOnThread())
 			throw new IllegalStateException();
 		serval.getResultClient().meshmsSendMessage(self.sid, peer.sid, message);
 	}
@@ -53,7 +53,7 @@ public class MessageList extends AbstractFutureList<MeshMSMessage, MeshMSExcepti
 	}
 
 	public void markRead() throws ServalDInterfaceException, MeshMSException, IOException {
-		if (serval.uiHandler.isUiThread())
+		if (serval.uiHandler.isOnThread())
 			throw new IllegalStateException();
 		serval.getResultClient().meshmsMarkAllMessagesRead(self.sid, peer.sid);
 		messaging.refresh();
