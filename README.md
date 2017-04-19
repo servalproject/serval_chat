@@ -21,6 +21,8 @@ You can;
 - See some details of each identity
 - List every broadcast feed with names, currently in your local rhizome store
 - List the messages of any broadcast feed
+- Follow and Un-Follow any broadcast feed
+- List the messages of Followed feeds in the order they arrived
 - Reply privately to the author of any feed
 - List incoming private conversations
 - List private conversation threads
@@ -32,8 +34,7 @@ You can't (yet or ever?);
 - Protect identities with a PIN
 - Control which of your identities are usable / visible to others nearby
 - Block, follow or provide your own local name for any broadcast feeds
-- List the messages of all feeds you are following in a single view
 - Be notified of incoming broadcast messages
-- See timestamp, delivery or last read markers
+- See delivery or last read markers
 - Disable the app. If you are connected to wifi or bluetooth is enabled, the app will attempt to find other nearby users, there is no off switch.
-- Reliably match incoming private messages with any broadcast message feed from the same identity. This matching may occur, but isn't reliable.
+- Reliably match incoming private messages with any broadcast message feed from the same identity. This matching may occur if the peer is online, but isn't reliable.
