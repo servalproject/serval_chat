@@ -33,7 +33,6 @@ public class IdentityDetailsPresenter extends Presenter<IdentityDetails> {
 		IdentityDetails view = getView();
 		if (identity != null) {
 			view.name.setText(identity.getName());
-			view.phone.setText(identity.getDid());
 			view.sid.setText(identity.subscriber.sid.abbreviation());
 			view.sidLabel.setVisibility(View.VISIBLE);
 			view.sid.setVisibility(View.VISIBLE);
@@ -102,6 +101,6 @@ public class IdentityDetailsPresenter extends Presenter<IdentityDetails> {
 		};
 
 		IdentityDetails view = getView();
-		updater.execute(view.phone.getText().toString(), view.name.getText().toString(), "");
+		updater.execute("", view.name.getText().toString(), "");
 	}
 }

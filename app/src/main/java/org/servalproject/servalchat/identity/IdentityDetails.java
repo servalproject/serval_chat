@@ -25,7 +25,6 @@ public class IdentityDetails extends LinearLayout
 	TextView sidLabel;
 	TextView sid;
 	EditText name;
-	EditText phone;
 	Button update;
 	IdentityDetailsPresenter presenter;
 
@@ -39,7 +38,6 @@ public class IdentityDetails extends LinearLayout
 		sidLabel = (TextView) findViewById(R.id.sid_label);
 		sid = (TextView) findViewById(R.id.sid);
 		name = (EditText) findViewById(R.id.name);
-		phone = (EditText) findViewById(R.id.did);
 		update = (Button) findViewById(R.id.update);
 		update.setOnClickListener(this);
 
