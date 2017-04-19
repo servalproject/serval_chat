@@ -26,6 +26,24 @@ public class ActivityList extends AbstractFutureList<MeshMBActivityMessage, IOEx
 		super.start();
 	}
 
+	private void updatePeer(MeshMBActivityMessage item){
+		Peer p = serval.knownPeers.getPeer(item.subscriber);
+		p.updateFeedName(item.name);
+	}
+
+	@Override
+	protected void addingPastItem(MeshMBActivityMessage item) {
+		if (item!=null)
+			updatePeer(item);
+		super.addingPastItem(item);
+	}
+
+	@Override
+	protected void addingFutureItem(MeshMBActivityMessage item) {
+		updatePeer(item);
+		super.addingFutureItem(item);
+	}
+
 	@Override
 	protected AbstractJsonList<MeshMBActivityMessage, IOException> openPast() throws ServalDInterfaceException, IOException, IOException {
 		return serval.getResultClient().meshmbActivity(identity.subscriber);
