@@ -240,9 +240,9 @@ afterEvaluate{
                             if (bk)
                                 args+="BK=$bk"
                             if (confType=="release")
-                                args+="name=${android.appName} ${variant.versionName}.apk"
+                                args+="name=${android.appName}-${variant.versionName}.apk"
                             else
-                                args+="name=${android.appName}-${confType} ${variant.versionName}.apk"
+                                args+="name=${android.appName}-${confType}-${variant.versionName}.apk"
                             if (android.cleanBuild && confType != "development")
                                 args+="version=$variant.versionCode"
                         }
