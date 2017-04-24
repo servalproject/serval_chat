@@ -12,6 +12,7 @@ import android.view.MenuItem;
 import android.widget.LinearLayout;
 
 import org.servalproject.mid.Identity;
+import org.servalproject.mid.Messaging;
 import org.servalproject.servalchat.R;
 import org.servalproject.servalchat.navigation.IHaveMenu;
 import org.servalproject.servalchat.navigation.ILifecycle;
@@ -39,10 +40,16 @@ public class PeerFeed extends LinearLayout
 
 	@Override
 	public void populateItems(Menu menu) {
-		menu.add(Menu.NONE, FOLLOW, Menu.NONE, R.string.follow_feed)
-				.setOnMenuItemClickListener(this);
-		menu.add(Menu.NONE, IGNORE, Menu.NONE, R.string.ignore_feed)
-				.setOnMenuItemClickListener(this);
+		Messaging.SubscriptionState state = presenter.getSubscriptionState();
+		if (state == null)
+			return;
+		if (state != Messaging.SubscriptionState.Ignored)
+			menu.add(Menu.NONE, IGNORE, Menu.NONE, R.string.ignore_feed)
+					.setOnMenuItemClickListener(this);
+		if (state != Messaging.SubscriptionState.Followed)
+			menu.add(Menu.NONE, FOLLOW, Menu.NONE, R.string.follow_feed)
+					.setOnMenuItemClickListener(this);
+		// TODO block
 	}
 
 	@Override

@@ -87,6 +87,9 @@ public final class Peer implements Comparable<Peer> {
 	}
 
 	private String feedName;
+	public String getFeedName(){
+		return feedName;
+	}
 
 	public String displayName() {
 		String n = feedName;

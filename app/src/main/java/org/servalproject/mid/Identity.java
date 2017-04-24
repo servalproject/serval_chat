@@ -47,12 +47,19 @@ public class Identity {
 		return new ActivityList(serval, this);
 	}
 
-	public void follow(SigningKey feed) throws ServalDInterfaceException, IOException {
-		serval.getResultClient().meshmbFollow(subscriber, feed);
+	public void follow(MessageFeed feed) throws ServalDInterfaceException, IOException {
+		serval.getResultClient().meshmbFollow(subscriber, feed.id.signingKey);
+		messaging.followed(feed);
 	}
 
-	public void ignore(SigningKey feed) throws ServalDInterfaceException, IOException {
-		serval.getResultClient().meshmbIgnore(subscriber, feed);
+	public void ignore(MessageFeed feed) throws ServalDInterfaceException, IOException {
+		serval.getResultClient().meshmbIgnore(subscriber, feed.id.signingKey);
+		messaging.ignored(feed);
+	}
+
+	public void block(MessageFeed feed) throws ServalDInterfaceException, IOException{
+		// TODO
+		messaging.blocked(feed);
 	}
 
 	public void update(KeyringIdentity id) {

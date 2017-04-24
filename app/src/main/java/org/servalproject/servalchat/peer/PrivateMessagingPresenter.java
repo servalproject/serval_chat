@@ -40,7 +40,7 @@ public final class PrivateMessagingPresenter extends Presenter<PrivateMessaging>
 			= new PresenterFactory<PrivateMessaging, PrivateMessagingPresenter>() {
 
 		@Override
-		protected String getKey(Identity id, Bundle savedState) {
+		protected String getKey(PrivateMessaging view, Identity id, Bundle savedState) {
 			try {
 				Subscriber them = KnownPeers.getSubscriber(savedState);
 				return id.subscriber.sid.toHex() + ":" + them.sid.toHex();

@@ -3,6 +3,8 @@ package org.servalproject.mid;
 import org.servalproject.servaldna.AbstractJsonList;
 import org.servalproject.servaldna.ServalDInterfaceException;
 import org.servalproject.servaldna.SigningKey;
+import org.servalproject.servaldna.Subscriber;
+import org.servalproject.servaldna.meshmb.MeshMBSubscription;
 import org.servalproject.servaldna.meshmb.MessagePlyList;
 import org.servalproject.servaldna.meshmb.PlyMessage;
 
@@ -12,18 +14,18 @@ import java.io.IOException;
  * Created by jeremy on 3/08/16.
  */
 public class MessageFeed extends AbstractFutureList<PlyMessage, IOException> {
-	public final SigningKey id;
+	public final Subscriber id;
 	private Peer peer;
 	private String name;
 
 	MessageFeed(Serval serval, Peer peer) {
-		this(serval, peer.getSubscriber().signingKey);
+		this(serval, peer.getSubscriber());
 		this.peer = peer;
 	}
 
-	MessageFeed(Serval serval, SigningKey id) {
+	MessageFeed(Serval serval, Subscriber id) {
 		super(serval);
-		if (id == null)
+		if (id == null || id.signingKey == null)
 			throw new NullPointerException("A bundle signing key is required");
 		this.id = id;
 	}
@@ -37,7 +39,7 @@ public class MessageFeed extends AbstractFutureList<PlyMessage, IOException> {
 
 	@Override
 	protected AbstractJsonList<PlyMessage, IOException> openPast() throws ServalDInterfaceException, IOException {
-		MessagePlyList list = serval.getResultClient().meshmbListMessages(id);
+		MessagePlyList list = serval.getResultClient().meshmbListMessages(id.signingKey);
 		this.name = list.getName();
 		if (peer != null)
 			peer.updateFeedName(name);
@@ -46,7 +48,7 @@ public class MessageFeed extends AbstractFutureList<PlyMessage, IOException> {
 
 	@Override
 	protected AbstractJsonList<PlyMessage, IOException> openFuture() throws ServalDInterfaceException, IOException {
-		MessagePlyList list = serval.getResultClient().meshmbListMessagesSince(id, last==null?"":last.token);
+		MessagePlyList list = serval.getResultClient().meshmbListMessagesSince(id.signingKey, last==null?"":last.token);
 		this.name = list.getName();
 		if (peer != null)
 			peer.updateFeedName(name);

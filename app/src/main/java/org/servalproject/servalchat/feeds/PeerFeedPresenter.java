@@ -7,6 +7,7 @@ import android.support.design.widget.Snackbar;
 import org.servalproject.mid.Identity;
 import org.servalproject.mid.KnownPeers;
 import org.servalproject.mid.MessageFeed;
+import org.servalproject.mid.Messaging;
 import org.servalproject.mid.Peer;
 import org.servalproject.mid.Serval;
 import org.servalproject.servalchat.R;
@@ -14,6 +15,7 @@ import org.servalproject.servalchat.views.Presenter;
 import org.servalproject.servalchat.views.PresenterFactory;
 import org.servalproject.servaldna.AbstractId;
 import org.servalproject.servaldna.Subscriber;
+import org.servalproject.servaldna.meshmb.MeshMBSubscription;
 
 /**
  * Created by jeremy on 3/08/16.
@@ -34,7 +36,7 @@ public class PeerFeedPresenter extends Presenter<PeerFeed> {
 			= new PresenterFactory<PeerFeed, PeerFeedPresenter>() {
 
 		@Override
-		protected String getKey(Identity id, Bundle savedState) {
+		protected String getKey(PeerFeed view, Identity id, Bundle savedState) {
 			try {
 				Subscriber them = KnownPeers.getSubscriber(savedState);
 				return id.subscriber.sid.toHex() + ":" + them.sid.toHex();
@@ -81,6 +83,13 @@ public class PeerFeedPresenter extends Presenter<PeerFeed> {
 		adapter.onHidden();
 	}
 
+
+	public Messaging.SubscriptionState getSubscriptionState(){
+		if (feed == null)
+			return null;
+		return identity.messaging.getSubscriptionState(feed.id);
+	}
+
 	public void subscribe(final boolean subscribe){
 		busy = true;
 		new AsyncTask<Void, Void, Void>(){
@@ -106,9 +115,9 @@ public class PeerFeedPresenter extends Presenter<PeerFeed> {
 			protected Void doInBackground(Void... voids) {
 				try {
 					if (subscribe) {
-						identity.follow(feed.id);
+						identity.follow(feed);
 					} else {
-						identity.ignore(feed.id);
+						identity.ignore(feed);
 					}
 				} catch (Exception e) {
 					this.e = e;

@@ -6,6 +6,8 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -17,6 +19,7 @@ import org.servalproject.mid.Observer;
 import org.servalproject.mid.Peer;
 import org.servalproject.mid.Serval;
 import org.servalproject.servalchat.R;
+import org.servalproject.servalchat.navigation.IHaveMenu;
 import org.servalproject.servalchat.navigation.ILifecycle;
 import org.servalproject.servalchat.navigation.INavigate;
 import org.servalproject.servalchat.navigation.MainActivity;
@@ -25,14 +28,17 @@ import org.servalproject.servalchat.views.ObservedRecyclerView;
 import org.servalproject.servalchat.views.RecyclerHelper;
 import org.servalproject.servaldna.meshms.MeshMSConversation;
 
+import java.util.List;
+
 /**
  * Created by jeremy on 13/07/16.
  */
 public class ConversationList
 		extends ObservedRecyclerView<MeshMSConversation, ConversationList.ConversationHolder>
-		implements INavigate {
+		implements INavigate, IHaveMenu, MenuItem.OnMenuItemClickListener {
 
-	private Messaging messaging;
+	private Navigation navigation;
+	private List<MeshMSConversation> conversations;
 	private static final String TAG = "ConversationList";
 	private final Serval serval;
 
@@ -65,24 +71,63 @@ public class ConversationList
 	protected MeshMSConversation get(int position) {
 		if (position >= getCount())
 			return null;
-		return messaging.conversations.get(position);
+		return conversations.get(position);
 	}
 
 	@Override
 	protected int getCount() {
-		if (messaging == null)
+		if (conversations == null)
 			return 0;
-		return messaging.conversations.size();
+		return conversations.size();
 	}
 
 	@Override
 	public ILifecycle onAttach(MainActivity activity, Navigation n, Identity id, Bundle args) {
-		if (this.messaging != id.messaging) {
-			this.messaging = id.messaging;
-			this.setObserverSet(messaging.observers);
+		List<MeshMSConversation> list;
+		if (n == Navigation.Inbox)
+			list = id.messaging.conversations;
+		else if(n == Navigation.Requests)
+			list = id.messaging.requests;
+		else if(n == Navigation.Blocked)
+			list = id.messaging.blocked;
+		else
+			throw new IllegalStateException("Unexpected navigation!");
+
+		this.navigation = n;
+		if (this.conversations != list) {
+			this.conversations = list;
+			this.setObserverSet(id.messaging.observers);
 			notifyChanged();
 		}
 		return super.onAttach(activity, n, id, args);
+	}
+
+	private static final int REQUESTS = 1;
+	private static final int BLOCKED = 2;
+
+	@Override
+	public void populateItems(Menu menu) {
+		if (navigation == Navigation.Inbox){
+			// TODO show unread count?
+			menu.add(Menu.NONE, REQUESTS, Menu.NONE, R.string.requests)
+					.setOnMenuItemClickListener(this);
+			// TODO
+//			menu.add(Menu.NONE, BLOCKED, Menu.NONE, R.string.blocked)
+//					.setOnMenuItemClickListener(this);
+		}
+	}
+
+	@Override
+	public boolean onMenuItemClick(MenuItem item) {
+		switch (item.getItemId()){
+			case REQUESTS:
+				activity.go(identity, Navigation.Requests, null);
+				return true;
+			case BLOCKED:
+				activity.go(identity, Navigation.Blocked, null);
+				return true;
+		}
+		return false;
 	}
 
 	public class ConversationHolder
