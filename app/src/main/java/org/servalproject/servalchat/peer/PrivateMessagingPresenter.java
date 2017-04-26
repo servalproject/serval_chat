@@ -165,6 +165,8 @@ public final class PrivateMessagingPresenter extends Presenter<PrivateMessaging>
 		if (view == null)
 			return;
 		final String message = view.message.getText().toString();
+		if ("".equals(message))
+			return;
 		view.message.setText("");
 
 		AsyncTask<Void, Void, Void> sender = new AsyncTask<Void, Void, Void>() {
