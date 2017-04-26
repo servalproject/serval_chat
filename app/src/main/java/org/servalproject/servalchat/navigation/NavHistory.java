@@ -30,28 +30,12 @@ public class NavHistory {
 		this.identity = identity;
 	}
 
-	public boolean up() {
-		HistoryItem item = getTop();
-		if (item.key.parent == null)
-			return false;
-
-		// always pop the current item
-		pop();
-
-		for (int i = history.size() - 1; i >= 0; i--) {
-			if (history.get(i).key == item.key.parent) {
-				// pop history back to here
-				while (history.size() > i + 1)
-					pop();
-				return true;
-			}
-		}
-		add(item.key.parent, null, false);
-		return true;
-	}
-
 	private void pop() {
 		history.remove(history.size() - 1);
+	}
+
+	public boolean canGoBack(){
+		return history.size()>1;
 	}
 
 	public boolean back() {
@@ -92,9 +76,12 @@ public class NavHistory {
 		Bundle state = new Bundle();
 		if (identity != null)
 			state.putByteArray("history.identity", identity.getBinary());
-		state.putString("history.key_0", key.name);
+		int i=0;
+		if (key.defaultParent!=null)
+			state.putString("history.key_" + (i++), key.defaultParent.name);
+		state.putString("history.key_" + i, key.name);
 		if (args != null && !args.isEmpty())
-			state.putBundle("history.args_0", args);
+			state.putBundle("history.args_" + i, args);
 		return state;
 	}
 
@@ -117,7 +104,7 @@ public class NavHistory {
 				if (nav == null)
 					throw new IllegalStateException();
 				Bundle args = state.getBundle("history.args_" + i);
-				ret.add(nav, args, false);
+				ret.history.add(new HistoryItem(nav, args));
 			}
 			return ret;
 		} catch (AbstractId.InvalidBinaryException e) {

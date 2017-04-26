@@ -168,10 +168,10 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 		}
 
 		ActionBar bar = getSupportActionBar();
-		bar.invalidateOptionsMenu();
 		bar.setDisplayOptions(
-				ActionBar.DISPLAY_SHOW_HOME | (item.key.parent != null ? ActionBar.DISPLAY_HOME_AS_UP : 0),
+				ActionBar.DISPLAY_SHOW_HOME | (history.canGoBack() ? ActionBar.DISPLAY_HOME_AS_UP : 0),
 				ActionBar.DISPLAY_SHOW_HOME | ActionBar.DISPLAY_HOME_AS_UP);
+		supportInvalidateOptionsMenu();
 	}
 
 	public static Intent getIntentFor(Context context, Identity identity, Navigation key, Bundle args) {
@@ -258,20 +258,14 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 		}
 	}
 
-	public boolean goUp() {
-		if (history.up()) {
-			go();
-			return true;
-		}
-		return false;
-	}
-
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 			case android.R.id.home:
-				if (goUp())
+				if (history.back()) {
+					go();
 					return true;
+				}
 				break;
 		}
 		return super.onOptionsItemSelected(item);

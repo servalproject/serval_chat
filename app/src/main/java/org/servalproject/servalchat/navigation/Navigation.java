@@ -18,16 +18,16 @@ public class Navigation {
 	public final boolean requiresId;
 	public final int titleResource;
 	public final int layoutResource;
-	public final Navigation parent;
+	public final Navigation defaultParent;
 	public final Navigation containedIn;
 	public final String name;
 	public final List<Navigation> children = new ArrayList<>();
 
-	public Navigation(String name, boolean requiresId, int titleResource, int layoutResource, Navigation parent, Navigation containedIn) {
+	public Navigation(String name, boolean requiresId, int titleResource, int layoutResource, Navigation defaultParent, Navigation containedIn) {
 		this.requiresId = requiresId;
 		this.titleResource = titleResource;
 		this.layoutResource = layoutResource;
-		this.parent = parent;
+		this.defaultParent = defaultParent;
 		this.containedIn = containedIn;
 		this.name = name;
 		if (NavMap.containsKey(name))
@@ -41,25 +41,18 @@ public class Navigation {
 		this(name, true, titleResource, layoutResource, null, null);
 	}
 
-	public Navigation(String name, int titleResource, int layoutResource, Navigation parent) {
-		this(name, true, titleResource, layoutResource, parent, null);
+	public Navigation(String name, int titleResource, int layoutResource, Navigation defaultParent) {
+		this(name, true, titleResource, layoutResource, defaultParent, null);
 	}
 
-	public Navigation(String name, int titleResource, int layoutResource, Navigation parent, Navigation containedIn) {
-		this(name, true, titleResource, layoutResource, parent, containedIn);
+	public Navigation(String name, int titleResource, int layoutResource, Navigation defaultParent, Navigation containedIn) {
+		this(name, true, titleResource, layoutResource, defaultParent, containedIn);
 	}
 
 	public CharSequence getTitle(Context context, Identity identity) {
 		if (titleResource == R.string.app_name && identity != null)
 			return identity.getName();
 		return context.getString(titleResource);
-	}
-
-	@Override
-	public int hashCode() {
-		int result = layoutResource;
-		result = 31 * result + (parent != null ? parent.hashCode() : 0);
-		return result;
 	}
 
 	public static final Map<String, Navigation> NavMap = new HashMap<>();
@@ -86,5 +79,5 @@ public class Navigation {
 	public static final Navigation PeerTabs = new Navigation("PeerTabs", R.string.app_name, R.layout.main_tabs);
 	public static final Navigation PeerDetails = new Navigation("PeerDetails", R.string.peer_details, R.layout.peer_details, null, PeerTabs);
 	public static final Navigation PeerFeed = new Navigation("PeerFeed", R.string.peer_feed, R.layout.peer_feed, null, PeerTabs);
-	public static final Navigation PrivateMessages = new Navigation("PeerMessaging", R.string.message_list, R.layout.message_list, null, PeerTabs);
+	public static final Navigation PrivateMessages = new Navigation("PeerMessaging", R.string.message_list, R.layout.message_list, Inbox, PeerTabs);
 }
