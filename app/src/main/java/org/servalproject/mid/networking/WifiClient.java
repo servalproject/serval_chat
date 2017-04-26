@@ -28,7 +28,7 @@ public class WifiClient extends NetworkInfo{
 
 	@Override
 	public String getStatus(Context context) {
-		if (getState()==State.Off && serval.networks.getGoal() == Networks.WifiGoal.ClientOn)
+		if (getState()==State.Off && Networks.getInstance().getGoal() == Networks.WifiGoal.ClientOn)
 			return context.getString(R.string.queued);
 		return super.getStatus(context);
 	}
@@ -39,12 +39,12 @@ public class WifiClient extends NetworkInfo{
 
 	@Override
 	public void enable(Context context) {
-		serval.networks.setWifiGoal(Networks.WifiGoal.ClientOn);
+		Networks.getInstance().setWifiGoal(Networks.WifiGoal.ClientOn);
 	}
 
 	@Override
 	public void disable(Context context) {
-		serval.networks.setWifiGoal(Networks.WifiGoal.Off);
+		Networks.getInstance().setWifiGoal(Networks.WifiGoal.Off);
 	}
 
 	@Override

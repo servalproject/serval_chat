@@ -217,7 +217,7 @@ public class Hotspot extends NetworkInfo {
 
 		switch (getState()){
 			case Off:
-				Networks.WifiGoal goal = serval.networks.getGoal();
+				Networks.WifiGoal goal = Networks.getInstance().getGoal();
 				if (goal == Networks.WifiGoal.HotspotOn || goal == Networks.WifiGoal.HotspotOnServalConfig)
 					return context.getString(R.string.queued);
 				break;
@@ -235,12 +235,12 @@ public class Hotspot extends NetworkInfo {
 	@Override
 	public void enable(Context context) {
 		boolean useConfig = serval.settings.getBoolean("hotspot_serval_config", true);
-		serval.networks.setWifiGoal(useConfig ? Networks.WifiGoal.HotspotOnServalConfig : Networks.WifiGoal.HotspotOn);
+		Networks.getInstance().setWifiGoal(useConfig ? Networks.WifiGoal.HotspotOnServalConfig : Networks.WifiGoal.HotspotOn);
 	}
 
 	@Override
 	public void disable(Context context) {
-		serval.networks.setWifiGoal(Networks.WifiGoal.Off);
+		Networks.getInstance().setWifiGoal(Networks.WifiGoal.Off);
 	}
 
 	@Override

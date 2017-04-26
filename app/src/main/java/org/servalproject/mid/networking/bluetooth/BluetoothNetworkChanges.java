@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 
 import org.servalproject.mid.Serval;
+import org.servalproject.mid.networking.Networks;
 
 public class BluetoothNetworkChanges extends BroadcastReceiver {
 	@Override
@@ -14,7 +15,7 @@ public class BluetoothNetworkChanges extends BroadcastReceiver {
 		Serval serval = Serval.getInstance();
 		if (serval == null)
 			return;
-		BlueToothControl blueTooth = serval.networks.blueTooth;
+		BlueToothControl blueTooth = Networks.getInstance().blueTooth;
 		if (blueTooth == null)
 			return;
 		String action = intent.getAction();

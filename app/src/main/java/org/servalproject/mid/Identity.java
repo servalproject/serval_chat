@@ -1,10 +1,8 @@
 package org.servalproject.mid;
 
 import org.servalproject.servaldna.ServalDInterfaceException;
-import org.servalproject.servaldna.SigningKey;
 import org.servalproject.servaldna.Subscriber;
 import org.servalproject.servaldna.keyring.KeyringIdentity;
-import org.servalproject.servaldna.meshmb.MeshMBSubscriptionList;
 
 import java.io.IOException;
 

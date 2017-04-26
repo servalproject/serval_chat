@@ -27,7 +27,7 @@ public class Notifications {
 	private static final String TAG = "Notifications";
 	private static final String NotificationTag = "PrivateMessaging";
 
-	static void onStart(final Serval serval, final Context context) {
+	static void init(final Serval serval, final Context context) {
 		serval.identities.listObservers.addBackground(new ListObserver<Identity>() {
 			@Override
 			public void added(Identity obj) {
@@ -49,28 +49,20 @@ public class Notifications {
 
 		// track which interfaces are running, start a foreground service whenever an interface is up
 		serval.knownPeers.interfaceObservers.addBackground(new ListObserver<Interface>() {
-			private Interface interfaces[] = new Interface[16];
-			private int count = 0;
 			private boolean serviceStarted = false;
 
 			@Override
 			public void added(Interface obj) {
-				if (interfaces[obj.id] == null)
-					count++;
-				interfaces[obj.id] = obj;
 				updateNotification();
 			}
 
 			@Override
 			public void removed(Interface obj) {
-				if (interfaces[obj.id] != null)
-					count--;
-				interfaces[obj.id] = null;
 				updateNotification();
 			}
 
 			private void updateNotification() {
-				boolean shouldRun = count > 0;
+				boolean shouldRun = serval.knownPeers.getInterfaceCount() > 0;
 				if (shouldRun == serviceStarted)
 					return;
 				Intent i = new Intent(context, ForegroundService.class);
@@ -158,4 +150,5 @@ public class Notifications {
 			nm.notify(NotificationTag, this.notificationId, builder.build());
 		}
 	}
+
 }

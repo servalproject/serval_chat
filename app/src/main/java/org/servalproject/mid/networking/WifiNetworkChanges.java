@@ -14,7 +14,7 @@ public class WifiNetworkChanges extends BroadcastReceiver {
 		if (serval == null)
 			return;
 		String action = intent.getAction();
-		WifiClient wifiClient = serval.networks.wifiClient;
+		WifiClient wifiClient = Networks.getInstance().wifiClient;
 
 		if (action.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
 			wifiClient.onStateChanged(intent);

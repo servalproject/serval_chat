@@ -6,6 +6,7 @@ import android.util.Log;
 import org.servalproject.mid.ListObserverSet;
 import org.servalproject.mid.Observer;
 import org.servalproject.mid.Serval;
+import org.servalproject.mid.Server;
 import org.servalproject.mid.networking.bluetooth.BlueToothControl;
 
 import java.util.ArrayList;
@@ -24,18 +25,25 @@ public class Networks implements Observer<NetworkInfo> {
 	public final Hotspot wifiHotspot;
 	public final ListObserverSet<NetworkInfo> observers;
 
-	public Networks(Serval serval){
+	private Networks(Serval serval){
 		this.serval = serval;
 		observers = new ListObserverSet<>(serval);
 		this.wifiClient = new WifiClient(serval);
 		this.wifiHotspot = Hotspot.getHotspot(serval);
 
+		serval.server.observers.addBackground(new Observer<Server>() {
+			@Override
+			public void updated(Server obj) {
+				onStart();
+			}
+		});
+	}
+
+	private void onStart(){
 		wifiClient.observers.addBackground(this);
 		if (wifiHotspot!=null)
 			wifiHotspot.observers.addBackground(this);
-	}
 
-	public void onStart(){
 		blueTooth = BlueToothControl.getBlueToothControl(serval, serval.selector, serval.server.getMdpPort());
 		if (blueTooth != null) {
 			blueTooth.onEnableChanged();
@@ -50,6 +58,18 @@ public class Networks implements Observer<NetworkInfo> {
 			observers.onAdd(wifiHotspot);
 		}
 	}
+
+	private static Networks instance;
+	public static void init(Serval serval){
+		if (instance!=null)
+			throw new IllegalStateException();
+		instance = new Networks(serval);
+	}
+
+	public static Networks getInstance(){
+		return instance;
+	}
+
 
 	@Override
 	public void updated(NetworkInfo obj) {

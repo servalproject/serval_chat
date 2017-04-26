@@ -14,7 +14,6 @@ import android.util.Log;
 
 import org.servalproject.mid.Serval;
 import org.servalproject.mid.networking.NetworkInfo;
-import org.servalproject.servalchat.R;
 import org.servalproject.servaldna.AbstractExternalInterface;
 import org.servalproject.servaldna.ChannelSelector;
 

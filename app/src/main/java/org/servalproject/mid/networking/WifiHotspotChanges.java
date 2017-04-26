@@ -18,7 +18,7 @@ public class WifiHotspotChanges extends BroadcastReceiver {
 		if (serval == null)
 			return;
 		String action = intent.getAction();
-		Hotspot hotspot = serval.networks.wifiHotspot;
+		Hotspot hotspot = Networks.getInstance().wifiHotspot;
 		if (hotspot == null)
 			return;
 

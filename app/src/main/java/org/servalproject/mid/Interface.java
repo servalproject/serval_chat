@@ -11,20 +11,4 @@ public class Interface {
 		this.id = id;
 		this.name = name;
 	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-
-		Interface that = (Interface) o;
-
-		return id == that.id;
-
-	}
-
-	@Override
-	public int hashCode() {
-		return id;
-	}
 }

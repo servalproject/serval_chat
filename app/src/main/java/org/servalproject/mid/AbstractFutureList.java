@@ -4,7 +4,6 @@ import org.servalproject.servaldna.AbstractJsonList;
 import org.servalproject.servaldna.ServalDInterfaceException;
 
 import java.io.IOException;
-import java.util.Comparator;
 
 /**
  * Created by jeremy on 30/01/17.

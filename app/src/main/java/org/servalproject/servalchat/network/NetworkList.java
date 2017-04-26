@@ -47,7 +47,7 @@ public class NetworkList extends ObservedRecyclerView<NetworkInfo, NetworkList.N
 		setHasFixedSize(true);
 		RecyclerHelper.createLayoutManager(this, true, false);
 		RecyclerHelper.createDivider(this);
-		setObserverSet(serval.networks.observers);
+		setObserverSet(Networks.getInstance().observers);
 	}
 
 	@Override
@@ -63,12 +63,12 @@ public class NetworkList extends ObservedRecyclerView<NetworkInfo, NetworkList.N
 
 	@Override
 	protected NetworkInfo get(int position) {
-		return serval.networks.networks.get(position);
+		return Networks.getInstance().networks.get(position);
 	}
 
 	@Override
 	protected int getCount() {
-		return serval.networks.networks.size();
+		return Networks.getInstance().networks.size();
 	}
 
 	@Override

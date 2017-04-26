@@ -16,9 +16,13 @@ public class NavHistory {
 	public final List<HistoryItem> history = new ArrayList<>();
 	private static final String TAG = "History";
 
+	private Navigation getDefault(){
+		return identity == null ? Navigation.IdentityList : Navigation.Activity;
+	}
+
 	public HistoryItem getTop() {
 		if (history.size() == 0)
-			history.add(new HistoryItem(identity == null ? Navigation.IdentityList : Navigation.Activity, null));
+			history.add(new HistoryItem(getDefault(), null));
 		return history.get(history.size() - 1);
 	}
 

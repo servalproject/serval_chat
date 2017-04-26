@@ -28,6 +28,8 @@ public class KnownPeers {
 	private final Serval serval;
 	private final Map<SubscriberId, Peer> peersBySid = new HashMap<>();
 	private int reachableCount = 0;
+	private Interface interfaces[] = new Interface[16];
+	private int interfaceCount=0;
 	public final ListObserverSet<Peer> peerListObservers;
 	public final ListObserverSet<Interface> interfaceObservers;
 	public final ObserverSet<KnownPeers> observers;
@@ -111,11 +113,24 @@ public class KnownPeers {
 	}
 
 	private void interfaceChange(RouteLink link) {
-		Interface i = new Interface(link.interface_id, link.interface_name);
-		if (link.interface_up)
+		Interface i = interfaces[link.interface_id];
+
+		if (link.interface_up){
+			if (i==null)
+				interfaceCount ++;
+			else if (i.name.equals(link.interface_name))
+				return;
+			i = interfaces[link.interface_id] = new Interface(link.interface_id, link.interface_name);
 			interfaceObservers.onAdd(i);
-		else
+		}else if (i!=null){
+			interfaces[link.interface_id] = null;
+			interfaceCount --;
 			interfaceObservers.onRemove(i);
+		}
+	}
+
+	public int getInterfaceCount(){
+		return interfaceCount;
 	}
 
 	private final AsyncResult<RouteLink> routeResults = new AsyncResult<RouteLink>() {

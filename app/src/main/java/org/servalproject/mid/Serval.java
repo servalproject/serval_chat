@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 import android.os.HandlerThread;
 import android.preference.PreferenceManager;
 
-import org.servalproject.mid.networking.Networks;
 import org.servalproject.servalchat.BuildConfig;
 import org.servalproject.servaldna.ChannelSelector;
 import org.servalproject.servaldna.ServalDClient;
@@ -51,7 +50,6 @@ public class Serval {
 		server = new Server(this, context);
 		rhizome = new Rhizome(this, context);
 		config = new Config();
-		networks = new Networks(this);
 
 		selector = new ChannelSelector();
 		knownPeers = new KnownPeers(this);
@@ -118,7 +116,6 @@ public class Serval {
 	private String restfulUsername = "ServalDClient";
 	private String restfulPassword;
 	private ServalDClient client;
-	public final Networks networks;
 	public final ChannelSelector selector;
 	final File instancePath;
 
@@ -128,7 +125,6 @@ public class Serval {
 		} catch (ServalDInterfaceException e) {
 			throw new IllegalStateException(e);
 		}
-		networks.onStart();
 		identities.onStart();
 		knownPeers.onStart();
 		rhizome.onStart();

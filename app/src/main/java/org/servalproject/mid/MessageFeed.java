@@ -2,9 +2,7 @@ package org.servalproject.mid;
 
 import org.servalproject.servaldna.AbstractJsonList;
 import org.servalproject.servaldna.ServalDInterfaceException;
-import org.servalproject.servaldna.SigningKey;
 import org.servalproject.servaldna.Subscriber;
-import org.servalproject.servaldna.meshmb.MeshMBSubscription;
 import org.servalproject.servaldna.meshmb.MessagePlyList;
 import org.servalproject.servaldna.meshmb.PlyMessage;
 

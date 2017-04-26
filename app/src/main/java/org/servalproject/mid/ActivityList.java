@@ -3,7 +3,6 @@ package org.servalproject.mid;
 import org.servalproject.servaldna.AbstractJsonList;
 import org.servalproject.servaldna.ServalDInterfaceException;
 import org.servalproject.servaldna.meshmb.MeshMBActivityMessage;
-import org.servalproject.servaldna.meshmb.MeshMBSubscription;
 
 import java.io.IOException;
 

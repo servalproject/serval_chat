@@ -1,6 +1,5 @@
 package org.servalproject.mid;
 
-import android.os.Handler;
 import android.util.Log;
 
 import org.servalproject.servaldna.RouteLink;
