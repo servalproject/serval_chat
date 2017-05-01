@@ -4,6 +4,7 @@ import android.os.AsyncTask;
 
 import org.servalproject.mid.Identity;
 import org.servalproject.mid.IdentityFeed;
+import org.servalproject.servalchat.App;
 import org.servalproject.servalchat.views.Presenter;
 import org.servalproject.servalchat.views.PresenterFactory;
 
@@ -44,11 +45,16 @@ public class MyFeedPresenter extends Presenter<MyFeed> {
 			return;
 		view.list.setAdapter(adapter);
 		setEnabled();
+		if (App.isTesting() && "".equals(view.message.getText().toString()))
+			view.message.setText("Sample Post");
 	}
 
 	public void post() {
 		MyFeed view = getView();
 		final String message = view.message.getText().toString();
+		if ("".equals(message))
+			return;
+
 		AsyncTask<Void, Void, Void> sendTask = new AsyncTask<Void, Void, Void>() {
 			Exception e;
 

@@ -101,7 +101,6 @@ public class NetworkList extends ObservedRecyclerView<NetworkInfo, NetworkList.N
 				Context context = getContext();
 				String name = info.getName(context);
 				String status = info.getStatus(context);
-				Log.v(TAG, "setItem "+name+" - "+status);
 				this.name.setText(name);
 				this.status.setText(status);
 				this.onOff.setChecked(info.isUsable());

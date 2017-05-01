@@ -98,12 +98,14 @@ android {
         debug{
             def manifestId = project.findProperty("debug.manifest.id")
             buildConfigField "String", "ManifestId", manifestId==null?"null":"\"$manifestId\"";
+            buildConfigField "String", "ReleaseType", ("\"debug\"");
         }
         release {
             minifyEnabled false
             proguardFiles.add(file('proguard-android.txt'))
             def manifestId = project.findProperty("${releaseType}.manifest.id")
             buildConfigField "String", "ManifestId", manifestId==null?"null":"\"$manifestId\"";
+            buildConfigField "String", "ReleaseType", ("\""+releaseType+"\"");
             // leave the apk unsigned for a release build if config is missing
             if (signingConfigs.release.storeFile)
                 signingConfig signingConfigs.release

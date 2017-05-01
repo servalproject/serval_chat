@@ -23,6 +23,7 @@ import android.widget.LinearLayout;
 import org.servalproject.mid.Identity;
 import org.servalproject.mid.ListObserver;
 import org.servalproject.mid.Serval;
+import org.servalproject.servalchat.App;
 import org.servalproject.servalchat.R;
 
 import java.io.File;
@@ -278,8 +279,7 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 	public boolean onMenuItemClick(MenuItem item) {
 		switch (item.getItemId()) {
 			case SHARE:
-				String testLabSetting = Settings.System.getString(this.getContentResolver(), "firebase.test.lab");
-				if ("true".equals(testLabSetting)) {
+				if (App.isTesting()){
 					showSnack("Ignoring firebase testlab", Snackbar.LENGTH_SHORT);
 					break;
 				}
@@ -313,8 +313,10 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		menu.add(Menu.NONE, SHARE, Menu.NONE, R.string.share_app)
-				.setOnMenuItemClickListener(this);
+		if (!App.isTesting()) {
+			menu.add(Menu.NONE, SHARE, Menu.NONE, R.string.share_app)
+					.setOnMenuItemClickListener(this);
+		}
 		populateMenu(menu, viewStack.peek().view);
 		super.onCreateOptionsMenu(menu);
 		return true;
@@ -399,6 +401,8 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 	}
 
 	public void showError(final Exception e) {
+		if (App.isTesting())
+			throw new CrashReportException(e);
 		showSnack(e.getMessage(), Snackbar.LENGTH_LONG, getString(R.string.crash),
 				new View.OnClickListener() {
 					@Override

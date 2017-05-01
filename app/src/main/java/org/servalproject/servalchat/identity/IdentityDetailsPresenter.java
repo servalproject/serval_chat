@@ -5,6 +5,7 @@ import android.view.View;
 
 import org.servalproject.mid.Identity;
 import org.servalproject.mid.Serval;
+import org.servalproject.servalchat.App;
 import org.servalproject.servalchat.navigation.Navigation;
 import org.servalproject.servalchat.views.Presenter;
 import org.servalproject.servalchat.views.PresenterFactory;
@@ -39,6 +40,8 @@ public class IdentityDetailsPresenter extends Presenter<IdentityDetails> {
 		} else {
 			view.sidLabel.setVisibility(View.GONE);
 			view.sid.setVisibility(View.GONE);
+			if (App.isTesting())
+				view.name.setText("Test User");
 		}
 		view.update.setEnabled(!updating);
 	}

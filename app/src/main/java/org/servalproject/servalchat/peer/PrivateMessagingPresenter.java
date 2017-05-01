@@ -12,6 +12,7 @@ import org.servalproject.mid.Identity;
 import org.servalproject.mid.KnownPeers;
 import org.servalproject.mid.MessageList;
 import org.servalproject.mid.Serval;
+import org.servalproject.servalchat.App;
 import org.servalproject.servalchat.R;
 import org.servalproject.servalchat.views.BasicViewHolder;
 import org.servalproject.servalchat.views.Presenter;
@@ -61,6 +62,8 @@ public final class PrivateMessagingPresenter extends Presenter<PrivateMessaging>
 		PrivateMessaging view = getView();
 		view.send.setEnabled(!sending);
 		view.list.setAdapter(adapter);
+		if (App.isTesting() && "".equals(view.message.getText().toString()))
+			view.message.setText("Sample Message");
 	}
 
 	@Override
