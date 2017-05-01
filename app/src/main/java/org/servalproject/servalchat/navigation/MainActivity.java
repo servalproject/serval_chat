@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
@@ -277,6 +278,11 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 	public boolean onMenuItemClick(MenuItem item) {
 		switch (item.getItemId()) {
 			case SHARE:
+				String testLabSetting = Settings.System.getString(this.getContentResolver(), "firebase.test.lab");
+				if ("true".equals(testLabSetting)) {
+					showSnack("Ignoring firebase testlab", Snackbar.LENGTH_SHORT);
+					break;
+				}
 				try {
 					Intent intent = new Intent(Intent.ACTION_SEND);
 					intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(serval.apkFile));
