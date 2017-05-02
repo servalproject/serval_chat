@@ -7,6 +7,8 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -16,6 +18,7 @@ import org.servalproject.mid.ListObserverSet;
 import org.servalproject.mid.Peer;
 import org.servalproject.mid.Serval;
 import org.servalproject.servalchat.R;
+import org.servalproject.servalchat.navigation.IHaveMenu;
 import org.servalproject.servalchat.navigation.Navigation;
 import org.servalproject.servalchat.views.ObservedRecyclerView;
 import org.servalproject.servalchat.views.RecyclerHelper;
@@ -30,7 +33,8 @@ import java.util.Set;
 /**
  * Created by jeremy on 31/05/16.
  */
-public class PeerList extends ObservedRecyclerView<Peer, PeerList.PeerHolder> {
+public class PeerList extends ObservedRecyclerView<Peer, PeerList.PeerHolder>
+		implements IHaveMenu, MenuItem.OnMenuItemClickListener {
 	private Serval serval;
 	private static final String TAG = "PeerList";
 	private List<Peer> items = new ArrayList<Peer>();
@@ -73,6 +77,24 @@ public class PeerList extends ObservedRecyclerView<Peer, PeerList.PeerHolder> {
 	@Override
 	public long getId(Peer item) {
 		return item.getId();
+	}
+
+	private static final int MAP = 1;
+
+	@Override
+	public void populateItems(Menu menu) {
+		menu.add(Menu.NONE, MAP, Menu.NONE, R.string.peer_map)
+				.setOnMenuItemClickListener(this);
+	}
+
+	@Override
+	public boolean onMenuItemClick(MenuItem menuItem) {
+		switch(menuItem.getItemId()) {
+			case MAP:
+				activity.go(identity, Navigation.PeerMap, null);
+				return true;
+		}
+		return false;
 	}
 
 	public class PeerHolder extends RecyclerView.ViewHolder implements View.OnClickListener {

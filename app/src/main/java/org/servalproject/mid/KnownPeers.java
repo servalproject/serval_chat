@@ -1,6 +1,7 @@
 package org.servalproject.mid;
 
 import android.os.Bundle;
+import android.util.Log;
 
 import org.servalproject.servaldna.AbstractId;
 import org.servalproject.servaldna.AsyncResult;
@@ -85,6 +86,22 @@ public class KnownPeers {
 		return getPeer(getSubscriber(args));
 	}
 
+	private Peer getPeer(SubscriberId sid){
+		if (sid==null)
+			return null;
+		Peer p = peersBySid.get(sid);
+		if (p == null) {
+			synchronized (this) {
+				p = peersBySid.get(sid);
+				if (p == null) {
+					p = new Peer(serval, new Subscriber(sid, null, false));
+					peersBySid.put(sid, p);
+				}
+			}
+		}
+		return p;
+	}
+
 	public Peer getPeer(Subscriber subscriber) {
 		boolean isNew = false;
 
@@ -129,6 +146,15 @@ public class KnownPeers {
 		}
 	}
 
+	public List<Interface> getActiveInterfaces(){
+		List<Interface> ret = new ArrayList<>();
+		for(int i=0;i<interfaces.length;i++){
+			if (interfaces[i]!=null)
+				ret.add(interfaces[i]);
+		}
+		return ret;
+	}
+
 	public int getInterfaceCount(){
 		return interfaceCount;
 	}
@@ -143,7 +169,15 @@ public class KnownPeers {
 			}
 			Peer p = getPeer(nextResult.subscriber);
 			boolean wasReachable = p.isReachable();
-			p.update(nextResult);
+
+			Peer priorHop = getPeer(nextResult.prior_hop == null?
+					nextResult.next_hop : nextResult.prior_hop
+			);
+			Interface netInterface =
+					(nextResult.interface_id>=0 && nextResult.interface_id < interfaces.length) ?
+							interfaces[nextResult.interface_id] : null;
+			p.update(nextResult, netInterface, priorHop);
+			Log.v(TAG, "Updated peer "+p);
 			peerListObservers.onUpdate(p);
 			boolean nowReachable = p.isReachable();
 			if (nowReachable != wasReachable) {

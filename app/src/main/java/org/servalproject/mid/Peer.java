@@ -5,6 +5,7 @@ import android.util.Log;
 import org.servalproject.servaldna.RouteLink;
 import org.servalproject.servaldna.ServalDCommand;
 import org.servalproject.servaldna.Subscriber;
+import org.servalproject.servaldna.SubscriberId;
 
 /**
  * Created by jeremy on 4/05/16.
@@ -52,9 +53,23 @@ public final class Peer implements Comparable<Peer> {
 	}
 
 	RouteLink link;
+	Interface netInterface;
+	Peer priorHop;
 
 	public boolean isReachable() {
 		return link != null;
+	}
+
+	public int getHopCount(){
+		return link != null ? link.hop_count : -1;
+	}
+
+	public Peer getPriorHop(){
+		return isReachable() ? priorHop : null;
+	}
+
+	public Interface getNetInterface(){
+		return netInterface;
 	}
 
 	public boolean isContact() {
@@ -65,8 +80,10 @@ public final class Peer implements Comparable<Peer> {
 		return false;
 	}
 
-	void update(RouteLink route) {
+	void update(RouteLink route, Interface netInterface, Peer priorHop) {
 		link = route.isReachable() ? route : null;
+		this.netInterface = netInterface;
+		this.priorHop = priorHop;
 		Log.v(TAG, "Updated route " + route.toString());
 		observers.onUpdate();
 	}
@@ -82,6 +99,8 @@ public final class Peer implements Comparable<Peer> {
 				"subscriber=" + subscriber +
 				", lookup=" + lookup +
 				", link=" + link +
+				", interface=" + (netInterface==null?"None":netInterface.name) +
+				", prior=" + (priorHop==null?"None":priorHop.subscriber.sid.abbreviation()) +
 				'}';
 	}
 

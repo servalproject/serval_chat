@@ -69,4 +69,5 @@
     <string name="hotspot_closed">On (%1$s, Closed)</string>
 
     <string name="wifi_client">Wi-Fi</string>
+    <string name="peer_map">Map</string>
 </resources>
