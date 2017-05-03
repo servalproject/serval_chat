@@ -15,6 +15,7 @@ public class ViewState {
 	private IContainerView container;
 	private ILifecycle lifecycle;
 	public final View view;
+	private View firstInput = null;
 
 	public IContainerView getContainer() {
 		return container;
@@ -24,11 +25,17 @@ public class ViewState {
 		return lifecycle;
 	}
 
+	public View getTextInput(){
+		return firstInput;
+	}
+
 	private void attach(MainActivity activity, Navigation key, Identity identity, Bundle args, View view) {
 		if (view instanceof INavigate) {
 			INavigate navigate = (INavigate) view;
 			lifecycle = navigate.onAttach(activity, key, identity, args);
 		}
+		if (view.onCheckIsTextEditor() && firstInput == null)
+			firstInput = view;
 		if (view instanceof IContainerView)
 			container = (IContainerView) view;
 		if (view instanceof ViewGroup) {

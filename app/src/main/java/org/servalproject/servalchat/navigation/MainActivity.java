@@ -1,11 +1,11 @@
 package org.servalproject.servalchat.navigation;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
@@ -18,6 +18,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.LinearLayout;
 
 import org.servalproject.mid.Identity;
@@ -26,7 +27,6 @@ import org.servalproject.mid.Serval;
 import org.servalproject.servalchat.App;
 import org.servalproject.servalchat.R;
 
-import java.io.File;
 import java.util.Stack;
 
 public class MainActivity extends AppCompatActivity implements IContainerView, MenuItem.OnMenuItemClickListener {
@@ -37,10 +37,12 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 	private NavHistory history;
 	private Serval serval;
 	private Identity identity;
+	private InputMethodManager imm;
 
 	@Override
 	protected void onCreate(@Nullable Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		imm = (InputMethodManager)getSystemService(Activity.INPUT_METHOD_SERVICE);
 		serval = Serval.getInstance();
 		setContentView(R.layout.main);
 		rootLayout = (LinearLayout) findViewById(R.id.root_layout);
@@ -154,7 +156,6 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 		popViewsTo(i, false);
 
 		// add views (& locate containers?)
-		LayoutInflater inflater = LayoutInflater.from(this);
 		ViewState parent = viewStack.isEmpty() ? null : viewStack.get(viewStack.size() - 1);
 		while (n != null) {
 			IContainerView container = (parent == null) ? this : parent.getContainer();
@@ -174,6 +175,14 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 				ActionBar.DISPLAY_SHOW_HOME | (history.canGoBack() ? ActionBar.DISPLAY_HOME_AS_UP : 0),
 				ActionBar.DISPLAY_SHOW_HOME | ActionBar.DISPLAY_HOME_AS_UP);
 		supportInvalidateOptionsMenu();
+
+		View firstInput = null;
+		for(ViewState state : viewStack){
+			if ((firstInput = state.getTextInput())!=null)
+				break;
+		}
+		if (firstInput == null)
+			imm.hideSoftInputFromWindow(findViewById(android.R.id.content).getWindowToken(), 0);
 	}
 
 	public static Intent getIntentFor(Context context, Identity identity, Navigation key, Bundle args) {

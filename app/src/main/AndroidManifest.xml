@@ -44,16 +44,25 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".navigation.MainActivity"
-            android:launchMode="standard">
+            android:launchMode="standard"
+            android:windowSoftInputMode="stateHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".navigation.Id1" android:taskAffinity="org.servalproject.id1" />
-        <activity android:name=".navigation.Id2" android:taskAffinity="org.servalproject.id2" />
-        <activity android:name=".navigation.Id3" android:taskAffinity="org.servalproject.id3" />
-        <activity android:name=".navigation.Id4" android:taskAffinity="org.servalproject.id4" />
+        <activity android:name=".navigation.Id1"
+                  android:taskAffinity="org.servalproject.id1"
+                  android:windowSoftInputMode="stateHidden" />
+        <activity android:name=".navigation.Id2"
+                  android:taskAffinity="org.servalproject.id2"
+                  android:windowSoftInputMode="stateHidden" />
+        <activity android:name=".navigation.Id3"
+                  android:taskAffinity="org.servalproject.id3"
+                  android:windowSoftInputMode="stateHidden" />
+        <activity android:name=".navigation.Id4"
+                  android:taskAffinity="org.servalproject.id4"
+                  android:windowSoftInputMode="stateHidden" />
 
         <service android:name=".ForegroundService" android:enabled="true"/>
 

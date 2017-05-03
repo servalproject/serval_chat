@@ -68,6 +68,9 @@ public class NavPageAdapter extends PagerAdapter
 	public void setPrimaryItem(ViewGroup container, int position, Object object) {
 		super.setPrimaryItem(container, position, object);
 		pageChanged(position);
+		View input = views[position].getTextInput();
+		if (input!=null)
+			input.requestFocus();
 	}
 
 	@Override
