@@ -124,8 +124,8 @@ public class Messaging {
 
 	private void putSubscription(MessageFeed feed, boolean blocked){
 		SubscriptionState state = blocked ? SubscriptionState.Blocked : SubscriptionState.Followed;
-		subscriptions.put(feed.id, state);
-		subscriptionsBySid.put(feed.id.sid, state);
+		subscriptions.put(feed.getId(), state);
+		subscriptionsBySid.put(feed.getId().sid, state);
 		refresh();
 	}
 
@@ -138,8 +138,8 @@ public class Messaging {
 	}
 
 	void ignored(MessageFeed feed){
-		subscriptions.remove(feed.id);
-		subscriptionsBySid.remove(feed.id.sid);
+		subscriptions.remove(feed.getId());
+		subscriptionsBySid.remove(feed.getId().sid);
 		refresh();
 	}
 

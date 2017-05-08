@@ -31,10 +31,11 @@ public abstract class AbstractGrowingList<T, E extends Exception>
 		if (pastList == null)
 			pastList = openPast();
 
-		T item = pastList.next();
+		T item = (pastList == null) ? null : pastList.next();
 		if (item == null) {
 			hasMore = false;
-			pastList.close();
+			if (pastList != null)
+				pastList.close();
 			pastList = null;
 		}
 		addingPastItem(item);

@@ -11,8 +11,6 @@ import org.servalproject.servaldna.SubscriberId;
  * Created by jeremy on 4/05/16.
  */
 public final class Peer implements Comparable<Peer> {
-	private static final String TAG = "Peer";
-
 	private static long nextId = 0;
 	private final long id;
 
@@ -33,6 +31,7 @@ public final class Peer implements Comparable<Peer> {
 		if (this.subscriber.sid.equals(subscriber.sid)
 				&& this.subscriber.signingKey == null) {
 			this.subscriber = subscriber;
+			observers.onUpdate();
 		}
 	}
 
@@ -48,7 +47,6 @@ public final class Peer implements Comparable<Peer> {
 
 	void update(ServalDCommand.LookupResult result) {
 		lookup = result;
-		Log.v(TAG, "Updated details " + result.toString());
 		observers.onUpdate();
 	}
 
@@ -84,7 +82,6 @@ public final class Peer implements Comparable<Peer> {
 		link = route.isReachable() ? route : null;
 		this.netInterface = netInterface;
 		this.priorHop = priorHop;
-		Log.v(TAG, "Updated route " + route.toString());
 		observers.onUpdate();
 	}
 
@@ -130,8 +127,6 @@ public final class Peer implements Comparable<Peer> {
 	}
 
 	public MessageFeed getFeed() {
-		if (subscriber.signingKey == null)
-			return null;
 		return new MessageFeed(Serval.getInstance(), this);
 	}
 

@@ -77,12 +77,14 @@ public abstract class AbstractFutureList<T, E extends Exception>
 			try {
 				while (polling) {
 					AbstractJsonList<T, E> list = futureList = openFuture();
-					T item;
-					while (polling && (item = list.next()) != null) {
-						addingFutureItem(item);
+					if (list != null) {
+						T item;
+						while (polling && (item = list.next()) != null) {
+							addingFutureItem(item);
+						}
+						// on graceful close, restart
+						list.close();
 					}
-					// on graceful close, restart
-					list.close();
 					futureList = null;
 				}
 			} catch (IOException e) {

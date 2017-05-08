@@ -8,6 +8,7 @@ import org.servalproject.mid.Identity;
 import org.servalproject.mid.KnownPeers;
 import org.servalproject.mid.MessageFeed;
 import org.servalproject.mid.Messaging;
+import org.servalproject.mid.Observer;
 import org.servalproject.mid.Peer;
 import org.servalproject.mid.Serval;
 import org.servalproject.servalchat.R;
@@ -27,6 +28,22 @@ public class PeerFeedPresenter extends Presenter<PeerFeed> {
 	private Peer peer;
 	private MessageFeed feed;
 	private boolean busy;
+
+	private Observer<Peer> peerObserver = new Observer<Peer>() {
+		@Override
+		public void updated(Peer obj) {
+			// if we discover a peer signing key, reset our adapter
+			if (obj.getSubscriber().signingKey != null && (feed == null || feed.getId() == null)){
+				feed = peer.getFeed();
+				adapter = new FeedAdapter(feed);
+				PeerFeed view = getView();
+				if (view != null) {
+					view.list.setAdapter(adapter);
+					view.activity.supportInvalidateOptionsMenu();
+				}
+			}
+		}
+	};
 
 	protected PeerFeedPresenter(PresenterFactory<PeerFeed, ?> factory, String key, Identity identity) {
 		super(factory, key, identity);
@@ -75,19 +92,20 @@ public class PeerFeedPresenter extends Presenter<PeerFeed> {
 	public void onVisible() {
 		super.onVisible();
 		adapter.onVisible();
+		peer.observers.addUI(this.peerObserver);
 	}
 
 	@Override
 	public void onHidden() {
 		super.onHidden();
 		adapter.onHidden();
+		peer.observers.removeUI(this.peerObserver);
 	}
 
-
 	public Messaging.SubscriptionState getSubscriptionState(){
-		if (feed == null)
+		if (feed == null || feed.getId() == null)
 			return null;
-		return identity.messaging.getSubscriptionState(feed.id);
+		return identity.messaging.getSubscriptionState(feed.getId());
 	}
 
 	public void subscribe(final boolean subscribe){
@@ -105,10 +123,12 @@ public class PeerFeedPresenter extends Presenter<PeerFeed> {
 
 				if (e != null)
 					view.activity.showError(e);
-				else
+				else {
 					view.activity.showSnack(
 							subscribe ? R.string.followed : R.string.ignored,
 							Snackbar.LENGTH_SHORT);
+					view.activity.supportInvalidateOptionsMenu();
+				}
 			}
 
 			@Override

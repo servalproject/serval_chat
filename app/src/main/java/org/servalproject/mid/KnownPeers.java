@@ -1,7 +1,6 @@
 package org.servalproject.mid;
 
 import android.os.Bundle;
-import android.util.Log;
 
 import org.servalproject.servaldna.AbstractId;
 import org.servalproject.servaldna.AsyncResult;
@@ -23,7 +22,6 @@ import java.util.Map;
  */
 public class KnownPeers {
 
-	private static final String TAG = "Peers";
 	private MdpDnaLookup dnaLookup;
 	private MdpRoutingChanges routingChanges;
 	private final Serval serval;
@@ -177,7 +175,6 @@ public class KnownPeers {
 					(nextResult.interface_id>=0 && nextResult.interface_id < interfaces.length) ?
 							interfaces[nextResult.interface_id] : null;
 			p.update(nextResult, netInterface, priorHop);
-			Log.v(TAG, "Updated peer "+p);
 			peerListObservers.onUpdate(p);
 			boolean nowReachable = p.isReachable();
 			if (nowReachable != wasReachable) {

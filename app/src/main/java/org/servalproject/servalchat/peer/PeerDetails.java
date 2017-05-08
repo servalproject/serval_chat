@@ -25,7 +25,7 @@ import org.servalproject.servaldna.AbstractId;
  * Created by jeremy on 1/08/16.
  */
 public class PeerDetails extends LinearLayout
-		implements INavigate, IHaveMenu, MenuItem.OnMenuItemClickListener, ILifecycle, Observer<Peer> {
+		implements INavigate, ILifecycle, Observer<Peer> {
 
 	private MainActivity activity;
 	private TextView name;
@@ -53,38 +53,6 @@ public class PeerDetails extends LinearLayout
 		}
 
 		return this;
-	}
-
-	private static final int IGNORE = 1;
-	private static final int BLOCK = 2;
-	private static final int ADD = 3;
-
-	@Override
-	public void populateItems(Menu menu) {
-		menu.add(Menu.NONE, ADD, Menu.NONE, R.string.add_contact)
-				.setOnMenuItemClickListener(this);
-		menu.add(Menu.NONE, IGNORE, Menu.NONE, R.string.ignore_contact)
-				.setOnMenuItemClickListener(this);
-		menu.add(Menu.NONE, BLOCK, Menu.NONE, R.string.block_contact)
-				.setOnMenuItemClickListener(this);
-	}
-
-	@Override
-	public boolean onMenuItemClick(MenuItem item) {
-		switch (item.getItemId()) {
-			case BLOCK:
-				activity.showSnack("TODO, block contact", Snackbar.LENGTH_SHORT);
-				break;
-			case IGNORE:
-				activity.showSnack("TODO, ignore contact", Snackbar.LENGTH_SHORT);
-				break;
-			case ADD:
-				activity.showSnack("TODO, remember contact", Snackbar.LENGTH_SHORT);
-				break;
-			default:
-				return false;
-		}
-		return true;
 	}
 
 	@Override

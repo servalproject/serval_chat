@@ -46,12 +46,12 @@ public class Identity {
 	}
 
 	public void follow(MessageFeed feed) throws ServalDInterfaceException, IOException {
-		serval.getResultClient().meshmbFollow(subscriber, feed.id.signingKey);
+		serval.getResultClient().meshmbFollow(subscriber, feed.getId().signingKey);
 		messaging.followed(feed);
 	}
 
 	public void ignore(MessageFeed feed) throws ServalDInterfaceException, IOException {
-		serval.getResultClient().meshmbIgnore(subscriber, feed.id.signingKey);
+		serval.getResultClient().meshmbIgnore(subscriber, feed.getId().signingKey);
 		messaging.ignored(feed);
 	}
 
