@@ -1,16 +1,19 @@
 package org.servalproject.servalchat.peer;
 
 import android.content.Context;
-import android.graphics.Camera;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.View;
 
 import org.servalproject.mid.Identity;
@@ -18,21 +21,18 @@ import org.servalproject.mid.Interface;
 import org.servalproject.mid.ListObserver;
 import org.servalproject.mid.Peer;
 import org.servalproject.mid.Serval;
+import org.servalproject.servalchat.R;
 import org.servalproject.servalchat.navigation.ILifecycle;
 import org.servalproject.servalchat.navigation.INavigate;
 import org.servalproject.servalchat.navigation.MainActivity;
 import org.servalproject.servalchat.navigation.Navigation;
-import org.servalproject.servaldna.Subscriber;
 import org.servalproject.servaldna.SubscriberId;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static android.R.attr.factor;
 
 /**
  * Created by jeremy on 1/05/17.
@@ -43,12 +43,16 @@ public class PeerMap extends View implements INavigate, ILifecycle{
 	private int gen=-1;
 	private List<DrawNode> drawNodes = new ArrayList<>();
 	private Map<SubscriberId, DrawPeer> peerMap = new HashMap<>();
-	private Camera camera;
+	private float scale=-999;
+	private float translateX=0;
+	private float translateY=0;
 	private Paint circlePaint;
 	private Paint linePaint;
 	private Paint labelPaint;
-	private Rect graphBounds;
+	private RectF graphBounds;
 	private static final String TAG = "PeerMap";
+	private GestureDetector panDetector;
+	private ScaleGestureDetector scaleDetector;
 
 	public PeerMap(Context context, @Nullable AttributeSet attrs) {
 		super(context, attrs);
@@ -68,9 +72,26 @@ public class PeerMap extends View implements INavigate, ILifecycle{
 		labelPaint.setSubpixelText(true);
 		labelPaint.setAntiAlias(true);
 
-		camera = new Camera();
 		Self.angle = 0;
 		Self.arc = (float) (Math.PI * 2);
+		scaleDetector = new ScaleGestureDetector(context, new ScaleGestureDetector.SimpleOnScaleGestureListener(){
+			@Override
+			public boolean onScale(ScaleGestureDetector detector) {
+				float scaleBy = detector.getScaleFactor();
+				scale *= scaleBy;
+				invalidate();
+				return true;
+			}
+		});
+		panDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener(){
+			@Override
+			public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+				translateX += distanceX / scale;
+				translateY += distanceY / scale;
+				invalidate();
+				return true;
+			}
+		});
 	}
 
 	@Override
@@ -83,16 +104,31 @@ public class PeerMap extends View implements INavigate, ILifecycle{
 		super.onDraw(canvas);
 		recalcFinalPositions();
 		moveNodes();
+		canvas.save();
 
 		float xScale = (float)canvas.getWidth() / graphBounds.width();
 		float yScale = (float)canvas.getHeight() / graphBounds.height();
-		float scale = ((xScale > yScale) ? yScale : xScale) * 0.95f;
-		if (scale > 2)
-			scale = 2;
+		float idealScale = ((xScale > yScale) ? yScale : xScale) * 0.95f;
+		if (idealScale > 2)
+			idealScale = 2;
 
-		canvas.save();
-		canvas.translate(canvas.getWidth()/2 - graphBounds.centerX()*scale, canvas.getHeight()/2 - graphBounds.centerY()*scale);
+		// clip scale to reasonable bounds
+		if (scale < idealScale)
+			scale = idealScale;
+		if (scale > 5)
+			scale = 5;
+
+		// clip translation to the visible edges of the graph
+		float boundx = Math.max((graphBounds.width() - canvas.getWidth() / scale)/2,0);
+		float boundy = Math.max((graphBounds.height() - canvas.getHeight() / scale)/2,0);
+		float cx = graphBounds.centerX();
+		float cy = graphBounds.centerY();
+		translateX = Math.max(Math.min(translateX, cx + boundx), cx - boundx);
+		translateY = Math.max(Math.min(translateY, cy + boundy), cy - boundy);
+
+		canvas.translate(canvas.getWidth()/2 - translateX * scale, canvas.getHeight()/2 - translateY * scale);
 		canvas.scale(scale, scale);
+
 		for(DrawNode node : drawNodes) {
 			if (node.visible())
 				node.draw(canvas);
@@ -230,7 +266,7 @@ public class PeerMap extends View implements INavigate, ILifecycle{
 	private void moveNodes(){
 		// TODO animate each node to move towards it's destx/desty
 
-		Rect bounds = new Rect();
+		RectF bounds = new RectF();
 
 		for(DrawNode n : drawNodes){
 			if (n.visible()) {
@@ -243,12 +279,18 @@ public class PeerMap extends View implements INavigate, ILifecycle{
 		graphBounds = bounds;
 	}
 
+	@Override
+	public boolean onTouchEvent(MotionEvent event) {
+		boolean scaled = scaleDetector.onTouchEvent(event);
+		return panDetector.onTouchEvent(event) || scaled || super.onTouchEvent(event);
+	}
+
 	private abstract class DrawNode implements Comparable<DrawNode>{
 		float destX;
 		float destY;
 		float x;
 		float y;
-		Rect bounds;
+		RectF bounds;
 
 		double angle;
 		double arc;
@@ -260,14 +302,16 @@ public class PeerMap extends View implements INavigate, ILifecycle{
 		abstract boolean visible();
 
 		void calcBounds(){
-			bounds = new Rect();
+			bounds = new RectF();
 			String label = getLabel();
 			if (label!=null && !"".equals(label)) {
-				labelPaint.getTextBounds(label, 0, label.length(), bounds);
+				Rect textBounds = new Rect();
+				labelPaint.getTextBounds(label, 0, label.length(), textBounds);
+				bounds.set(textBounds);
 				bounds.offset(- bounds.width()/2, 12 + bounds.height());
 			}
 			bounds.union(-10,-10,10,10);
-			bounds.offset((int)x, (int)y);
+			bounds.offset(x, y);
 		}
 		void draw(Canvas canvas) {
 			circlePaint.setColor(getColor());
@@ -326,7 +370,7 @@ public class PeerMap extends View implements INavigate, ILifecycle{
 
 		@Override
 		String getLabel() {
-			return "Self";
+			return PeerMap.this.getResources().getString(R.string.map_self);
 		}
 
 		@Override
