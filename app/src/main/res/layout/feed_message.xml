@@ -5,9 +5,11 @@
               android:layout_height="wrap_content">
 
     <org.servalproject.servalchat.views.TimestampView
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
+        android:layout_gravity="right"
+        android:textAlignment="gravity"
         android:gravity="right"
         android:id="@+id/age"/>
 

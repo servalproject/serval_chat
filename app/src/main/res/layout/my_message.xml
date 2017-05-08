@@ -9,13 +9,16 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:id="@+id/message"
-        android:layout_gravity="left"/>
+        android:layout_gravity="left"
+        />
 
     <org.servalproject.servalchat.views.TimestampView
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:gravity="right"
+        android:layout_gravity="right"
+        android:textAlignment="gravity"
         android:id="@+id/age"/>
 
 </LinearLayout>
