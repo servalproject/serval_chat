@@ -3,6 +3,7 @@ package org.servalproject.servalchat;
 import android.app.Application;
 import android.provider.Settings;
 
+import org.servalproject.mid.SelfUpdater;
 import org.servalproject.mid.Serval;
 import org.servalproject.mid.networking.Networks;
 
@@ -31,5 +32,6 @@ public class App extends Application {
 		Notifications.init(serval, this);
 		if (testing && "alpha".equals(BuildConfig.ReleaseType))
 			SampleData.init(serval);
+		SelfUpdater.init(serval);
 	}
 }

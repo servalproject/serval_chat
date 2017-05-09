@@ -28,10 +28,6 @@ public class Serval {
 
 	private static final String TAG = "Serval";
 
-	static final int START = 1;
-	static final int CPU_LOCK = 2;
-	static final int SERVER_UP = 3;
-
 	private Serval(Context context) throws IOException {
 		this.context = context;
 		this.apkFile = new File(context.getPackageCodePath());
@@ -54,8 +50,6 @@ public class Serval {
 		selector = new ChannelSelector();
 		knownPeers = new KnownPeers(this);
 		identities = new Identities(this);
-
-		selfUpdater = SelfUpdater.getSelfUpdater(this);
 
 		// Do the rest of our startup process on a background thread
 		backgroundHandler.post(new Runnable() {
@@ -110,7 +104,6 @@ public class Serval {
 	public final KnownPeers knownPeers;
 	public final Identities identities;
 	public final SharedPreferences settings;
-	private final SelfUpdater selfUpdater;
 	private final BlockingQueue<Runnable> backgroundQueue;
 	private final ThreadPoolExecutor backgroundThreads;
 	private String restfulUsername = "ServalDClient";

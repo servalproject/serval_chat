@@ -19,11 +19,15 @@ public class SelfUpdater {
 	private final BundleId ourBundle;
 	private final Serval serval;
 	private boolean inserted = false;
+	private static final String TAG = "SelfUpdater";
 
-	static SelfUpdater getSelfUpdater(Serval serval){
+	private static SelfUpdater instance;
+	public static void init(Serval serval){
 		if (BuildConfig.ManifestId==null)
-			return null;
-		return new SelfUpdater(serval);
+			return;
+		if (instance != null)
+			throw new IllegalStateException();
+		instance = new SelfUpdater(serval);
 	}
 
 	private SelfUpdater(Serval servalinst){
@@ -43,8 +47,15 @@ public class SelfUpdater {
 			public void updated(Rhizome obj) {
 				if (!obj.isEnabled())
 					return;
+				if (inserted)
+					return;
 
-				rhizomeInsert();
+				serval.runOnThreadPool(new Runnable() {
+					@Override
+					public void run() {
+						rhizomeInsert();
+					}
+				});
 			}
 		});
 
@@ -52,7 +63,7 @@ public class SelfUpdater {
 			@Override
 			public void added(RhizomeListBundle obj) {
 				if (obj.manifest.id.equals(ourBundle)){
-
+					// TODO test if we should upgrade
 				}
 			}
 
@@ -73,12 +84,7 @@ public class SelfUpdater {
 		});
 	}
 
-	private final String TAG = "SelfUpdater";
-
 	private void rhizomeInsert(){
-		if (inserted)
-			return;
-
 		try {
 			ServalDCommand.ManifestResult r =
 					ServalDCommand.rhizomeImportZipBundle(serval.apkFile);
@@ -89,6 +95,7 @@ public class SelfUpdater {
 		SharedPreferences.Editor e = serval.settings.edit();
 		e.putString("apk_added", BuildConfig.BuildStamp);
 		e.apply();
+		// only try once, even if we failed
 		inserted = true;
 	}
 }
