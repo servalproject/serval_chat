@@ -69,8 +69,7 @@ public class Navigation {
 	public static final Navigation Main = new Navigation("Main", R.string.app_name, R.layout.main_tabs);
 	public static final Navigation IdentityDetails = new Navigation("Details", R.string.identity_details, R.layout.identity_details, null, Main);
 	public static final Navigation MyFeed = new Navigation("MyFeed", R.string.my_feed, R.layout.my_feed, null, Main);
-	public static final Navigation Activity = new Navigation("Activity", R.string.activity, R.layout.my_activity, null, Main);
-	public static final Navigation AllFeeds = new Navigation("AllFeeds", R.string.all_feeds, R.layout.feed_list, Activity, null);
+	public static final Navigation AllFeeds = new Navigation("AllFeeds", R.string.all_feeds, R.layout.feed_list, MyFeed, null);
 	public static final Navigation Inbox = new Navigation("Inbox", R.string.conversation_list, R.layout.conversation_list, null, Main);
 	public static final Navigation Requests = new Navigation("Requests", R.string.requests, R.layout.conversation_list, Inbox, null);
 	public static final Navigation Blocked = new Navigation("Blocked", R.string.blocked, R.layout.conversation_list, Inbox, null);

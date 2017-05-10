@@ -17,7 +17,7 @@ public class NavHistory {
 	private static final String TAG = "History";
 
 	private Navigation getDefault(){
-		return identity == null ? Navigation.IdentityList : Navigation.Activity;
+		return identity == null ? Navigation.IdentityList : Navigation.MyFeed;
 	}
 
 	public HistoryItem getTop() {

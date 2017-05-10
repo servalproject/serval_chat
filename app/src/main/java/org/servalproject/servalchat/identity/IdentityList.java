@@ -126,7 +126,7 @@ public class IdentityList
 
 		@Override
 		public void onClick(View v) {
-			activity.go(id, Navigation.Activity, null);
+			activity.go(id, Navigation.MyFeed, null);
 		}
 	}
 }

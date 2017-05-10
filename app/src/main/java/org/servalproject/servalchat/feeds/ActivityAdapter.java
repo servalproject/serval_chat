@@ -19,9 +19,9 @@ import org.servalproject.servaldna.meshmb.MeshMBActivityMessage;
  */
 
 public class ActivityAdapter extends ScrollingAdapter<MeshMBActivityMessage, ActivityAdapter.MessageHolder> {
-	private final ActivityPresenter presenter;
+	private final MyFeedPresenter presenter;
 
-	public ActivityAdapter(IObservableList<MeshMBActivityMessage, ?> list, ActivityPresenter presenter) {
+	public ActivityAdapter(IObservableList<MeshMBActivityMessage, ?> list, MyFeedPresenter presenter) {
 		super(list);
 		this.presenter = presenter;
 	}
@@ -42,11 +42,6 @@ public class ActivityAdapter extends ScrollingAdapter<MeshMBActivityMessage, Act
 		super.insertedItem(item, position);
 		if (position+1<getItemCount())
 			notifyItemChanged(position +1);
-	}
-
-	@Override
-	protected void addItem(int index, MeshMBActivityMessage item) {
-		super.addItem(index, item);
 	}
 
 	@Override
