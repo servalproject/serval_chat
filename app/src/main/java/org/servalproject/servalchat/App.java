@@ -32,6 +32,6 @@ public class App extends Application {
 		Notifications.init(serval, this);
 		if (testing && "alpha".equals(BuildConfig.ReleaseType))
 			SampleData.init(serval);
-		SelfUpdater.init(serval);
+		SelfUpdater.init(serval, this);
 	}
 }

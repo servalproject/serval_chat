@@ -71,4 +71,7 @@
     <string name="wifi_client">Wi-Fi</string>
     <string name="peer_map">Map</string>
     <string name="map_self">You</string>
+
+    <string name="new_version_title">Software Update</string>
+    <string name="new_version_message">A new version of Serval Chat is available</string>
 </resources>
