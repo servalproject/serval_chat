@@ -29,10 +29,10 @@ public abstract class Presenter<V extends View> implements ILifecycle {
 	public final void takeView(V view) {
 		this.view = view;
 		if (view != null)
-			bind();
+			bind(view);
 	}
 
-	protected void bind() {
+	protected void bind(V view) {
 	}
 
 	protected void save(Bundle config) {
@@ -49,6 +49,8 @@ public abstract class Presenter<V extends View> implements ILifecycle {
 
 	@Override
 	public void onDetach(boolean changingConfig) {
+		if (factory == null)
+			return;
 		takeView(null);
 		if (!changingConfig) {
 			factory.release(this);

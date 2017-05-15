@@ -18,12 +18,19 @@ public class NavPageAdapter extends PagerAdapter
 	final HistoryItem[] screens;
 	private final ViewState[] views;
 	private boolean visible = false;
+	private ViewPager pager;
 
 	public NavPageAdapter(MainActivity activity, Identity identity, HistoryItem[] items) {
 		this.activity = activity;
 		this.identity = identity;
 		this.screens = items;
 		this.views = new ViewState[this.screens.length];
+	}
+
+	public void setViewPager(ViewPager pager){
+		this.pager = pager;
+		pager.setAdapter(this);
+		pager.addOnPageChangeListener(this);
 	}
 
 	@Override
@@ -49,6 +56,8 @@ public class NavPageAdapter extends PagerAdapter
 
 	@Override
 	public void destroyItem(ViewGroup container, int position, Object object) {
+		if (views[position] == null || views[position] != object)
+			return;
 		ViewState state = ((ViewState) object);
 		ILifecycle lifecycle = state.getLifecycle();
 		if (lifecycle != null) {
@@ -100,13 +109,7 @@ public class NavPageAdapter extends PagerAdapter
 
 	@Override
 	public void onDetach(boolean configChange) {
-		for (ViewState state : views) {
-			if (state == null)
-				continue;
-			ILifecycle lifecycle = state.getLifecycle();
-			if (lifecycle != null)
-				lifecycle.onDetach(configChange);
-		}
+		pager.setAdapter(null);
 	}
 
 	@Override

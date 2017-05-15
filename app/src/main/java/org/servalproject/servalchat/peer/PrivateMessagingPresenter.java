@@ -58,8 +58,7 @@ public final class PrivateMessagingPresenter extends Presenter<PrivateMessaging>
 	};
 
 	@Override
-	protected void bind() {
-		PrivateMessaging view = getView();
+	protected void bind(PrivateMessaging view) {
 		view.send.setEnabled(!sending);
 		view.list.setAdapter(adapter);
 		if (App.isTesting() && "".equals(view.message.getText().toString()))
@@ -180,7 +179,8 @@ public final class PrivateMessagingPresenter extends Presenter<PrivateMessaging>
 				super.onPreExecute();
 				sending = true;
 				PrivateMessaging view = getView();
-				view.send.setEnabled(false);
+				if (view!=null)
+					view.send.setEnabled(false);
 				markRead();
 			}
 

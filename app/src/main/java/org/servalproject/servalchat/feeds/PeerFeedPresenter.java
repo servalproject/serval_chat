@@ -70,8 +70,7 @@ public class PeerFeedPresenter extends Presenter<PeerFeed> {
 	};
 
 	@Override
-	protected void bind() {
-		PeerFeed feed = getView();
+	protected void bind(PeerFeed feed) {
 		feed.list.setAdapter(adapter);
 	}
 

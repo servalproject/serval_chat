@@ -30,9 +30,8 @@ public class PublicFeedsPresenter extends Presenter<PublicFeedsList> {
 	};
 
 	@Override
-	protected void bind() {
-		getView().setAdapter(adapter);
-		super.bind();
+	protected void bind(PublicFeedsList view) {
+		view.setAdapter(adapter);
 	}
 
 	@Override

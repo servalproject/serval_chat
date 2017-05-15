@@ -48,10 +48,7 @@ public class MyFeedPresenter extends Presenter<MyFeed> {
 	}
 
 	@Override
-	protected void bind() {
-		MyFeed view = getView();
-		if (view == null)
-			return;
+	protected void bind(MyFeed view) {
 		view.list.setAdapter(adapter);
 		setEnabled();
 		if (App.isTesting() && "".equals(view.message.getText().toString()))
@@ -60,6 +57,8 @@ public class MyFeedPresenter extends Presenter<MyFeed> {
 
 	public void post() {
 		MyFeed view = getView();
+		if (view == null)
+			return;
 		final String message = view.message.getText().toString();
 		if ("".equals(message))
 			return;

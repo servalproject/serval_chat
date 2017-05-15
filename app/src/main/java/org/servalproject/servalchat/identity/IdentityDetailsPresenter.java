@@ -30,8 +30,7 @@ public class IdentityDetailsPresenter extends Presenter<IdentityDetails> {
 	}
 
 	@Override
-	protected void bind() {
-		IdentityDetails view = getView();
+	protected void bind(IdentityDetails view) {
 		if (identity != null) {
 			view.name.setText(identity.getName());
 			view.sid.setText(identity.subscriber.sid.abbreviation());
@@ -48,11 +47,17 @@ public class IdentityDetailsPresenter extends Presenter<IdentityDetails> {
 
 	@Override
 	public void onVisible() {
-		bind();
+		IdentityDetails view = getView();
+		if (view != null)
+			bind(view);
 	}
 
 	public void update() {
 		if (updating)
+			return;
+
+		IdentityDetails view = getView();
+		if (view == null)
 			return;
 
 		AsyncTask<String, Void, Exception> updater = new AsyncTask<String, Void, Exception>() {
@@ -103,7 +108,6 @@ public class IdentityDetailsPresenter extends Presenter<IdentityDetails> {
 			}
 		};
 
-		IdentityDetails view = getView();
 		updater.execute("", view.name.getText().toString(), "");
 	}
 }

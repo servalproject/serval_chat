@@ -47,8 +47,7 @@ public class NavTabStrip extends LinearLayout implements IContainerView, INaviga
 			items[i] = new HistoryItem(n.children.get(i), args);
 		adapter = new NavPageAdapter(activity, id, items);
 		pager = (ViewPager) findViewById(R.id.pager);
-		pager.setAdapter(adapter);
-		pager.addOnPageChangeListener(adapter);
+		adapter.setViewPager(pager);
 		TabLayout tabs = (TabLayout) findViewById(R.id.sliding_tabs);
 		tabs.setupWithViewPager(pager);
 		return adapter;
