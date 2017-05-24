@@ -1,6 +1,5 @@
 package org.servalproject.mid;
 
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -15,13 +14,18 @@ import org.servalproject.servalchat.BuildConfig;
 import org.servalproject.servalchat.R;
 import org.servalproject.servaldna.AbstractId;
 import org.servalproject.servaldna.BundleId;
+import org.servalproject.servaldna.ServalDClient;
 import org.servalproject.servaldna.ServalDCommand;
-import org.servalproject.servaldna.ServalDFailureException;
-import org.servalproject.servaldna.ServalDInterfaceException;
-import org.servalproject.servaldna.rhizome.RhizomeBundleStatus;
+import org.servalproject.servaldna.rhizome.RhizomeCommon;
+import org.servalproject.servaldna.rhizome.RhizomeImportStatus;
 import org.servalproject.servaldna.rhizome.RhizomeListBundle;
+import org.servalproject.servaldna.rhizome.RhizomeManifest;
+import org.servalproject.servaldna.rhizome.RhizomeManifestBundle;
+import org.servalproject.servaldna.rhizome.RhizomePayloadRawBundle;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 
 /**
  * Created by jeremy on 12/04/17.
@@ -33,7 +37,6 @@ public class SelfUpdater {
 	private final Serval serval;
 	private final Context context;
 	private String addedBuild;
-	private long rhizomeVersion=-1;
 	private static final String TAG = "SelfUpdater";
 
 	private static SelfUpdater instance;
@@ -54,9 +57,7 @@ public class SelfUpdater {
 		} catch (AbstractId.InvalidHexException e) {
 			throw new IllegalStateException(e);
 		}
-
-		addedBuild = serval.settings.getString("apk_added", null);
-		rhizomeVersion = serval.settings.getLong("rhizome_version", -1);
+		addedBuild = serval.settings.getString("added_build", null);
 
 		serval.rhizome.observers.addBackground(new Observer<Rhizome>() {
 			@Override
@@ -74,17 +75,13 @@ public class SelfUpdater {
 
 		serval.rhizome.observerSet.addBackground(new ListObserver<RhizomeListBundle>() {
 			@Override
-			public void added(RhizomeListBundle obj) {
-				if (obj.manifest.id.equals(ourBundle) && obj.manifest.version != rhizomeVersion){
-					// note, our insert into rhizome should trigger this
-					SharedPreferences.Editor e = serval.settings.edit();
-					e.putLong("rhizome_version", rhizomeVersion = obj.manifest.version);
-					e.apply();
-
+			public void added(final RhizomeListBundle obj) {
+				// note, our insert into rhizome should trigger this callback too
+				if (obj.manifest.id.equals(ourBundle) && obj.manifest.version > BuildConfig.ManifestVersion){
 					serval.runOnThreadPool(new Runnable() {
 						@Override
 						public void run() {
-							notifyUpgrade();
+							exportApk(obj.manifest);
 						}
 					});
 				}
@@ -107,40 +104,86 @@ public class SelfUpdater {
 		});
 	}
 
-	private void notifyUpgrade(){
+	private File getUpgradeFile(){
 		if (!Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
-			return;
+			return null;
 
 		File folder = context.getExternalFilesDir(null);
 		if (folder == null)
-			return;
+			return null;
 
-		File newVersion = new File(folder, BuildConfig.ReleaseType + "_upgrade.apk");
+		return new File(folder, BuildConfig.ReleaseType + "_upgrade.apk");
+	}
 
-		if (!BuildConfig.BuildStamp.equals(addedBuild)
-				|| rhizomeVersion <= BuildConfig.ManifestVersion) {
-			newVersion.delete();
-			return;
+	private void uptoDate(){
+		File upgradeFile = getUpgradeFile();
+		if (upgradeFile!=null)
+			upgradeFile.delete();
+		// stop checking rhizome until re-install or new bundle arrives
+		SharedPreferences.Editor e = serval.settings.edit();
+		e.putString("added_build", addedBuild = BuildConfig.BuildStamp);
+		e.apply();
+	}
+
+	private RhizomeManifest ourManifest(){
+		try {
+			RhizomeManifestBundle result = serval.getResultClient().rhizomeManifest(ourBundle);
+			if (result!=null)
+				return result.manifest;
+		}catch (Exception e) {
+			Log.e(TAG, e.getMessage(), e);
 		}
+		return null;
+	}
 
-		// create a combined payload and manifest
-		if (!newVersion.exists()) {
-			try {
-				ServalDCommand.ManifestResult r =
-						ServalDCommand.rhizomeExportZipBundle(ourBundle, newVersion);
-				// TODO, double check the version exported from rhizome
-			} catch (ServalDInterfaceException e) {
-				// anything could go wrong, might be out of disk space
-				Log.v(TAG, e.getMessage(), e);
+	private void exportApk() {
+		RhizomeManifest manifest = ourManifest();
+		if (manifest!=null)
+			exportApk(manifest);
+	}
+
+	private void exportApk(RhizomeManifest manifest){
+		try {
+			File upgradeFile = getUpgradeFile();
+			if (upgradeFile == null)
 				return;
-			}
-		}
 
+			if (upgradeFile.length() != manifest.filesize + manifest.toTextFormat().length - 2) {
+				// If the file is missing, or the wrong size, export it again
+				// TODO binary compare manifest text in case we release two builds of the same length?
+				// or just remember the version we exported?
+
+				RhizomePayloadRawBundle payload = serval.getResultClient().rhizomePayloadRaw(ourBundle);
+				if (payload == null || payload.rawPayloadInputStream == null)
+					return;
+
+				RhizomeCommon.WriteBundleZip(payload, upgradeFile);
+			}
+
+			// we can stop checking rhizome while this file exists
+			SharedPreferences.Editor e = serval.settings.edit();
+			e.putString("added_build", addedBuild = BuildConfig.BuildStamp);
+			e.apply();
+
+			notifyUpgrade(upgradeFile);
+		} catch (Exception e) {
+			Log.e(TAG, e.getMessage(), e);
+		}
+	}
+
+	private void notifyUpgrade(){
+		File upgradeFile = getUpgradeFile();
+		if (upgradeFile == null || !upgradeFile.exists())
+			return;
+		notifyUpgrade(upgradeFile);
+	}
+
+	private void notifyUpgrade(File upgradeFile){
 		Intent i = new Intent("android.intent.action.VIEW")
 				.setType("application/vnd.android.package-archive")
 				.setClassName("com.android.packageinstaller",
 						"com.android.packageinstaller.PackageInstallerActivity")
-				.setData(Uri.fromFile(newVersion))
+				.setData(Uri.fromFile(upgradeFile))
 				.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
 		PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, i,
@@ -160,38 +203,49 @@ public class SelfUpdater {
 	}
 
 	private void rhizomeStarted(){
-		try {
-			if (!BuildConfig.BuildStamp.equals(addedBuild)) {
-				ServalDCommand.ManifestResult r =
-						ServalDCommand.rhizomeImportZipBundle(serval.apkFile);
-				SharedPreferences.Editor e = serval.settings.edit();
-				switch (r.getBundleStatus()) {
-					case OLD:
-					case NEW:
-					case SAME:
-						e.putLong("rhizome_version", rhizomeVersion = r.version);
-						e.putString("apk_added", addedBuild = BuildConfig.BuildStamp);
-						break;
-
-					case BUSY:
-					case NO_ROOM:
-						// allow another later attempt
-						break;
-
-					case INVALID:
-						// no manifest, or other permanent error
-						e.putLong("rhizome_version", rhizomeVersion = -1);
-						e.putString("apk_added", addedBuild = BuildConfig.BuildStamp);
-						break;
-
-					default:
-						throw new IllegalStateException("Import returned " + r.getBundleStatus());
-				}
-				e.apply();
-			}
+		if (BuildConfig.BuildStamp.equals(addedBuild)) {
+			// check if we have seen a new version
 			notifyUpgrade();
-		} catch (ServalDInterfaceException e) {
-			throw new IllegalStateException(e);
+			return;
+		}
+
+		try {
+			RhizomeManifest manifest = ourManifest();
+
+			if (manifest!=null){
+				if(manifest.version == BuildConfig.ManifestVersion) {
+					uptoDate();
+					return;
+				}else if(manifest.version > BuildConfig.ManifestVersion){
+					exportApk(manifest);
+					return;
+				}
+			}
+
+			RhizomeImportStatus status = serval.getResultClient().rhizomeImportZip(serval.apkFile);
+			switch (status.bundleStatus) {
+				// possible race conditions with rhizome syncing an apk over the network
+				case OLD:
+					exportApk();
+					break;
+				case SAME:
+				case NEW:
+					uptoDate();
+					break;
+
+				case INVALID:
+					// no manifest, or other permanent error
+
+				case BUSY:
+				case NO_ROOM:
+					// allow another later attempt
+					return;
+
+				default:
+					throw new IllegalStateException("Import returned " + status.bundleStatus);
+			}
+		} catch (Exception e) {
+			Log.v(TAG, e.getMessage(),e);
 		}
 	}
 }
