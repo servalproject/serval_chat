@@ -110,10 +110,6 @@ public class Server extends BroadcastReceiver implements IJniServer, Runnable, H
 				}
 			}
 		}
-		if (alarmIntent != null) {
-			am.cancel(alarmIntent);
-			alarmIntent = null;
-		}
 	}
 
 	@Override
