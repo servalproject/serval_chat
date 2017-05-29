@@ -7,6 +7,7 @@ import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -25,6 +26,7 @@ import org.servalproject.mid.Observer;
 import org.servalproject.mid.Serval;
 import org.servalproject.mid.networking.NetworkInfo;
 import org.servalproject.mid.networking.Networks;
+import org.servalproject.servalchat.App;
 import org.servalproject.servalchat.R;
 import org.servalproject.servalchat.navigation.ILifecycle;
 import org.servalproject.servalchat.navigation.INavigate;
@@ -120,16 +122,22 @@ public class NetworkList extends ObservedRecyclerView<NetworkInfo, NetworkList.N
 
 		@Override
 		public void onClick(View view) {
-			if (info != null) {
-				switch (view.getId()){
-					case R.id.onoff:
-						info.toggle(getContext());
-						break;
-					default:
-						Intent i = info.getIntent(getContext());
-						if (i!=null)
-							getContext().startActivity(i);
-				}
+			if (info == null)
+				return;
+
+			switch (view.getId()){
+				case R.id.onoff:
+					info.toggle(getContext());
+					break;
+				default:
+					Intent i = info.getIntent(getContext());
+					if (i==null)
+						return;
+					if (App.isTesting()){
+						activity.showSnack("Ignoring firebase testlab", Snackbar.LENGTH_SHORT);
+						return;
+					}
+					getContext().startActivity(i);
 			}
 		}
 	}

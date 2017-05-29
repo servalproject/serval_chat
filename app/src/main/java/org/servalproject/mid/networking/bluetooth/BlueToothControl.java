@@ -14,6 +14,7 @@ import android.util.Log;
 
 import org.servalproject.mid.Serval;
 import org.servalproject.mid.networking.NetworkInfo;
+import org.servalproject.servalchat.App;
 import org.servalproject.servaldna.AbstractExternalInterface;
 import org.servalproject.servaldna.ChannelSelector;
 
@@ -529,6 +530,10 @@ public class BlueToothControl extends AbstractExternalInterface {
 		if (isDiscoverable())
 			return;
 
+		if (App.isTesting()){
+			// snack?
+			return;
+		}
 		Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
 		discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 3600);
 		context.startActivity(discoverableIntent);
