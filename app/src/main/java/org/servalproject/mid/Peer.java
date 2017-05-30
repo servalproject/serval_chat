@@ -132,6 +132,9 @@ public final class Peer implements Comparable<Peer> {
 
 	@Override
 	public int compareTo(Peer another) {
-		return this.displayName().compareTo(another.displayName());
+		int r = this.displayName().compareTo(another.displayName());
+		if (r!=0)
+			return r;
+		return subscriber.sid.toHex().compareTo(another.subscriber.sid.toHex());
 	}
 }

@@ -49,6 +49,7 @@ public class MyFeed extends RelativeLayout
 	}
 
 	private static final int ALL_FEEDS=1;
+	private static final int CONTACTS=2;
 
 	@Override
 	public boolean onMenuItemClick(MenuItem menuItem) {
@@ -56,12 +57,17 @@ public class MyFeed extends RelativeLayout
 			case ALL_FEEDS:
 				activity.go(Navigation.AllFeeds, null);
 				return true;
+			case CONTACTS:
+				activity.go(Navigation.Contacts, null);
+				return true;
 		}
 		return false;
 	}
 
 	@Override
 	public void populateItems(Menu menu) {
+		menu.add(Menu.NONE, CONTACTS, Menu.NONE, R.string.contacts)
+				.setOnMenuItemClickListener(this);
 		menu.add(Menu.NONE, ALL_FEEDS, Menu.NONE, R.string.all_feeds)
 				.setOnMenuItemClickListener(this);
 	}

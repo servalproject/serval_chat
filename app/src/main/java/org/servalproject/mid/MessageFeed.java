@@ -35,6 +35,10 @@ public class MessageFeed extends AbstractFutureList<PlyMessage, IOException> {
 		this.id = id;
 	}
 
+	public Peer getPeer(){
+		return peer;
+	}
+
 	public Subscriber getId(){
 		if (id == null && peer != null){
 			// might have discovered the key some other way in the mean time

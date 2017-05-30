@@ -30,10 +30,14 @@ public class Messaging {
 	public final List<MeshMSConversation> conversations = new ArrayList<>();
 	public final List<MeshMSConversation> requests = new ArrayList<>();
 	public final List<MeshMSConversation> blocked = new ArrayList<>();
+	public final List<Peer> contacts = new ArrayList<>();
+
 	private final HashMap<SubscriberId, MeshMSConversation> hashmap = new HashMap<>();
 	private final HashMap<Subscriber, SubscriptionState> subscriptions = new HashMap<>();
 	private final HashMap<SubscriberId, SubscriptionState> subscriptionsBySid = new HashMap<>();
+
 	public final ListObserverSet<MeshMSConversation> observers;
+	public final ListObserverSet<Peer> observeContacts;
 
 	public int getHashCode() {
 		return hashCode;
@@ -47,6 +51,7 @@ public class Messaging {
 		this.serval = serval;
 		this.identity = identity;
 		this.observers = new ListObserverSet<>(serval);
+		this.observeContacts = new ListObserverSet<>(serval);
 
 		// TODO add restful api for conversation list updates?
 		serval.rhizome.observerSet.addBackground(rhizomeObserver);
@@ -97,10 +102,12 @@ public class Messaging {
 			this.subscriptions.put(subscription.subscriber, state);
 			this.subscriptionsBySid.put(subscription.subscriber.sid, state);
 			Peer p = serval.knownPeers.getPeer(subscription.subscriber);
+			this.contacts.add(p);
 			// Don't overwrite the feed name with a cached name that might be stale
 			if (p.getFeedName()==null)
 				p.updateFeedName(subscription.name);
 		}
+		observeContacts.onReset();
 		loadedSubscriptions = true;
 	}
 
@@ -124,6 +131,9 @@ public class Messaging {
 
 	private void putSubscription(MessageFeed feed, boolean blocked){
 		SubscriptionState state = blocked ? SubscriptionState.Blocked : SubscriptionState.Followed;
+		Peer peer = feed.getPeer();
+		contacts.add(peer);
+		observeContacts.onAdd(peer);
 		subscriptions.put(feed.getId(), state);
 		subscriptionsBySid.put(feed.getId().sid, state);
 		refresh();
@@ -138,6 +148,9 @@ public class Messaging {
 	}
 
 	void ignored(MessageFeed feed){
+		Peer peer = feed.getPeer();
+		contacts.remove(peer);
+		observeContacts.onRemove(peer);
 		subscriptions.remove(feed.getId());
 		subscriptionsBySid.remove(feed.getId().sid);
 		refresh();

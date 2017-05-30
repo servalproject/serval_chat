@@ -1,19 +1,12 @@
 package org.servalproject.servalchat.peer;
 
 import android.content.Context;
-import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
-import org.servalproject.mid.KnownPeers;
 import org.servalproject.mid.ListObserverSet;
 import org.servalproject.mid.Peer;
 import org.servalproject.mid.Serval;
@@ -33,7 +26,7 @@ import java.util.Set;
 /**
  * Created by jeremy on 31/05/16.
  */
-public class PeerList extends ObservedRecyclerView<Peer, PeerList.PeerHolder>
+public class PeerList extends ObservedRecyclerView<Peer, PeerHolder>
 		implements IHaveMenu, MenuItem.OnMenuItemClickListener {
 	private Serval serval;
 	private static final String TAG = "PeerList";
@@ -62,16 +55,12 @@ public class PeerList extends ObservedRecyclerView<Peer, PeerList.PeerHolder>
 
 	@Override
 	public PeerHolder createHolder(ViewGroup parent, int viewType) {
-		return new PeerHolder(parent);
+		return new PeerHolder(activity, parent);
 	}
 
 	@Override
 	public void bind(PeerHolder holder, Peer item) {
-		holder.peer = item;
-		holder.name.setText(item.displayName());
-		if (item.isReachable()) {
-			// Show green dot?
-		}
+		holder.bind(item);
 	}
 
 	@Override
@@ -95,26 +84,6 @@ public class PeerList extends ObservedRecyclerView<Peer, PeerList.PeerHolder>
 				return true;
 		}
 		return false;
-	}
-
-	public class PeerHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-		//private final ImageView avatar;
-		private final TextView name;
-		private Peer peer;
-
-		public PeerHolder(ViewGroup parent) {
-			super(LayoutInflater.from(parent.getContext()).inflate(R.layout.peer, parent, false));
-			//avatar = (ImageView)this.itemView.findViewById(R.id.avatar);
-			name = (TextView) this.itemView.findViewById(R.id.name);
-			this.itemView.setOnClickListener(this);
-		}
-
-		@Override
-		public void onClick(View v) {
-			Bundle args = new Bundle();
-			KnownPeers.saveSubscriber(peer.getSubscriber(), args);
-			activity.go(Navigation.PeerDetails, args);
-		}
 	}
 
 	private boolean sorted = false;
