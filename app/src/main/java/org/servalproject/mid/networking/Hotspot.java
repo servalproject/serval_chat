@@ -5,11 +5,15 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.net.Uri;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
+import android.os.Build;
+import android.provider.Settings;
 import android.util.Log;
 
 import org.servalproject.mid.Serval;
+import org.servalproject.servalchat.BuildConfig;
 import org.servalproject.servalchat.R;
 
 import java.lang.reflect.InvocationTargetException;
@@ -159,7 +163,9 @@ public class Hotspot extends NetworkInfo {
 			// shouldn't happen
 			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
-			// shouldn't happen
+			// shouldn't happen?
+			if (e.getCause()!=null)
+				throw new IllegalStateException(e.getCause());
 			throw new IllegalStateException(e);
 		}
 	}
@@ -234,12 +240,24 @@ public class Hotspot extends NetworkInfo {
 
 	@Override
 	public void enable(Context context) {
+		if (Build.VERSION.SDK_INT >= 23){
+			if (!Settings.System.canWrite(context)){
+				Intent i = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS,
+						Uri.parse("package:" + BuildConfig.APPLICATION_ID));
+				context.startActivity(i);
+				return;
+			}
+		}
 		boolean useConfig = serval.settings.getBoolean("hotspot_serval_config", true);
 		Networks.getInstance().setWifiGoal(useConfig ? Networks.WifiGoal.HotspotOnServalConfig : Networks.WifiGoal.HotspotOn);
 	}
 
 	@Override
 	public void disable(Context context) {
+		if (Build.VERSION.SDK_INT >= 23) {
+			if (!Settings.System.canWrite(context))
+				return;
+		}
 		Networks.getInstance().setWifiGoal(Networks.WifiGoal.Off);
 	}
 
