@@ -291,6 +291,11 @@ public class Hotspot extends NetworkInfo {
 	}
 
 	@Override
+	public String getRadioName() {
+		return null;
+	}
+
+	@Override
 	public boolean isUsable(){
 		return isOn() && isServalConfig();
 	}

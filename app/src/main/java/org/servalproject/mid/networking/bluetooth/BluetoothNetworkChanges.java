@@ -12,9 +12,6 @@ import org.servalproject.mid.networking.Networks;
 public class BluetoothNetworkChanges extends BroadcastReceiver {
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		Serval serval = Serval.getInstance();
-		if (serval == null)
-			return;
 		BlueToothControl blueTooth = Networks.getInstance().blueTooth;
 		if (blueTooth == null)
 			return;

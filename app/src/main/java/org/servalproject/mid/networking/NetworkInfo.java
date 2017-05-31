@@ -44,6 +44,7 @@ public abstract class NetworkInfo {
 	public abstract void enable(Context context);
 	public abstract void disable(Context context);
 	public abstract Intent getIntent(Context context);
+	public abstract String getRadioName();
 
 	public boolean isUsable(){
 		return isOn();

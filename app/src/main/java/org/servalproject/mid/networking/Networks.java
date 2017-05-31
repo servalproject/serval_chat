@@ -24,12 +24,18 @@ public class Networks implements Observer<NetworkInfo> {
 	public final WifiClient wifiClient;
 	public final Hotspot wifiHotspot;
 	public final ListObserverSet<NetworkInfo> observers;
+	final FlightModeObserver flightModeObserver;
 
 	private Networks(Serval serval){
 		this.serval = serval;
 		observers = new ListObserverSet<>(serval);
 		this.wifiClient = new WifiClient(serval);
 		this.wifiHotspot = Hotspot.getHotspot(serval);
+
+		this.flightModeObserver = new FlightModeObserver(
+				this,
+				serval.context.getContentResolver(),
+				serval.backgroundHandler);
 
 		serval.server.observers.addBackground(new Observer<Server>() {
 			@Override
@@ -49,14 +55,11 @@ public class Networks implements Observer<NetworkInfo> {
 			blueTooth.onEnableChanged();
 			networks.add(blueTooth.networkInfo);
 			blueTooth.networkInfo.observers.addBackground(this);
-			observers.onAdd(blueTooth.networkInfo);
 		}
 		networks.add(wifiClient);
-		observers.onAdd(wifiClient);
-		if (wifiHotspot!=null) {
+		if (wifiHotspot!=null)
 			networks.add(wifiHotspot);
-			observers.onAdd(wifiHotspot);
-		}
+		flightModeObserver.register();
 	}
 
 	private static Networks instance;
@@ -70,6 +73,26 @@ public class Networks implements Observer<NetworkInfo> {
 		return instance;
 	}
 
+	public boolean canEnable(NetworkInfo networkInfo){
+		if (!flightModeObserver.flightMode)
+			return true;
+
+		String name = networkInfo.getRadioName();
+		if (name == null)
+			return true;
+
+		for (String allowed: flightModeObserver.flightModeToggleable.split(",")) {
+			if (name.equals(allowed))
+				return true;
+		}
+
+		return false;
+	}
+
+	void onFlightModeChanged(){
+		// just force a full update
+		observers.onReset();
+	}
 
 	@Override
 	public void updated(NetworkInfo obj) {
@@ -100,7 +123,7 @@ public class Networks implements Observer<NetworkInfo> {
 	// We could depend on that, but....
 
 	// Android's security model for hotspot config is a little broken,
-	// we can enable the hotspot && reconfigure it, only if it is off.
+	// we can enable the hotspot && reconfigure it, but perhaps only if it is off.
 
 	// So if we want to jump from hotspot with our config to client mode we need to;
 	// - turn off the hotspot (&& wait for the hotspot to turn off)

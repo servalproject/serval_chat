@@ -49,6 +49,11 @@ public class BlueToothInfo extends NetworkInfo {
 	}
 
 	@Override
+	public String getRadioName() {
+		return "bluetooth";
+	}
+
+	@Override
 	public boolean isUsable() {
 		return control.isDiscoverable();
 	}

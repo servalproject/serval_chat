@@ -10,9 +10,6 @@ import org.servalproject.mid.Serval;
 public class WifiNetworkChanges extends BroadcastReceiver {
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		Serval serval = Serval.getInstance();
-		if (serval == null)
-			return;
 		String action = intent.getAction();
 		WifiClient wifiClient = Networks.getInstance().wifiClient;
 

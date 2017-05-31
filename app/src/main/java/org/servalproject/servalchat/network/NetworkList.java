@@ -5,42 +5,31 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
-import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
-import android.support.v7.widget.DividerItemDecoration;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SwitchCompat;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.ToggleButton;
 
-import org.servalproject.mid.Identity;
-import org.servalproject.mid.Observer;
 import org.servalproject.mid.Serval;
 import org.servalproject.mid.networking.NetworkInfo;
 import org.servalproject.mid.networking.Networks;
 import org.servalproject.servalchat.App;
 import org.servalproject.servalchat.R;
-import org.servalproject.servalchat.navigation.ILifecycle;
-import org.servalproject.servalchat.navigation.INavigate;
-import org.servalproject.servalchat.navigation.MainActivity;
-import org.servalproject.servalchat.navigation.Navigation;
 import org.servalproject.servalchat.views.ObservedRecyclerView;
 import org.servalproject.servalchat.views.RecyclerHelper;
-import org.servalproject.servalchat.views.SimpleRecyclerView;
 
 /**
  * Created by jeremy on 2/11/16.
  */
 public class NetworkList extends ObservedRecyclerView<NetworkInfo, NetworkList.NetworkHolder> {
 	private final Serval serval;
+	private final Networks networks;
 	private static final String TAG = "NetworkList";
 
 	public NetworkList(Context context, @Nullable AttributeSet attrs) {
@@ -49,7 +38,8 @@ public class NetworkList extends ObservedRecyclerView<NetworkInfo, NetworkList.N
 		setHasFixedSize(true);
 		RecyclerHelper.createLayoutManager(this, true, false);
 		RecyclerHelper.createDivider(this);
-		setObserverSet(Networks.getInstance().observers);
+		networks = Networks.getInstance();
+		setObserverSet(networks.observers);
 	}
 
 	@Override
@@ -65,12 +55,12 @@ public class NetworkList extends ObservedRecyclerView<NetworkInfo, NetworkList.N
 
 	@Override
 	protected NetworkInfo get(int position) {
-		return Networks.getInstance().networks.get(position);
+		return networks.networks.get(position);
 	}
 
 	@Override
 	protected int getCount() {
-		return Networks.getInstance().networks.size();
+		return networks.networks.size();
 	}
 
 	@Override
@@ -106,6 +96,7 @@ public class NetworkList extends ObservedRecyclerView<NetworkInfo, NetworkList.N
 				this.name.setText(name);
 				this.status.setText(status);
 				this.onOff.setChecked(info.isUsable());
+				this.onOff.setEnabled(networks.canEnable(info));
 
 				Intent i = info.getIntent(context);
 				Drawable d = null;

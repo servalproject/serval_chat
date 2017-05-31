@@ -14,9 +14,6 @@ public class WifiHotspotChanges extends BroadcastReceiver {
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		Serval serval = Serval.getInstance();
-		if (serval == null)
-			return;
 		String action = intent.getAction();
 		Hotspot hotspot = Networks.getInstance().wifiHotspot;
 		if (hotspot == null)

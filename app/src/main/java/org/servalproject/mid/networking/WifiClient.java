@@ -52,6 +52,11 @@ public class WifiClient extends NetworkInfo{
 		return new Intent(WifiManager.ACTION_PICK_WIFI_NETWORK);
 	}
 
+	@Override
+	public String getRadioName() {
+		return "wifi";
+	}
+
 	public static State statusToState(int state) {
 		switch (state) {
 			case WifiManager.WIFI_STATE_DISABLED:
