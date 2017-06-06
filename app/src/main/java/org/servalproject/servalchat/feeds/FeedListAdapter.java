@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import org.servalproject.mid.FeedList;
+import org.servalproject.mid.Messaging;
 import org.servalproject.servalchat.R;
 import org.servalproject.servalchat.views.BasicViewHolder;
 import org.servalproject.servalchat.views.ScrollingAdapter;
@@ -41,12 +42,16 @@ public class FeedListAdapter extends ScrollingAdapter<RhizomeListBundle, FeedLis
 
 	@Override
 	protected void addItem(int index, RhizomeListBundle item) {
-		if (bundles.contains(item.manifest.id)) {
+		BundleId id = item.manifest.id;
+		Messaging.SubscriptionState state = presenter.identity.messaging.getSubscriptionState(id);
+		if (state == Messaging.SubscriptionState.Blocked)
+			return;
+		if (bundles.contains(id)) {
 			if (index == items.size())
 				return;
-			removeItem(item.manifest.id);
+			removeItem(id);
 		}else{
-			bundles.add(item.manifest.id);
+			bundles.add(id);
 		}
 		super.addItem(index, item);
 	}

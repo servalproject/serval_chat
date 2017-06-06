@@ -16,6 +16,7 @@ import org.servalproject.servalchat.views.Presenter;
 import org.servalproject.servalchat.views.PresenterFactory;
 import org.servalproject.servaldna.AbstractId;
 import org.servalproject.servaldna.Subscriber;
+import org.servalproject.servaldna.meshmb.MeshMBCommon;
 import org.servalproject.servaldna.meshmb.MeshMBSubscription;
 
 /**
@@ -104,10 +105,10 @@ public class PeerFeedPresenter extends Presenter<PeerFeed> {
 	public Messaging.SubscriptionState getSubscriptionState(){
 		if (feed == null || feed.getId() == null)
 			return null;
-		return identity.messaging.getSubscriptionState(feed.getId());
+		return identity.messaging.getSubscriptionState(feed.getId().signingKey);
 	}
 
-	public void subscribe(final boolean subscribe){
+	public void subscribe(final MeshMBCommon.SubscriptionAction action){
 		busy = true;
 		new AsyncTask<Void, Void, Void>(){
 			private Exception e;
@@ -123,9 +124,19 @@ public class PeerFeedPresenter extends Presenter<PeerFeed> {
 				if (e != null)
 					view.activity.showError(e);
 				else {
-					view.activity.showSnack(
-							subscribe ? R.string.followed : R.string.ignored,
-							Snackbar.LENGTH_SHORT);
+					int r=-1;
+					switch (action){
+						case Follow:
+							r = R.string.followed;
+							break;
+						case Ignore:
+							r = R.string.ignored;
+							break;
+						case Block:
+							r = R.string.blocked;
+							break;
+					}
+					view.activity.showSnack(r, Snackbar.LENGTH_SHORT);
 					view.activity.supportInvalidateOptionsMenu();
 				}
 			}
@@ -133,11 +144,7 @@ public class PeerFeedPresenter extends Presenter<PeerFeed> {
 			@Override
 			protected Void doInBackground(Void... voids) {
 				try {
-					if (subscribe) {
-						identity.follow(feed);
-					} else {
-						identity.ignore(feed);
-					}
+					identity.alterSubscription(action, feed);
 				} catch (Exception e) {
 					this.e = e;
 				}

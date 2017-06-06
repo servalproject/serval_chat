@@ -24,7 +24,7 @@ public class ForegroundService extends Service {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		if (intent.getBooleanExtra("foreground", false)) {
+		if (intent != null && intent.getBooleanExtra("foreground", false)) {
 			Intent navIntent = MainActivity.getIntentFor(this, null, Navigation.Networking, null);
 			PendingIntent pending = PendingIntent.getActivity(this, 0, navIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 

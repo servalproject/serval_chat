@@ -3,6 +3,7 @@ package org.servalproject.mid;
 import org.servalproject.servaldna.ServalDInterfaceException;
 import org.servalproject.servaldna.Subscriber;
 import org.servalproject.servaldna.keyring.KeyringIdentity;
+import org.servalproject.servaldna.meshmb.MeshMBCommon;
 
 import java.io.IOException;
 
@@ -45,19 +46,9 @@ public class Identity {
 		return new ActivityList(serval, this);
 	}
 
-	public void follow(MessageFeed feed) throws ServalDInterfaceException, IOException {
-		serval.getResultClient().meshmbFollow(subscriber, feed.getId().signingKey);
-		messaging.followed(feed);
-	}
-
-	public void ignore(MessageFeed feed) throws ServalDInterfaceException, IOException {
-		serval.getResultClient().meshmbIgnore(subscriber, feed.getId().signingKey);
-		messaging.ignored(feed);
-	}
-
-	public void block(MessageFeed feed) throws ServalDInterfaceException, IOException{
-		// TODO
-		messaging.blocked(feed);
+	public void alterSubscription(MeshMBCommon.SubscriptionAction action, MessageFeed feed) throws ServalDInterfaceException, IOException {
+		serval.getResultClient().meshmbAlterSubscription(subscriber, action, feed.getId().signingKey);
+		messaging.subscriptionAltered(action, feed);
 	}
 
 	public void update(KeyringIdentity id) {

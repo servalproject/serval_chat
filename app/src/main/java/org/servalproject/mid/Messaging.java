@@ -1,8 +1,10 @@
 package org.servalproject.mid;
 
 import org.servalproject.servaldna.ServalDInterfaceException;
+import org.servalproject.servaldna.SigningKey;
 import org.servalproject.servaldna.Subscriber;
 import org.servalproject.servaldna.SubscriberId;
+import org.servalproject.servaldna.meshmb.MeshMBCommon;
 import org.servalproject.servaldna.meshmb.MeshMBSubscription;
 import org.servalproject.servaldna.meshmb.MeshMBSubscriptionList;
 import org.servalproject.servaldna.meshms.MeshMSConversation;
@@ -29,11 +31,11 @@ public class Messaging {
 
 	public final List<MeshMSConversation> conversations = new ArrayList<>();
 	public final List<MeshMSConversation> requests = new ArrayList<>();
-	public final List<MeshMSConversation> blocked = new ArrayList<>();
+	//public final List<MeshMSConversation> blocked = new ArrayList<>();
 	public final List<Peer> contacts = new ArrayList<>();
 
 	private final HashMap<SubscriberId, MeshMSConversation> hashmap = new HashMap<>();
-	private final HashMap<Subscriber, SubscriptionState> subscriptions = new HashMap<>();
+	private final HashMap<SigningKey, SubscriptionState> subscriptions = new HashMap<>();
 	private final HashMap<SubscriberId, SubscriptionState> subscriptionsBySid = new HashMap<>();
 
 	public final ListObserverSet<MeshMSConversation> observers;
@@ -99,12 +101,14 @@ public class Messaging {
 		MeshMBSubscription subscription;
 		while((subscription = subscriptions.next())!=null){
 			SubscriptionState state = subscription.blocked ? SubscriptionState.Blocked : SubscriptionState.Followed;
-			this.subscriptions.put(subscription.subscriber, state);
+			this.subscriptions.put(subscription.subscriber.signingKey, state);
 			this.subscriptionsBySid.put(subscription.subscriber.sid, state);
+			if (subscription.blocked)
+				continue;
 			Peer p = serval.knownPeers.getPeer(subscription.subscriber);
 			this.contacts.add(p);
 			// Don't overwrite the feed name with a cached name that might be stale
-			if (p.getFeedName()==null)
+			if (p.getFeedName()==null && subscription.name!=null)
 				p.updateFeedName(subscription.name);
 		}
 		observeContacts.onReset();
@@ -117,10 +121,10 @@ public class Messaging {
 		Blocked
 	}
 
-	public SubscriptionState getSubscriptionState(Subscriber subscriber){
-		if (!subscriptions.containsKey(subscriber))
+	public SubscriptionState getSubscriptionState(SigningKey signingKey){
+		if (!subscriptions.containsKey(signingKey))
 			return SubscriptionState.Ignored;
-		return subscriptions.get(subscriber);
+		return subscriptions.get(signingKey);
 	}
 
 	public SubscriptionState getSubscriptionState(SubscriberId subscriber){
@@ -129,30 +133,30 @@ public class Messaging {
 		return subscriptionsBySid.get(subscriber);
 	}
 
-	private void putSubscription(MessageFeed feed, boolean blocked){
-		SubscriptionState state = blocked ? SubscriptionState.Blocked : SubscriptionState.Followed;
+	void subscriptionAltered(MeshMBCommon.SubscriptionAction action, MessageFeed feed){
+		Subscriber id = feed.getId();
+		SubscriptionState current = getSubscriptionState(id.signingKey);
+		SubscriptionState newState = null;
+
+		switch (action){
+			case Follow: newState = SubscriptionState.Followed; break;
+			case Ignore: newState = SubscriptionState.Ignored; break;
+			case Block: newState = SubscriptionState.Blocked; break;
+		}
+		if (current == newState)
+			return;
+
+		subscriptions.put(id.signingKey, newState);
+		subscriptionsBySid.put(id.sid, newState);
+
 		Peer peer = feed.getPeer();
-		contacts.add(peer);
-		observeContacts.onAdd(peer);
-		subscriptions.put(feed.getId(), state);
-		subscriptionsBySid.put(feed.getId().sid, state);
-		refresh();
-	}
-
-	void blocked(MessageFeed feed){
-		putSubscription(feed, true);
-	}
-
-	void followed(MessageFeed feed){
-		putSubscription(feed, false);
-	}
-
-	void ignored(MessageFeed feed){
-		Peer peer = feed.getPeer();
-		contacts.remove(peer);
-		observeContacts.onRemove(peer);
-		subscriptions.remove(feed.getId());
-		subscriptionsBySid.remove(feed.getId().sid);
+		if (newState == SubscriptionState.Followed){
+			contacts.add(peer);
+			observeContacts.onAdd(peer);
+		}else if(current == SubscriptionState.Followed){
+			contacts.remove(peer);
+			observeContacts.onRemove(peer);
+		}
 		refresh();
 	}
 
@@ -196,7 +200,6 @@ public class Messaging {
 						return;
 					conversations.clear();
 					requests.clear();
-					blocked.clear();
 					for(MeshMSConversation c:replace) {
 						hashmap.put(c.them.sid, c);
 						switch (getSubscriptionState(c.them.sid)){
@@ -205,9 +208,6 @@ public class Messaging {
 								break;
 							case Ignored:
 								requests.add(c);
-								break;
-							case Blocked:
-								blocked.add(c);
 								break;
 						}
 					}

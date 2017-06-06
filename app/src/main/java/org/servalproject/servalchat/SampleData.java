@@ -8,6 +8,7 @@ import org.servalproject.mid.Observer;
 import org.servalproject.mid.Peer;
 import org.servalproject.mid.Serval;
 import org.servalproject.mid.Server;
+import org.servalproject.servaldna.meshmb.MeshMBCommon;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -83,7 +84,7 @@ public class SampleData {
 					if ((i+j)%4==2)
 						continue;
 
-					id.follow(p.getFeed());
+					id.alterSubscription(MeshMBCommon.SubscriptionAction.Follow, p.getFeed());
 				}
 			}
 

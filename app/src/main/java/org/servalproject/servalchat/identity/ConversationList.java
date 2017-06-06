@@ -88,8 +88,6 @@ public class ConversationList
 			list = id.messaging.conversations;
 		else if(n == Navigation.Requests)
 			list = id.messaging.requests;
-		else if(n == Navigation.Blocked)
-			list = id.messaging.blocked;
 		else
 			throw new IllegalStateException("Unexpected navigation!");
 

@@ -20,6 +20,7 @@ import org.servalproject.servalchat.navigation.INavigate;
 import org.servalproject.servalchat.navigation.MainActivity;
 import org.servalproject.servalchat.navigation.Navigation;
 import org.servalproject.servalchat.views.RecyclerHelper;
+import org.servalproject.servaldna.meshmb.MeshMBCommon;
 
 /**
  * Created by jeremy on 3/08/16.
@@ -37,6 +38,7 @@ public class PeerFeed extends LinearLayout
 
 	private static final int FOLLOW = 1;
 	private static final int IGNORE = 2;
+	private static final int BLOCK = 3;
 
 	@Override
 	public void populateItems(Menu menu) {
@@ -49,17 +51,22 @@ public class PeerFeed extends LinearLayout
 		if (state != Messaging.SubscriptionState.Followed)
 			menu.add(Menu.NONE, FOLLOW, Menu.NONE, R.string.follow_feed)
 					.setOnMenuItemClickListener(this);
-		// TODO block
+		if (state != Messaging.SubscriptionState.Blocked)
+			menu.add(Menu.NONE, BLOCK, Menu.NONE, R.string.block_contact)
+					.setOnMenuItemClickListener(this);
 	}
 
 	@Override
 	public boolean onMenuItemClick(MenuItem item) {
 		switch (item.getItemId()) {
 			case FOLLOW:
-				presenter.subscribe(true);
+				presenter.subscribe(MeshMBCommon.SubscriptionAction.Follow);
 				break;
 			case IGNORE:
-				presenter.subscribe(false);
+				presenter.subscribe(MeshMBCommon.SubscriptionAction.Ignore);
+				break;
+			case BLOCK:
+				presenter.subscribe(MeshMBCommon.SubscriptionAction.Block);
 				break;
 			default:
 				return false;
