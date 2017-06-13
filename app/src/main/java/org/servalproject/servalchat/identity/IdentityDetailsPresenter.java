@@ -33,7 +33,7 @@ public class IdentityDetailsPresenter extends Presenter<IdentityDetails> {
 	protected void bind(IdentityDetails view) {
 		if (identity != null) {
 			view.name.setText(identity.getName());
-			view.sid.setText(identity.subscriber.sid.abbreviation());
+			view.sid.setText(identity.subscriber.sid.toHex());
 			view.sidLabel.setVisibility(View.VISIBLE);
 			view.sid.setVisibility(View.VISIBLE);
 		} else {
