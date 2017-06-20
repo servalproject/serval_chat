@@ -105,7 +105,7 @@ public class PeerFeedPresenter extends Presenter<PeerFeed> {
 	public Messaging.SubscriptionState getSubscriptionState(){
 		if (feed == null || feed.getId() == null)
 			return null;
-		return identity.messaging.getSubscriptionState(feed.getId().signingKey);
+		return identity.messaging.getSubscriptionState(feed.getId());
 	}
 
 	public void subscribe(final MeshMBCommon.SubscriptionAction action){

@@ -47,7 +47,7 @@ public class Identity {
 	}
 
 	public void alterSubscription(MeshMBCommon.SubscriptionAction action, MessageFeed feed) throws ServalDInterfaceException, IOException {
-		serval.getResultClient().meshmbAlterSubscription(subscriber, action, feed.getId().signingKey);
+		serval.getResultClient().meshmbAlterSubscription(subscriber, action, feed.getId(), feed.getName());
 		messaging.subscriptionAltered(action, feed);
 	}
 

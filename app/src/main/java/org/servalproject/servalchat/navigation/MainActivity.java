@@ -1,6 +1,7 @@
 package org.servalproject.servalchat.navigation;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -25,8 +26,10 @@ import org.servalproject.mid.Identity;
 import org.servalproject.mid.ListObserver;
 import org.servalproject.mid.Serval;
 import org.servalproject.servalchat.App;
+import org.servalproject.servalchat.BuildConfig;
 import org.servalproject.servalchat.R;
 
+import java.io.File;
 import java.util.Stack;
 
 public class MainActivity extends AppCompatActivity implements IContainerView, MenuItem.OnMenuItemClickListener {
@@ -189,11 +192,12 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 		// Spawn new task
 		Intent intent = new Intent();
 		Class<?> activity = MainActivity.class;
+		int flags = Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK;
 		if (identity != null) {
 			if (Build.VERSION.SDK_INT >= 21) {
-				// Untested!
-				intent.setFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
-				intent.setDataAndType(Uri.parse("sid:" + identity.subscriber.sid.toHex()), "application/org.servalproject.sid");
+				flags = Intent.FLAG_ACTIVITY_NEW_DOCUMENT
+						| Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS;
+				intent.setData(Uri.parse("org.servalproject.sid:" + identity.subscriber.sid.toHex()));
 			} else {
 				// TODO use & persist some kind of MRU ordering?
 				switch ((int) identity.getId() % 4) {
@@ -212,7 +216,7 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 				}
 			}
 		}
-		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+		intent.addFlags(flags);
 		intent.setClass(context, activity);
 		intent.putExtras(NavHistory.prepareNew(identity == null ? null : identity.subscriber.sid, key, args));
 		return intent;
@@ -225,11 +229,6 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 		}
 
 		startActivity(getIntentFor(this, identity, key, args));
-		if (Build.VERSION.SDK_INT >= 21)
-			finishAndRemoveTask();
-		else
-			// TODO need an ugly work around here?
-			finish();
 	}
 
 	public void go(Navigation key, Bundle args) {
@@ -282,26 +281,30 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 		return super.onOptionsItemSelected(item);
 	}
 
-	private static final int SHARE = 1;
+	private static final int SHARE_APK = 1;
+
+	private void shareFile(File file, String type){
+		if (App.isTesting()){
+			showSnack("Ignoring firebase testlab", Snackbar.LENGTH_SHORT);
+			return;
+		}
+		try {
+			Intent intent = new Intent(Intent.ACTION_SEND);
+			intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
+			intent.setType(type);
+			intent.addCategory(Intent.CATEGORY_DEFAULT);
+			intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			startActivity(intent);
+		} catch (Exception e) {
+			showError(e);
+		}
+	}
 
 	@Override
 	public boolean onMenuItemClick(MenuItem item) {
 		switch (item.getItemId()) {
-			case SHARE:
-				if (App.isTesting()){
-					showSnack("Ignoring firebase testlab", Snackbar.LENGTH_SHORT);
-					break;
-				}
-				try {
-					Intent intent = new Intent(Intent.ACTION_SEND);
-					intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(serval.apkFile));
-					intent.setType("image/apk");
-					intent.addCategory(Intent.CATEGORY_DEFAULT);
-					intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-					startActivity(intent);
-				} catch (Exception e) {
-					showError(e);
-				}
+			case SHARE_APK:
+				shareFile(serval.apkFile, "image/apk");
 				break;
 		}
 		return false;
@@ -323,7 +326,7 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		if (!App.isTesting()) {
-			menu.add(Menu.NONE, SHARE, Menu.NONE, R.string.share_app)
+			menu.add(Menu.NONE, SHARE_APK, Menu.NONE, R.string.share_app)
 					.setOnMenuItemClickListener(this);
 		}
 		populateMenu(menu, viewStack.peek().view);
@@ -390,7 +393,11 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 		if (isStarted && lifecycle != null)
 			lifecycle.onVisible();
 		// TODO observe identity and update title
-		getSupportActionBar().setTitle(n.getTitle(this, identity));
+		CharSequence title = n.getTitle(this, identity);
+		getSupportActionBar().setTitle(title);
+		if (Build.VERSION.SDK_INT>=21) {
+			setTaskDescription(new ActivityManager.TaskDescription(title.toString()));
+		}
 		return ret;
 	}
 

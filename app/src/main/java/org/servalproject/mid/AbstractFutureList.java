@@ -82,7 +82,7 @@ public abstract class AbstractFutureList<T, E extends Exception>
 						while (polling && (item = list.next()) != null) {
 							addingFutureItem(item);
 						}
-						// on graceful close, restart
+						// on graceful close from the server, restart
 						list.close();
 					}
 					futureList = null;

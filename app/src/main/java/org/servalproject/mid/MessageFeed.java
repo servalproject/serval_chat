@@ -107,4 +107,15 @@ public class MessageFeed extends AbstractFutureList<PlyMessage, IOException> {
 			peer.updateFeedName(name);
 		return list;
 	}
+
+	public String getName(){
+		String peerName = name;
+		if (peer != null) {
+			if (peerName == null)
+				peerName = peer.getFeedName();
+			if (peerName == null)
+				peerName = peer.getName();
+		}
+		return peerName;
+	}
 }

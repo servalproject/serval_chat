@@ -42,8 +42,11 @@ public class FeedListAdapter extends ScrollingAdapter<RhizomeListBundle, FeedLis
 
 	@Override
 	protected void addItem(int index, RhizomeListBundle item) {
+		Subscriber subscriber = new Subscriber(
+				item.author != null ? item.author : item.manifest.sender,
+				item.manifest.id, true);
 		BundleId id = item.manifest.id;
-		Messaging.SubscriptionState state = presenter.identity.messaging.getSubscriptionState(id);
+		Messaging.SubscriptionState state = presenter.identity.messaging.getSubscriptionState(subscriber);
 		if (state == Messaging.SubscriptionState.Blocked)
 			return;
 		if (bundles.contains(id)) {

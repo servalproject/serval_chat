@@ -14,7 +14,9 @@ import org.servalproject.servaldna.rhizome.RhizomeListBundle;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by jeremy on 11/07/16.
@@ -25,21 +27,24 @@ public class Messaging {
 	private final Identity identity;
 	private int hashCode;
 	private int unreadCount;
+	private int requestsUnread;
 	private boolean loadedSubscriptions = false;
 	private RhizomeListBundle last;
 	private static final String TAG = "Messaging";
 
 	public final List<MeshMSConversation> conversations = new ArrayList<>();
 	public final List<MeshMSConversation> requests = new ArrayList<>();
-	//public final List<MeshMSConversation> blocked = new ArrayList<>();
 	public final List<Peer> contacts = new ArrayList<>();
 
 	private final HashMap<SubscriberId, MeshMSConversation> hashmap = new HashMap<>();
-	private final HashMap<SigningKey, SubscriptionState> subscriptions = new HashMap<>();
-	private final HashMap<SubscriberId, SubscriptionState> subscriptionsBySid = new HashMap<>();
+	private final Set<Subscriber> following = new HashSet<>();
+	private final Set<SubscriberId> followingSids = new HashSet<>();
+	private final Set<Subscriber> blocking = new HashSet<>();
+	private final Set<SubscriberId> blockingSids = new HashSet<>();
 
 	public final ListObserverSet<MeshMSConversation> observers;
 	public final ListObserverSet<Peer> observeContacts;
+	public final ListObserverSet<Peer> observeBlockList;
 
 	public int getHashCode() {
 		return hashCode;
@@ -49,11 +54,16 @@ public class Messaging {
 		return unreadCount;
 	}
 
+	public int getUnreadRequests(){
+		return requestsUnread;
+	}
+
 	Messaging(Serval serval, Identity identity) {
 		this.serval = serval;
 		this.identity = identity;
 		this.observers = new ListObserverSet<>(serval);
 		this.observeContacts = new ListObserverSet<>(serval);
+		this.observeBlockList = new ListObserverSet<>(serval);
 
 		// TODO add restful api for conversation list updates?
 		serval.rhizome.observerSet.addBackground(rhizomeObserver);
@@ -100,11 +110,12 @@ public class Messaging {
 		MeshMBSubscriptionList subscriptions = serval.getResultClient().meshmbSubscriptions(identity.subscriber);
 		MeshMBSubscription subscription;
 		while((subscription = subscriptions.next())!=null){
-			SubscriptionState state = subscription.blocked ? SubscriptionState.Blocked : SubscriptionState.Followed;
-			this.subscriptions.put(subscription.subscriber.signingKey, state);
-			this.subscriptionsBySid.put(subscription.subscriber.sid, state);
-			if (subscription.blocked)
+			if (subscription.blocked){
+				blocking.add(subscription.subscriber);
+				blockingSids.add(subscription.subscriber.sid);
 				continue;
+			}
+			following.add(subscription.subscriber);
 			Peer p = serval.knownPeers.getPeer(subscription.subscriber);
 			this.contacts.add(p);
 			// Don't overwrite the feed name with a cached name that might be stale
@@ -115,47 +126,75 @@ public class Messaging {
 		loadedSubscriptions = true;
 	}
 
+	public List<Peer> getBlockList(){
+		List<Peer> ret = new ArrayList<>();
+		for (Subscriber k: blocking) {
+			ret.add(serval.knownPeers.getPeer(k));
+		}
+		return ret;
+	}
+
 	public enum SubscriptionState{
 		Followed,
 		Ignored,
 		Blocked
 	}
 
-	public SubscriptionState getSubscriptionState(SigningKey signingKey){
-		if (!subscriptions.containsKey(signingKey))
-			return SubscriptionState.Ignored;
-		return subscriptions.get(signingKey);
+	public SubscriptionState getSubscriptionState(Subscriber id){
+		if (following.contains(id))
+			return SubscriptionState.Followed;
+		if (blocking.contains(id))
+			return SubscriptionState.Blocked;
+		return SubscriptionState.Ignored;
 	}
-
+/*
 	public SubscriptionState getSubscriptionState(SubscriberId subscriber){
 		if (!subscriptionsBySid.containsKey(subscriber))
 			return SubscriptionState.Ignored;
 		return subscriptionsBySid.get(subscriber);
 	}
-
+*/
 	void subscriptionAltered(MeshMBCommon.SubscriptionAction action, MessageFeed feed){
 		Subscriber id = feed.getId();
-		SubscriptionState current = getSubscriptionState(id.signingKey);
-		SubscriptionState newState = null;
+		SigningKey key = id.signingKey;
+		Peer peer = feed.getPeer();
 
 		switch (action){
-			case Follow: newState = SubscriptionState.Followed; break;
-			case Ignore: newState = SubscriptionState.Ignored; break;
-			case Block: newState = SubscriptionState.Blocked; break;
-		}
-		if (current == newState)
-			return;
-
-		subscriptions.put(id.signingKey, newState);
-		subscriptionsBySid.put(id.sid, newState);
-
-		Peer peer = feed.getPeer();
-		if (newState == SubscriptionState.Followed){
-			contacts.add(peer);
-			observeContacts.onAdd(peer);
-		}else if(current == SubscriptionState.Followed){
-			contacts.remove(peer);
-			observeContacts.onRemove(peer);
+			case Follow:
+				if (following.contains(id))
+					return;
+				following.add(id);
+				followingSids.add(id.sid);
+				if (blocking.remove(id)){
+					blockingSids.remove(id.sid);
+					observeBlockList.onRemove(peer);
+				}
+				contacts.add(peer);
+				observeContacts.onAdd(peer);
+				break;
+			case Ignore:
+				if (blocking.remove(id)){
+					blockingSids.remove(id.sid);
+					observeBlockList.onRemove(peer);
+				}
+				followingSids.remove(id.sid);
+				if (following.remove(id)) {
+					contacts.remove(peer);
+					observeContacts.onRemove(peer);
+				}
+				break;
+			case Block:
+				if (blocking.contains(id))
+					return;
+				followingSids.remove(id.sid);
+				blocking.add(id);
+				blockingSids.add(id.sid);
+				observeBlockList.onAdd(peer);
+				if (following.remove(id)){
+					contacts.remove(peer);
+					observeContacts.onRemove(peer);
+				}
+				break;
 		}
 		refresh();
 	}
@@ -177,6 +216,7 @@ public class Messaging {
 				MeshMSConversationList list = serval.getResultClient().meshmsListConversations(identity.subscriber.sid);
 				int hashCode = 0;
 				int unreadCount = 0;
+				int requestsUnread = 0;
 
 				try {
 					MeshMSConversation conversation;
@@ -184,9 +224,11 @@ public class Messaging {
 						if (cancel)
 							return;
 						if (!conversation.isRead) {
-							if (getSubscriptionState(conversation.them.sid) == SubscriptionState.Followed){
+							if (followingSids.contains(conversation.them.sid)){
 								hashCode = hashCode ^ conversation.readHashCode();
 								unreadCount++;
+							}else if(!blockingSids.contains(conversation.them.sid)) {
+								requestsUnread++;
 							}
 						}
 						replace.add(conversation);
@@ -202,17 +244,15 @@ public class Messaging {
 					requests.clear();
 					for(MeshMSConversation c:replace) {
 						hashmap.put(c.them.sid, c);
-						switch (getSubscriptionState(c.them.sid)){
-							case Followed:
-								conversations.add(c);
-								break;
-							case Ignored:
-								requests.add(c);
-								break;
+						if (followingSids.contains(c.them.sid)){
+							conversations.add(c);
+						}else if(!blockingSids.contains(c.them.sid)) {
+							requests.add(c);
 						}
 					}
 					Messaging.this.hashCode = hashCode;
 					Messaging.this.unreadCount = unreadCount;
+					Messaging.this.requestsUnread = requestsUnread;
 				}
 				observers.onReset();
 			} catch (Exception e) {

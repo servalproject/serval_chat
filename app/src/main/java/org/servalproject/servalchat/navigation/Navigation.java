@@ -73,7 +73,7 @@ public class Navigation {
 	public static final Navigation Contacts = new Navigation("Contacts", R.string.contacts, R.layout.contacts, MyFeed, null);
 	public static final Navigation Inbox = new Navigation("Inbox", R.string.conversation_list, R.layout.conversation_list, null, Main);
 	public static final Navigation Requests = new Navigation("Requests", R.string.requests, R.layout.conversation_list, Inbox, null);
-	public static final Navigation Blocked = new Navigation("Blocked", R.string.blocked, R.layout.conversation_list, Inbox, null);
+	public static final Navigation Blocked = new Navigation("Blocked", R.string.blocked, R.layout.block_list, Inbox, null);
 	public static final Navigation PeerList = new Navigation("PeerList", R.string.peer_list, R.layout.peer_list, null, Main);
 	public static final Navigation PeerMap = new Navigation("PeerMap", R.string.peer_map, R.layout.peer_map, PeerList, null);
 
