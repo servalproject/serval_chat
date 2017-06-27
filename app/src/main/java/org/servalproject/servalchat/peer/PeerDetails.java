@@ -6,6 +6,7 @@ import android.support.design.widget.Snackbar;
 import android.util.AttributeSet;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -19,7 +20,9 @@ import org.servalproject.servalchat.navigation.ILifecycle;
 import org.servalproject.servalchat.navigation.INavigate;
 import org.servalproject.servalchat.navigation.MainActivity;
 import org.servalproject.servalchat.navigation.Navigation;
+import org.servalproject.servalchat.views.Identicon;
 import org.servalproject.servaldna.AbstractId;
+import org.servalproject.servaldna.SigningKey;
 
 /**
  * Created by jeremy on 1/08/16.
@@ -28,8 +31,10 @@ public class PeerDetails extends LinearLayout
 		implements INavigate, ILifecycle, Observer<Peer> {
 
 	private MainActivity activity;
+	private ImageView icon;
 	private TextView name;
 	private TextView number;
+	private TextView numberLabel;
 	private TextView sid;
 	private Peer peer;
 
@@ -40,8 +45,10 @@ public class PeerDetails extends LinearLayout
 	@Override
 	public ILifecycle onAttach(MainActivity activity, Navigation n, Identity id, Bundle args) {
 		this.activity = activity;
+		icon = (ImageView) findViewById(R.id.identicon);
 		name = (TextView) findViewById(R.id.name);
 		number = (TextView) findViewById(R.id.number);
+		numberLabel = (TextView) findViewById(R.id.number_label);
 		sid = (TextView) findViewById(R.id.sid);
 
 		try {
@@ -74,7 +81,14 @@ public class PeerDetails extends LinearLayout
 	@Override
 	public void updated(Peer obj) {
 		name.setText(peer.getName());
-		number.setText(peer.getDid());
+		String did =peer.getDid();
+		number.setText(did);
+		SigningKey key = peer.getSubscriber().signingKey;
+		if (icon.getDrawable() == null && key!=null)
+			icon.setImageDrawable(new Identicon(key));
+		number.setVisibility( (did==null || "".equals(did)) ? GONE : VISIBLE);
+		numberLabel.setVisibility( (did==null || "".equals(did)) ? GONE : VISIBLE);
+
 		sid.setText(peer.getSubscriber().sid.toHex());
 	}
 }

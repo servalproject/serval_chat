@@ -1,5 +1,9 @@
 package org.servalproject.mid;
 
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+
+import org.servalproject.servalchat.views.Identicon;
 import org.servalproject.servaldna.ServalDInterfaceException;
 import org.servalproject.servaldna.Subscriber;
 import org.servalproject.servaldna.keyring.KeyringIdentity;
@@ -15,6 +19,7 @@ public class Identity {
 	public final Subscriber subscriber;
 	public final ObserverSet<Identity> observers;
 	private KeyringIdentity identity;
+	private Identicon icon;
 
 	private static long nextId = 0;
 	private final long id;
@@ -56,6 +61,23 @@ public class Identity {
 		if (observers != null)
 			observers.onUpdate();
 	}
+
+	public Identicon getIcon(){
+		if (icon == null)
+			icon = new Identicon(subscriber.signingKey);
+		return icon;
+	}
+
+	private Bitmap iconBitmap;
+	public Bitmap getBitmap(){
+		if (iconBitmap == null) {
+			iconBitmap = Bitmap.createBitmap(48, 48, Bitmap.Config.ARGB_8888);
+			Canvas canvas = new Canvas(iconBitmap);
+			getIcon().draw(canvas);
+		}
+		return iconBitmap;
+	}
+
 
 	public String getName() {
 		return identity == null ? null : identity.name;

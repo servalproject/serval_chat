@@ -6,6 +6,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -22,6 +23,7 @@ import org.servalproject.servalchat.navigation.Navigation;
 public class IdentityDetails extends LinearLayout
 		implements INavigate, View.OnClickListener {
 	MainActivity activity;
+	ImageView icon;
 	TextView sidLabel;
 	TextView sid;
 	EditText name;
@@ -35,6 +37,7 @@ public class IdentityDetails extends LinearLayout
 	@Override
 	public ILifecycle onAttach(MainActivity activity, Navigation n, Identity id, Bundle args) {
 		this.activity = activity;
+		icon = (ImageView) findViewById(R.id.identicon);
 		sidLabel = (TextView) findViewById(R.id.sid_label);
 		sid = (TextView) findViewById(R.id.sid);
 		name = (EditText) findViewById(R.id.name);

@@ -10,11 +10,18 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     >
 
+    <ImageView
+        android:id="@+id/identicon"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:layout_gravity="center_horizontal"/>
+
     <TextView
         android:id="@+id/sid_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_marginTop="@dimen/item_padding"
         android:text="@string/sid_label"/>
 
     <TextView
@@ -26,6 +33,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_marginTop="@dimen/item_padding"
         android:text="@string/name_label"/>
 
     <EditText
@@ -36,8 +44,10 @@
         android:inputType="text" />
 
     <Button
+        style="@style/Widget.AppCompat.Button.Colored"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/identity_update"
+        android:layout_marginTop="@dimen/item_padding"
         android:id="@+id/update" />
 </org.servalproject.servalchat.identity.IdentityDetails>

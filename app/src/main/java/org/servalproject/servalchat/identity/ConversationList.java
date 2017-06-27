@@ -10,6 +10,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.servalproject.mid.Identity;
@@ -24,8 +25,10 @@ import org.servalproject.servalchat.navigation.ILifecycle;
 import org.servalproject.servalchat.navigation.INavigate;
 import org.servalproject.servalchat.navigation.MainActivity;
 import org.servalproject.servalchat.navigation.Navigation;
+import org.servalproject.servalchat.views.Identicon;
 import org.servalproject.servalchat.views.ObservedRecyclerView;
 import org.servalproject.servalchat.views.RecyclerHelper;
+import org.servalproject.servaldna.SigningKey;
 import org.servalproject.servaldna.meshms.MeshMSConversation;
 
 import java.util.List;
@@ -132,12 +135,14 @@ public class ConversationList
 			extends RecyclerView.ViewHolder
 			implements View.OnClickListener, Observer<Peer> {
 		final TextView name;
+		final ImageView icon;
 		private MeshMSConversation conversation;
 		private Peer peer;
 
 		public ConversationHolder(View itemView) {
 			super(itemView);
 			name = (TextView) this.itemView.findViewById(R.id.name);
+			icon = (ImageView) this.itemView.findViewById(R.id.identicon);
 			itemView.setOnClickListener(this);
 		}
 
@@ -150,6 +155,10 @@ public class ConversationList
 				if (this.peer != null)
 					this.peer.observers.removeUI(this);
 				this.peer = p;
+				SigningKey key = p==null ? null : p.getSubscriber().signingKey;
+				if (key != null)
+					icon.setImageDrawable(new Identicon(key));
+				icon.setVisibility(key == null ? INVISIBLE : VISIBLE);
 				if (p != null)
 					this.peer.observers.addUI(this);
 			}

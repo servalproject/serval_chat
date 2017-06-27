@@ -6,17 +6,20 @@
     android:layout_height="match_parent">
 
     <Button
+        style="@style/Widget.AppCompat.Button.Colored"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/post"
         android:id="@+id/post"
         android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
         android:layout_alignParentTop="true" />
 
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignTop="@id/post"
+        android:layout_toStartOf="@id/post"
         android:layout_toLeftOf="@id/post"
         android:id="@+id/message" />
 

@@ -10,6 +10,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.servalproject.mid.Identity;
@@ -18,6 +19,7 @@ import org.servalproject.mid.Serval;
 import org.servalproject.servalchat.R;
 import org.servalproject.servalchat.navigation.IHaveMenu;
 import org.servalproject.servalchat.navigation.Navigation;
+import org.servalproject.servalchat.views.Identicon;
 import org.servalproject.servalchat.views.ObservedRecyclerView;
 import org.servalproject.servalchat.views.RecyclerHelper;
 import org.servalproject.servaldna.keyring.KeyringIdentity;
@@ -72,6 +74,7 @@ public class IdentityList
 	@Override
 	public void bind(IdentityHolder holder, Identity item) {
 		holder.id = item;
+		holder.icon.setImageDrawable(item.getIcon());
 
 		CharSequence name = item.getName();
 		if (name == null)
@@ -116,11 +119,13 @@ public class IdentityList
 
 	public class IdentityHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 		private final TextView name;
+		private final ImageView icon;
 		private Identity id;
 
 		public IdentityHolder(View view) {
 			super(view);
 			name = (TextView) this.itemView.findViewById(R.id.name);
+			icon = (ImageView) this.itemView.findViewById(R.id.identicon);
 			this.itemView.setOnClickListener(this);
 		}
 

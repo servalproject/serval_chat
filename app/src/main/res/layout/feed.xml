@@ -7,10 +7,17 @@
     android:layout_marginTop="@dimen/item_padding"
     android:layout_marginBottom="@dimen/item_padding">
 
+    <ImageView
+        android:id="@+id/identicon"
+        android:layout_width="@dimen/icon_size"
+        android:layout_height="@dimen/icon_size"/>
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_marginLeft="@dimen/item_padding"
+        android:layout_marginStart="@dimen/item_padding"
         android:id="@+id/name"/>
 
 </LinearLayout>

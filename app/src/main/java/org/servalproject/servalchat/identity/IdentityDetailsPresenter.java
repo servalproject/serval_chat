@@ -7,6 +7,7 @@ import org.servalproject.mid.Identity;
 import org.servalproject.mid.Serval;
 import org.servalproject.servalchat.App;
 import org.servalproject.servalchat.navigation.Navigation;
+import org.servalproject.servalchat.views.Identicon;
 import org.servalproject.servalchat.views.Presenter;
 import org.servalproject.servalchat.views.PresenterFactory;
 
@@ -34,11 +35,14 @@ public class IdentityDetailsPresenter extends Presenter<IdentityDetails> {
 		if (identity != null) {
 			view.name.setText(identity.getName());
 			view.sid.setText(identity.subscriber.sid.toHex());
+			view.icon.setImageDrawable(identity.getIcon());
 			view.sidLabel.setVisibility(View.VISIBLE);
 			view.sid.setVisibility(View.VISIBLE);
+			view.icon.setVisibility(View.VISIBLE);
 		} else {
 			view.sidLabel.setVisibility(View.GONE);
 			view.sid.setVisibility(View.GONE);
+			view.icon.setVisibility(View.GONE);
 			if (App.isTesting())
 				view.name.setText("Test User");
 		}

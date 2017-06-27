@@ -13,18 +13,32 @@
         android:gravity="right"
         android:id="@+id/age"/>
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:id="@+id/name"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:id="@+id/header">
+
+            <ImageView
+                android:id="@+id/identicon"
+                android:layout_width="@dimen/icon_size"
+                android:layout_height="@dimen/icon_size"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:layout_marginLeft="@dimen/item_padding"
+                android:layout_marginStart="@dimen/item_padding"
+                android:id="@+id/name"/>
+        </LinearLayout>
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/item_padding"
-        android:layout_marginLeft="@dimen/item_padding"
-        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_marginStart="64dp"
+        android:layout_marginLeft="64dp"
+        android:textAppearance="?android:attr/textAppearanceMedium"
         android:id="@+id/message"/>
 
 </LinearLayout>

@@ -396,7 +396,7 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 		CharSequence title = n.getTitle(this, identity);
 		getSupportActionBar().setTitle(title);
 		if (Build.VERSION.SDK_INT>=21) {
-			setTaskDescription(new ActivityManager.TaskDescription(title.toString()));
+			setTaskDescription(new ActivityManager.TaskDescription(title.toString(), identity == null ? null : identity.getBitmap()));
 		}
 		return ret;
 	}
