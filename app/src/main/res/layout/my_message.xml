@@ -17,6 +17,8 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:gravity="right"
+        android:layout_marginRight="48dp"
+        android:layout_marginEnd="48dp"
         android:layout_gravity="right"
         android:textAlignment="gravity"
         android:id="@+id/age"/>
