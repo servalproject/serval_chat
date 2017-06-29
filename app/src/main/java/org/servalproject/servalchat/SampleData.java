@@ -61,7 +61,7 @@ public class SampleData {
 			List<Identity> identities = new ArrayList<>();
 			List<Peer> peers = new ArrayList<>();
 			for (int i=0;i<4;i++) {
-				Identity id = serval.identities.addIdentity("", "User " + i, "");
+				Identity id = serval.identities.addIdentity("", "Sample User " + i, "");
 				peers.add(serval.knownPeers.getPeer(id.subscriber));
 				identities.add(id);
 			}
@@ -69,7 +69,7 @@ public class SampleData {
 				Identity id = identities.get(i);
 				IdentityFeed feed = id.getFeed();
 				for (int j = 0; j < 5; j++)
-					feed.sendMessage(id.getName() + ". Message " + j);
+					feed.sendMessage("Message " + j);
 			}
 			for (int i=0;i<identities.size();i++){
 				Identity id = identities.get(i);

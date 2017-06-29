@@ -52,7 +52,7 @@ public class MyFeedPresenter extends Presenter<MyFeed> {
 		view.list.setAdapter(adapter);
 		setEnabled();
 		if (App.isTesting() && "".equals(view.message.getText().toString()))
-			view.message.setText("Sample Post");
+			view.message.setText("Sample Post \uD83D\uDE00");
 	}
 
 	public void post() {

@@ -62,7 +62,7 @@ public final class PrivateMessagingPresenter extends Presenter<PrivateMessaging>
 		view.send.setEnabled(!sending);
 		view.list.setAdapter(adapter);
 		if (App.isTesting() && "".equals(view.message.getText().toString()))
-			view.message.setText("Sample Message");
+			view.message.setText("Sample Message \uD83D\uDE0E;");
 	}
 
 	@Override
