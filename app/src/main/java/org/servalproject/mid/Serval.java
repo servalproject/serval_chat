@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.os.HandlerThread;
 import android.preference.PreferenceManager;
 
+import org.servalproject.servalchat.App;
 import org.servalproject.servalchat.BuildConfig;
 import org.servalproject.servaldna.ChannelSelector;
 import org.servalproject.servaldna.ServalDClient;
