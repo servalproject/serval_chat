@@ -5,7 +5,7 @@ apply plugin: 'com.android.application'
 // based on https://www.timroes.de/2014/01/19/using-password-prompts-with-gradle-build-files/
 def readPassword(String fmt) {
     def ret = ''
-    if (System.console() == null){
+    if (System.console() == null) {
         new SwingBuilder().edt {
             dialog(modal: true,
                     title: 'Enter password',
@@ -25,19 +25,19 @@ def readPassword(String fmt) {
                 }
             }
         }
-    }else{
+    } else {
         ret = new String(System.console().readPassword("\n\$ $fmt"));
     }
     return ret;
 }
 
-if (project.hasProperty("ServalChat.properties")){
+if (project.hasProperty("ServalChat.properties")) {
     def propFile = file(project.property("ServalChat.properties"))
-    if (propFile.exists()){
+    if (propFile.exists()) {
         println "Loading additional properties from $propFile"
         def props = new Properties();
         props.load(new FileInputStream(propFile))
-        for(p in props) {
+        for (p in props) {
             def value = p.value
             if (value.startsWith("./"))
                 value = new File(propFile.getParent(), value.substring(2)).absolutePath
@@ -59,7 +59,7 @@ android {
     ext.releaseType = "development"
     ext.buildTime = System.currentTimeMillis();
 
-    if (cleanBuild){
+    if (cleanBuild) {
         // work out what kind of build this is based on the most recent git tag
         if (gitDescribe ==~ /[\d.]+/)
             releaseType = "release"
@@ -78,14 +78,14 @@ android {
         versionCode commitCount
         versionName gitDescribe
         // unique, deterministic identifier for an apk compiled from this source code
-        buildConfigField "String", "BuildStamp", ("\""+commitSha+(cleanBuild?"":"-"+new Date().getTime())+"\"");
-        buildConfigField "String", "CommitSha", ("\""+commitSha+"\"");
+        buildConfigField "String", "BuildStamp", ("\"" + commitSha + (cleanBuild ? "" : "-" + new Date().getTime()) + "\"");
+        buildConfigField "String", "CommitSha", ("\"" + commitSha + "\"");
     }
 
-    signingConfigs{
-        release{
-            storeFile = project.hasProperty("release.key.store")?
-                    file(project.property("release.key.store")):null
+    signingConfigs {
+        release {
+            storeFile = project.hasProperty("release.key.store") ?
+                    file(project.property("release.key.store")) : null
             if (storeFile && !storeFile.exists())
                 storeFile = null;
             // leave blank to force prompting the user
@@ -98,9 +98,9 @@ android {
     }
 
     buildTypes {
-        debug{
+        debug {
             def manifestId = project.findProperty("debug.manifest.id")
-            buildConfigField "String", "ManifestId", manifestId==null?"null":"\"$manifestId\"";
+            buildConfigField "String", "ManifestId", manifestId == null ? "null" : "\"$manifestId\"";
             buildConfigField "long", "ManifestVersion", "${buildTime}L";
             buildConfigField "String", "ReleaseType", ("\"debug\"");
         }
@@ -108,9 +108,9 @@ android {
             minifyEnabled false
             proguardFiles.add(file('proguard-android.txt'))
             def manifestId = project.findProperty("${releaseType}.manifest.id")
-            buildConfigField "String", "ManifestId", manifestId==null?"null":"\"$manifestId\"";
-            buildConfigField "long", "ManifestVersion", releaseType=="development" ? "${buildTime}L" : "$commitCount";
-            buildConfigField "String", "ReleaseType", ("\""+releaseType+"\"");
+            buildConfigField "String", "ManifestId", manifestId == null ? "null" : "\"$manifestId\"";
+            buildConfigField "long", "ManifestVersion", releaseType == "development" ? "${buildTime}L" : "$commitCount";
+            buildConfigField "String", "ReleaseType", ("\"" + releaseType + "\"");
             // leave the apk unsigned for a release build if config is missing
             if (signingConfigs.release.storeFile)
                 signingConfig signingConfigs.release
@@ -124,7 +124,7 @@ android {
         jniLibs.srcDirs = ['src/main/libs'] // ndk-build output
     }
 
-    task libsodiumBuild(type: Exec){
+    task libsodiumBuild(type: Exec) {
         // since there's no defined inputs, this should only run once.
         // TODO force re-run when submodule updated
         outputs.file('src/main/jni/libsodium/libsodium-android-armv6/lib/libsodium.a')
@@ -138,7 +138,7 @@ android {
         commandLine "$android.ndkDirectory/ndk-build", '-C', file('src/main/jni').absolutePath, 'clean'
     }
 
-    task hostServald(type: Exec){
+    task hostServald(type: Exec) {
         // assumes that autoconf && configure have been run manually
         inputs.files(fileTree(dir: 'src/main/jni/serval-dna', includes: ['*.c', '*.h']))
         outputs.file('src/main/jni/serval-dna/servald')
@@ -155,13 +155,13 @@ ext {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    testCompile 'junit:junit:4.12'
     compile "com.android.support:appcompat-v7:$supportLibraryVersion"
     compile "com.android.support:design:$supportLibraryVersion"
     compile "com.android.support:recyclerview-v7:$supportLibraryVersion"
+    testCompile 'junit:junit:4.12'
 }
 
-afterEvaluate{
+afterEvaluate {
     def keyring = project.findProperty("serval.keyring")
     def keyringFile = keyring ? file(keyring) : null
     if (keyringFile && !keyringFile.exists())
@@ -176,15 +176,15 @@ afterEvaluate{
         task "$ndkTaskName"(type: Exec, dependsOn: libsodiumBuild) {
             executable = "$android.ndkDirectory/ndk-build"
             if (variant.buildType.name == "debug")
-                args+='NDK_DEBUG=1'
-            args+=['-C', file('src/main/jni').absolutePath, '-j', Runtime.runtime.availableProcessors()]
+                args += 'NDK_DEBUG=1'
+            args += ['-C', file('src/main/jni').absolutePath, '-j', Runtime.runtime.availableProcessors()]
         }
 
         tasks["compile${variantName}Ndk"].dependsOn "$ndkTaskName"
 
         // Prompt for key passwords, if the signing config came from this build file
         // (Android studio gui has a way to trigger this from an external singing config)
-        if (project.tasks.findByName("install$variantName")){
+        if (project.tasks.findByName("install$variantName")) {
             // add a manifest to any built apk, based on user config
             def confType = "debug"
             if (variant.name == "release")
@@ -196,23 +196,23 @@ afterEvaluate{
             def bk = project.findProperty("${confType}.manifest.bk");
 
             def promptTask = "prompt${variantName}Pwd"
-            task "$promptTask"{
-                doLast{
+            task "$promptTask" {
+                doLast {
                     if (variant.buildType.name != "debug"
                             && variant.signingConfig
                             && variant.signingConfig.storeFile
-                    ){
+                    ) {
                         def signConfig = android.signingConfigs.findByName([variant.signingConfig.name]);
-                        if (signConfig!=null){
-                            if (signConfig.storeFile != null && signConfig.storeFile.exists()){
+                        if (signConfig != null) {
+                            if (signConfig.storeFile != null && signConfig.storeFile.exists()) {
                                 if (!signConfig.storePassword)
-                                    signConfig.storePassword=readPassword("Enter password for jar signing keystore:")
+                                    signConfig.storePassword = readPassword("Enter password for jar signing keystore:")
                                 if (!signConfig.keyPassword)
-                                    signConfig.keyPassword=readPassword("Enter password for jar signing key:")
+                                    signConfig.keyPassword = readPassword("Enter password for jar signing key:")
                             }
                         }
                     }
-                    if (keyringFile!=null && author!=null && entryPin == null)
+                    if (keyringFile != null && author != null && entryPin == null)
                         entryPin = readPassword("Enter serval keyring entry pin:")
                 }
             }
@@ -221,42 +221,42 @@ afterEvaluate{
             preBuild.mustRunAfter "$promptTask"
 
             // TODO supported method to seed this id?
-            if (manifestId && (secret || (author && keyring))){
+            if (manifestId && (secret || (author && keyring))) {
                 variant.outputs.each { output ->
                     def taskName = "manifest$variantName"
-                    task "$taskName"(type: Exec, dependsOn: hostServald){
+                    task "$taskName"(type: Exec, dependsOn: hostServald) {
                         environment SERVALINSTANCE_PATH: file('build/serval/').absolutePath
-                        if (keyringFile!=null && author!=null){
+                        if (keyringFile != null && author != null) {
                             environment SERVALD_KEYRING_READONLY: "true"
                             environment SERVALD_KEYRING_PATH: keyring
                         }
                         executable = hostServald.outputs.files[0]
-                        doFirst{
+                        doFirst {
                             args = ['rhizome', 'add', 'file']
-                            if (keyringFile!=null && author!=null && entryPin)
-                                args+="--entry-pin=$entryPin"
+                            if (keyringFile != null && author != null && entryPin)
+                                args += "--entry-pin=$entryPin"
                             args += [
                                     '--zip-comment',
-                                    author?:"",
+                                    author ?: "",
                                     output.outputFile,
                                     '',
-                                    secret?:"",
+                                    secret ?: "",
                                     "service=file"
                             ]
                             if (manifestId)
-                                args+="id=$manifestId"
+                                args += "id=$manifestId"
                             if (bk)
-                                args+="BK=$bk"
-                            if (confType=="release")
-                                args+="name=${android.appName}-${variant.versionName}.apk"
+                                args += "BK=$bk"
+                            if (confType == "release")
+                                args += "name=${android.appName}-${variant.versionName}.apk"
                             else
-                                args+="name=${android.appName}-${confType}-${variant.versionName}.apk"
+                                args += "name=${android.appName}-${confType}-${variant.versionName}.apk"
                             if (android.cleanBuild && confType != "development")
-                                args+="version=$variant.versionCode"
+                                args += "version=$variant.versionCode"
                             else
-                                args+="version=$android.buildTime"
+                                args += "version=$android.buildTime"
                         }
-                        doLast{
+                        doLast {
                             delete(file('build/serval/'))
                         }
                     }
