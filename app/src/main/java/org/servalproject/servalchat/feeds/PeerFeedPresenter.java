@@ -26,7 +26,7 @@ public class PeerFeedPresenter extends Presenter<PeerFeed> {
 
 	private Serval serval;
 	private FeedAdapter adapter;
-	private Peer peer;
+	private final Peer peer;
 	private MessageFeed feed;
 	private boolean busy;
 
@@ -46,26 +46,17 @@ public class PeerFeedPresenter extends Presenter<PeerFeed> {
 		}
 	};
 
-	protected PeerFeedPresenter(PresenterFactory<PeerFeed, ?> factory, String key, Identity identity) {
+	protected PeerFeedPresenter(PresenterFactory<PeerFeed, ?> factory, String key, Identity identity, Peer peer) {
 		super(factory, key, identity);
+		this.peer = peer;
 	}
 
 	public static PresenterFactory<PeerFeed, PeerFeedPresenter> factory
 			= new PresenterFactory<PeerFeed, PeerFeedPresenter>() {
 
 		@Override
-		protected String getKey(PeerFeed view, Identity id, Bundle savedState) {
-			try {
-				Subscriber them = KnownPeers.getSubscriber(savedState);
-				return id.subscriber.sid.toHex() + ":" + them.sid.toHex();
-			} catch (AbstractId.InvalidBinaryException e) {
-				throw new IllegalStateException(e);
-			}
-		}
-
-		@Override
-		protected PeerFeedPresenter create(String key, Identity id) {
-			return new PeerFeedPresenter(this, key, id);
+		protected PeerFeedPresenter create(String key, Identity id, Peer peer) {
+			return new PeerFeedPresenter(this, key, id, peer);
 		}
 
 	};
@@ -77,15 +68,9 @@ public class PeerFeedPresenter extends Presenter<PeerFeed> {
 
 	@Override
 	protected void restore(Bundle config) {
-		try {
-			serval = Serval.getInstance();
-			peer = serval.knownPeers.getPeer(config);
-			feed = peer.getFeed();
-			adapter = new FeedAdapter(feed);
-
-		} catch (AbstractId.InvalidBinaryException e) {
-			throw new IllegalStateException(e);
-		}
+		serval = Serval.getInstance();
+		feed = peer.getFeed();
+		adapter = new FeedAdapter(feed);
 	}
 
 	@Override

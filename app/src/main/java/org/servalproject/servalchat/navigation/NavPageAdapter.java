@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.servalproject.mid.Identity;
+import org.servalproject.mid.Peer;
 
 /**
  * Created by jeremy on 8/06/16.
@@ -15,14 +16,16 @@ public class NavPageAdapter extends PagerAdapter
 
 	private final MainActivity activity;
 	final Identity identity;
+	final Peer peer;
 	final HistoryItem[] screens;
 	private final ViewState[] views;
 	private boolean visible = false;
 	private ViewPager pager;
 
-	public NavPageAdapter(MainActivity activity, Identity identity, HistoryItem[] items) {
+	public NavPageAdapter(MainActivity activity, Identity identity, Peer peer, HistoryItem[] items) {
 		this.activity = activity;
 		this.identity = identity;
+		this.peer = peer;
 		this.screens = items;
 		this.views = new ViewState[this.screens.length];
 	}
@@ -40,7 +43,7 @@ public class NavPageAdapter extends PagerAdapter
 
 	ViewState getViewState(int position) {
 		if (views[position] == null)
-			views[position] = ViewState.Inflate(activity, screens[position].key, identity, screens[position].args);
+			views[position] = ViewState.Inflate(activity, screens[position].key, identity, peer, screens[position].args);
 		return views[position];
 	}
 
@@ -89,7 +92,7 @@ public class NavPageAdapter extends PagerAdapter
 
 	@Override
 	public CharSequence getPageTitle(int position) {
-		return screens[position].key.getTitle(activity, identity);
+		return screens[position].key.getTitle(activity, identity, peer);
 	}
 
 	@Override

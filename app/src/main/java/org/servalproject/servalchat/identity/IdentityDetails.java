@@ -11,6 +11,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.servalproject.mid.Identity;
+import org.servalproject.mid.Peer;
 import org.servalproject.servalchat.R;
 import org.servalproject.servalchat.navigation.ILifecycle;
 import org.servalproject.servalchat.navigation.INavigate;
@@ -35,7 +36,7 @@ public class IdentityDetails extends LinearLayout
 	}
 
 	@Override
-	public ILifecycle onAttach(MainActivity activity, Navigation n, Identity id, Bundle args) {
+	public ILifecycle onAttach(MainActivity activity, Navigation n, Identity id, Peer peer, Bundle args) {
 		this.activity = activity;
 		icon = (ImageView) findViewById(R.id.identicon);
 		sidLabel = (TextView) findViewById(R.id.sid_label);
@@ -44,7 +45,7 @@ public class IdentityDetails extends LinearLayout
 		update = (Button) findViewById(R.id.update);
 		update.setOnClickListener(this);
 
-		presenter = IdentityDetailsPresenter.factory.getPresenter(this, id, args);
+		presenter = IdentityDetailsPresenter.factory.getPresenter(this, id, peer, args);
 		return presenter;
 	}
 

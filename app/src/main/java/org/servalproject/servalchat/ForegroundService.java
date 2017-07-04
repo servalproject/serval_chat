@@ -25,7 +25,7 @@ public class ForegroundService extends Service {
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		if (intent != null && intent.getBooleanExtra("foreground", false)) {
-			Intent navIntent = MainActivity.getIntentFor(this, null, Navigation.Networking, null);
+			Intent navIntent = MainActivity.getIntentFor(this, Navigation.Networking, null, null, null);
 			PendingIntent pending = PendingIntent.getActivity(this, 0, navIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
 			NotificationCompat.Builder builder =

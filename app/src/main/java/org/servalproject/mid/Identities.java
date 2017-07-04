@@ -1,6 +1,7 @@
 package org.servalproject.mid;
 
 import org.servalproject.servaldna.ServalDInterfaceException;
+import org.servalproject.servaldna.SigningKey;
 import org.servalproject.servaldna.Subscriber;
 import org.servalproject.servaldna.SubscriberId;
 import org.servalproject.servaldna.keyring.KeyringIdentity;
@@ -58,9 +59,9 @@ public class Identities {
 		return loaded;
 	}
 
-	public Identity getIdentity(SubscriberId sid) {
+	public Identity getIdentity(SigningKey key) {
 		for (Identity id : identityList) {
-			if (id.subscriber.sid.equals(sid))
+			if (id.subscriber.signingKey.equals(key))
 				return id;
 		}
 		return null;

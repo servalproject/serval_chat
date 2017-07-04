@@ -80,7 +80,7 @@ public class PeerList extends ObservedRecyclerView<Peer, PeerHolder>
 	public boolean onMenuItemClick(MenuItem menuItem) {
 		switch(menuItem.getItemId()) {
 			case MAP:
-				activity.go(identity, Navigation.PeerMap, null);
+				activity.go(Navigation.PeerMap, identity, null, null);
 				return true;
 		}
 		return false;

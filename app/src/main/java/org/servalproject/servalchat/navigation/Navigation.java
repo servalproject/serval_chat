@@ -3,6 +3,7 @@ package org.servalproject.servalchat.navigation;
 import android.content.Context;
 
 import org.servalproject.mid.Identity;
+import org.servalproject.mid.Peer;
 import org.servalproject.servalchat.R;
 
 import java.util.ArrayList;
@@ -49,9 +50,13 @@ public class Navigation {
 		this(name, true, titleResource, layoutResource, defaultParent, containedIn);
 	}
 
-	public CharSequence getTitle(Context context, Identity identity) {
-		if (titleResource == R.string.app_name && identity != null)
-			return identity.getName();
+	public CharSequence getTitle(Context context, Identity identity, Peer peer) {
+		if (titleResource == R.string.app_name){
+			if (peer != null)
+				return peer.displayName();
+			if (identity != null)
+				return identity.getName();
+		}
 		return context.getString(titleResource);
 	}
 

@@ -11,6 +11,7 @@ import org.servalproject.mid.Identity;
 import org.servalproject.mid.Interface;
 import org.servalproject.mid.KnownPeers;
 import org.servalproject.mid.ListObserver;
+import org.servalproject.mid.Peer;
 import org.servalproject.mid.Serval;
 import org.servalproject.servalchat.navigation.MainActivity;
 import org.servalproject.servalchat.navigation.Navigation;
@@ -129,14 +130,13 @@ public class Notifications {
 		} else {
 
 			Navigation key = Navigation.Inbox;
-			Bundle args = null;
+			Peer peer = null;
 			if (unreadCount == 1) {
 				key = Navigation.PrivateMessages;
-				args = new Bundle();
-				KnownPeers.saveSubscriber(unread.them, args);
+				peer = Serval.getInstance().knownPeers.getPeer(unread.them);
 			}
 
-			Intent intent = MainActivity.getIntentFor(context, id, key, args);
+			Intent intent = MainActivity.getIntentFor(context, key, id, peer, null);
 			PendingIntent pending = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
 			NotificationCompat.Builder builder =

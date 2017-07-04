@@ -4,6 +4,7 @@ import android.os.AsyncTask;
 import android.view.View;
 
 import org.servalproject.mid.Identity;
+import org.servalproject.mid.Peer;
 import org.servalproject.mid.Serval;
 import org.servalproject.servalchat.App;
 import org.servalproject.servalchat.navigation.Navigation;
@@ -19,7 +20,7 @@ public class IdentityDetailsPresenter extends Presenter<IdentityDetails> {
 	public static PresenterFactory<IdentityDetails, IdentityDetailsPresenter> factory
 			= new PresenterFactory<IdentityDetails, IdentityDetailsPresenter>() {
 		@Override
-		protected IdentityDetailsPresenter create(String key, Identity id) {
+		protected IdentityDetailsPresenter create(String key, Identity id, Peer peer) {
 			return new IdentityDetailsPresenter(this, key, id);
 		}
 	};
@@ -77,7 +78,7 @@ public class IdentityDetailsPresenter extends Presenter<IdentityDetails> {
 					if (e != null)
 						view.activity.showError(e);
 					else {
-						view.activity.go(result, Navigation.MyFeed, null);
+						view.activity.go(Navigation.MyFeed, result, null, null);
 					}
 				}
 			}

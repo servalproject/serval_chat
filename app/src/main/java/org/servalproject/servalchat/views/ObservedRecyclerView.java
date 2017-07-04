@@ -9,6 +9,7 @@ import android.util.AttributeSet;
 import org.servalproject.mid.Identity;
 import org.servalproject.mid.ListObserver;
 import org.servalproject.mid.ListObserverSet;
+import org.servalproject.mid.Peer;
 import org.servalproject.servalchat.navigation.ILifecycle;
 import org.servalproject.servalchat.navigation.INavigate;
 import org.servalproject.servalchat.navigation.MainActivity;
@@ -23,6 +24,7 @@ public abstract class ObservedRecyclerView<T, H extends RecyclerView.ViewHolder>
 
 	protected MainActivity activity;
 	protected Identity identity;
+	protected Peer peer;
 	private ListObserverSet<T> observerSet;
 	private int generation = -1;
 
@@ -80,9 +82,10 @@ public abstract class ObservedRecyclerView<T, H extends RecyclerView.ViewHolder>
 	}
 
 	@Override
-	public ILifecycle onAttach(MainActivity activity, Navigation n, Identity id, Bundle args) {
+	public ILifecycle onAttach(MainActivity activity, Navigation n, Identity id, Peer peer, Bundle args) {
 		this.activity = activity;
 		this.identity = id;
+		this.peer = peer;
 		return this;
 	}
 

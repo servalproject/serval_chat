@@ -6,6 +6,8 @@ import android.os.Bundle;
 import org.servalproject.mid.Identity;
 import org.servalproject.mid.IdentityFeed;
 import org.servalproject.mid.KnownPeers;
+import org.servalproject.mid.Peer;
+import org.servalproject.mid.Serval;
 import org.servalproject.servalchat.App;
 import org.servalproject.servalchat.navigation.Navigation;
 import org.servalproject.servalchat.views.Presenter;
@@ -26,7 +28,7 @@ public class MyFeedPresenter extends Presenter<MyFeed> {
 
 	public static final PresenterFactory<MyFeed, MyFeedPresenter> factory = new PresenterFactory<MyFeed, MyFeedPresenter>() {
 		@Override
-		protected MyFeedPresenter create(String key, Identity id) {
+		protected MyFeedPresenter create(String key, Identity id, Peer peer) {
 			return new MyFeedPresenter(this, key, id);
 		}
 	};
@@ -105,10 +107,10 @@ public class MyFeedPresenter extends Presenter<MyFeed> {
 		MyFeed view = getView();
 		if (view == null || subscriber.equals(identity.subscriber))
 			return;
+		Peer peer = Serval.getInstance().knownPeers.getPeer(subscriber);
 		Bundle args = new Bundle();
 		args.putLong("offset", offset);
-		KnownPeers.saveSubscriber(subscriber, args);
-		view.activity.go(identity, Navigation.PeerFeed, args);
+		view.activity.go(Navigation.PeerFeed, peer, args);
 	}
 
 	@Override

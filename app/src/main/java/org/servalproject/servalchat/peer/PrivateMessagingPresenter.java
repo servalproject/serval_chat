@@ -11,6 +11,7 @@ import android.widget.TextView;
 import org.servalproject.mid.Identity;
 import org.servalproject.mid.KnownPeers;
 import org.servalproject.mid.MessageList;
+import org.servalproject.mid.Peer;
 import org.servalproject.mid.Serval;
 import org.servalproject.servalchat.App;
 import org.servalproject.servalchat.R;
@@ -28,33 +29,23 @@ import org.servalproject.servaldna.meshms.MeshMSMessage;
  */
 public final class PrivateMessagingPresenter extends Presenter<PrivateMessaging> {
 	private MessageList messages;
-
+	private final Peer peer;
 	private static final String TAG = "PrivateMessaging";
 	private boolean sending = false;
 	private ScrollingAdapter<MeshMSMessage, ItemHolder> adapter;
 
-	private PrivateMessagingPresenter(PresenterFactory<PrivateMessaging, ?> factory, String key, Identity identity) {
+	private PrivateMessagingPresenter(PresenterFactory<PrivateMessaging, ?> factory, String key, Identity identity, Peer peer) {
 		super(factory, key, identity);
+		this.peer = peer;
 	}
 
 	public static PresenterFactory<PrivateMessaging, PrivateMessagingPresenter> factory
 			= new PresenterFactory<PrivateMessaging, PrivateMessagingPresenter>() {
 
 		@Override
-		protected String getKey(PrivateMessaging view, Identity id, Bundle savedState) {
-			try {
-				Subscriber them = KnownPeers.getSubscriber(savedState);
-				return id.subscriber.sid.toHex() + ":" + them.sid.toHex();
-			} catch (AbstractId.InvalidBinaryException e) {
-				throw new IllegalStateException(e);
-			}
+		protected PrivateMessagingPresenter create(String key, Identity id, Peer peer) {
+			return new PrivateMessagingPresenter(this, key, id, peer);
 		}
-
-		@Override
-		protected PrivateMessagingPresenter create(String key, Identity id) {
-			return new PrivateMessagingPresenter(this, key, id);
-		}
-
 	};
 
 	@Override
@@ -66,67 +57,56 @@ public final class PrivateMessagingPresenter extends Presenter<PrivateMessaging>
 	}
 
 	@Override
-	protected void save(Bundle config) {
-		super.save(config);
-		KnownPeers.saveSubscriber(messages.peer, config);
-	}
-
-	@Override
 	protected void restore(Bundle config) {
-		try {
-			// TODO peer details?
-			Subscriber peer = KnownPeers.getSubscriber(config);
-			messages = identity.messaging.getPrivateMessages(peer);
-			adapter = new ScrollingAdapter<MeshMSMessage, ItemHolder>(messages) {
-				@Override
-				public ItemHolder create(ViewGroup parent, int viewType) {
-					LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-					boolean mine = MeshMSMessage.Type.values()[viewType] == MeshMSMessage.Type.MESSAGE_SENT;
-					return new ItemHolder(inflater, parent, mine);
-				}
+		// TODO show peer details?
+		messages = identity.messaging.getPrivateMessages(peer.getSubscriber());
+		adapter = new ScrollingAdapter<MeshMSMessage, ItemHolder>(messages) {
+			@Override
+			public ItemHolder create(ViewGroup parent, int viewType) {
+				LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+				boolean mine = MeshMSMessage.Type.values()[viewType] == MeshMSMessage.Type.MESSAGE_SENT;
+				return new ItemHolder(inflater, parent, mine);
+			}
 
-				@Override
-				protected void addItem(int index, MeshMSMessage item) {
-					if (item.type == MeshMSMessage.Type.ACK_RECEIVED) {
-						// TODO display "delivered" marker
-						return;
-					}
-					super.addItem(index, item);
+			@Override
+			protected void addItem(int index, MeshMSMessage item) {
+				if (item.type == MeshMSMessage.Type.ACK_RECEIVED) {
+					// TODO display "delivered" marker
+					return;
 				}
+				super.addItem(index, item);
+			}
 
-				@Override
-				protected void bind(ItemHolder holder, MeshMSMessage item) {
-				}
+			@Override
+			protected void bind(ItemHolder holder, MeshMSMessage item) {
+			}
 
-				@Override
-				public void insertedItem(MeshMSMessage item, int position) {
-					super.insertedItem(item, position);
-					if (position+1<getItemCount())
-						notifyItemChanged(position +1);
-				}
+			@Override
+			public void insertedItem(MeshMSMessage item, int position) {
+				super.insertedItem(item, position);
+				if (position+1<getItemCount())
+					notifyItemChanged(position +1);
+			}
 
-				@Override
-				protected void bindItem(ItemHolder holder, int position) {
-					holder.bind(getItem(position), position>0?getItem(position -1):null);
-				}
+			@Override
+			protected void bindItem(ItemHolder holder, int position) {
+				holder.bind(getItem(position), position>0?getItem(position -1):null);
+			}
 
-				@Override
-				protected int getItemType(MeshMSMessage item) {
-					return item.type.ordinal();
-				}
+			@Override
+			protected int getItemType(MeshMSMessage item) {
+				return item.type.ordinal();
+			}
 
-				@Override
-				public long getItemId(int position) {
-					MeshMSMessage item = getItem(position);
-					if (item == null)
-						return Long.MAX_VALUE;
-					return item.getId();
-				}
-			};
-			adapter.setHasStableIds(true);
-		} catch (AbstractId.InvalidBinaryException e) {
-			throw new IllegalStateException(e);
-		}
+			@Override
+			public long getItemId(int position) {
+				MeshMSMessage item = getItem(position);
+				if (item == null)
+					return Long.MAX_VALUE;
+				return item.getId();
+			}
+		};
+		adapter.setHasStableIds(true);
 	}
 
 	private void markRead(){

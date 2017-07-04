@@ -11,6 +11,7 @@ import android.widget.EditText;
 import android.widget.RelativeLayout;
 
 import org.servalproject.mid.Identity;
+import org.servalproject.mid.Peer;
 import org.servalproject.servalchat.R;
 import org.servalproject.servalchat.navigation.ILifecycle;
 import org.servalproject.servalchat.navigation.INavigate;
@@ -34,14 +35,14 @@ public class PrivateMessaging extends RelativeLayout
 	}
 
 	@Override
-	public ILifecycle onAttach(MainActivity activity, Navigation n, Identity id, Bundle args) {
+	public ILifecycle onAttach(MainActivity activity, Navigation n, Identity id, Peer peer, Bundle args) {
 		this.activity = activity;
 		this.message = (EditText) findViewById(R.id.message);
 		this.send = (Button) findViewById(R.id.send);
 		this.list = (RecyclerView) findViewById(R.id.message_list);
 		RecyclerHelper.createLayoutManager(list, true, true);
 		send.setOnClickListener(this);
-		presenter = PrivateMessagingPresenter.factory.getPresenter(this, id, args);
+		presenter = PrivateMessagingPresenter.factory.getPresenter(this, id, peer, args);
 		return presenter;
 	}
 

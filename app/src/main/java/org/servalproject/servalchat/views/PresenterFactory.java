@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.View;
 
 import org.servalproject.mid.Identity;
+import org.servalproject.mid.Peer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,15 +16,19 @@ public abstract class PresenterFactory<V extends View, P extends Presenter<V>> {
 
 	private Map<String, P> presenters = new HashMap<>();
 
-	protected String getKey(V view, Identity id, Bundle savedState) {
-		return id == null ? "null" : id.subscriber.toString();
+	protected String getKey(V view, Identity id, Peer peer, Bundle savedState) {
+		if (id == null)
+			return "null";
+		if (peer == null)
+			return id.subscriber.signingKey.toHex();
+		return id.subscriber.signingKey.toHex() + peer.getSubscriber().sid.toHex();
 	}
 
-	public final P getPresenter(V view, Identity id, Bundle savedState) {
-		String key = getKey(view, id, savedState);
+	public final P getPresenter(V view, Identity id, Peer peer, Bundle savedState) {
+		String key = getKey(view, id, peer, savedState);
 		P ret = presenters.get(key);
 		if (ret == null) {
-			ret = create(key, id);
+			ret = create(key, id, peer);
 			ret.restore(savedState);
 		}
 		ret.takeView(view);
@@ -35,5 +40,5 @@ public abstract class PresenterFactory<V extends View, P extends Presenter<V>> {
 		presenters.remove(presenter.key);
 	}
 
-	protected abstract P create(String key, Identity id);
+	protected abstract P create(String key, Identity id, Peer peer);
 }

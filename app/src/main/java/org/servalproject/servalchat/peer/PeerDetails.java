@@ -43,21 +43,15 @@ public class PeerDetails extends LinearLayout
 	}
 
 	@Override
-	public ILifecycle onAttach(MainActivity activity, Navigation n, Identity id, Bundle args) {
+	public ILifecycle onAttach(MainActivity activity, Navigation n, Identity id, Peer peer, Bundle args) {
 		this.activity = activity;
 		icon = (ImageView) findViewById(R.id.identicon);
 		name = (TextView) findViewById(R.id.name);
 		number = (TextView) findViewById(R.id.number);
 		numberLabel = (TextView) findViewById(R.id.number_label);
 		sid = (TextView) findViewById(R.id.sid);
-
-		try {
-			Serval serval = Serval.getInstance();
-			this.peer = serval.knownPeers.getPeer(args);
-			updated(this.peer);
-		} catch (AbstractId.InvalidBinaryException e) {
-			throw new IllegalStateException();
-		}
+		this.peer = peer;
+		updated(this.peer);
 
 		return this;
 	}
@@ -80,7 +74,7 @@ public class PeerDetails extends LinearLayout
 
 	@Override
 	public void updated(Peer obj) {
-		name.setText(peer.getName());
+		name.setText(peer.displayName());
 		String did =peer.getDid();
 		number.setText(did);
 		SigningKey key = peer.getSubscriber().signingKey;

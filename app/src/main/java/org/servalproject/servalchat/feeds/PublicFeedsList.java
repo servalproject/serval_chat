@@ -8,6 +8,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 
 import org.servalproject.mid.Identity;
+import org.servalproject.mid.Peer;
 import org.servalproject.servalchat.navigation.ILifecycle;
 import org.servalproject.servalchat.navigation.INavigate;
 import org.servalproject.servalchat.navigation.MainActivity;
@@ -26,11 +27,11 @@ public class PublicFeedsList extends RecyclerView implements INavigate {
 	}
 
 	@Override
-	public ILifecycle onAttach(MainActivity activity, Navigation n, Identity id, Bundle args) {
+	public ILifecycle onAttach(MainActivity activity, Navigation n, Identity id, Peer peer, Bundle args) {
 		this.activity = activity;
 		RecyclerHelper.createLayoutManager(this, true, false);
 		RecyclerHelper.createDivider(this);
-		presenter = PublicFeedsPresenter.factory.getPresenter(this, id, args);
+		presenter = PublicFeedsPresenter.factory.getPresenter(this, id, peer, args);
 		return presenter;
 	}
 }

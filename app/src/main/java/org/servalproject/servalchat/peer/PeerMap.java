@@ -137,7 +137,7 @@ public class PeerMap extends View implements INavigate, ILifecycle{
 	}
 
 	@Override
-	public ILifecycle onAttach(MainActivity activity, Navigation n, Identity id, Bundle args) {
+	public ILifecycle onAttach(MainActivity activity, Navigation n, Identity id, Peer peer, Bundle args) {
 		return this;
 	}
 

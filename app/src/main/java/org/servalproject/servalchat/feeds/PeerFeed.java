@@ -13,6 +13,7 @@ import android.widget.LinearLayout;
 
 import org.servalproject.mid.Identity;
 import org.servalproject.mid.Messaging;
+import org.servalproject.mid.Peer;
 import org.servalproject.servalchat.R;
 import org.servalproject.servalchat.navigation.IHaveMenu;
 import org.servalproject.servalchat.navigation.ILifecycle;
@@ -75,11 +76,11 @@ public class PeerFeed extends LinearLayout
 	}
 
 	@Override
-	public ILifecycle onAttach(MainActivity activity, Navigation n, Identity id, Bundle args) {
+	public ILifecycle onAttach(MainActivity activity, Navigation n, Identity id, Peer peer, Bundle args) {
 		this.activity = activity;
 		this.list = (RecyclerView) findViewById(R.id.list);
 		RecyclerHelper.createLayoutManager(list, true, false);
-		return presenter = PeerFeedPresenter.factory.getPresenter(this, id, args);
+		return presenter = PeerFeedPresenter.factory.getPresenter(this, id, peer, args);
 	}
 
 }

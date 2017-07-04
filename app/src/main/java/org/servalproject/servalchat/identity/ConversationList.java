@@ -85,7 +85,7 @@ public class ConversationList
 	}
 
 	@Override
-	public ILifecycle onAttach(MainActivity activity, Navigation n, Identity id, Bundle args) {
+	public ILifecycle onAttach(MainActivity activity, Navigation n, Identity id, Peer peer, Bundle args) {
 		List<MeshMSConversation> list;
 		if (n == Navigation.Inbox)
 			list = id.messaging.conversations;
@@ -100,7 +100,7 @@ public class ConversationList
 			this.setObserverSet(id.messaging.observers);
 			notifyChanged();
 		}
-		return super.onAttach(activity, n, id, args);
+		return super.onAttach(activity, n, id, peer, args);
 	}
 
 	private static final int REQUESTS = 1;
@@ -122,10 +122,10 @@ public class ConversationList
 	public boolean onMenuItemClick(MenuItem item) {
 		switch (item.getItemId()){
 			case REQUESTS:
-				activity.go(identity, Navigation.Requests, null);
+				activity.go(Navigation.Requests);
 				return true;
 			case BLOCKED:
-				activity.go(identity, Navigation.Blocked, null);
+				activity.go(Navigation.Blocked);
 				return true;
 		}
 		return false;
@@ -168,9 +168,8 @@ public class ConversationList
 
 		@Override
 		public void onClick(View v) {
-			Bundle args = new Bundle();
-			KnownPeers.saveSubscriber(conversation.them, args);
-			activity.go(identity, Navigation.PrivateMessages, args);
+			Peer peer = serval.knownPeers.getPeer(conversation.them);
+			activity.go(Navigation.PrivateMessages, peer, null);
 		}
 
 		@Override

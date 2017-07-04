@@ -13,6 +13,7 @@ import android.widget.EditText;
 import android.widget.RelativeLayout;
 
 import org.servalproject.mid.Identity;
+import org.servalproject.mid.Peer;
 import org.servalproject.servalchat.R;
 import org.servalproject.servalchat.navigation.IHaveMenu;
 import org.servalproject.servalchat.navigation.ILifecycle;
@@ -37,7 +38,7 @@ public class MyFeed extends RelativeLayout
 	}
 
 	@Override
-	public ILifecycle onAttach(MainActivity activity, Navigation n, Identity id, Bundle args) {
+	public ILifecycle onAttach(MainActivity activity, Navigation n, Identity id, Peer peer, Bundle args) {
 		this.activity = activity;
 		this.post = (Button) findViewById(R.id.post);
 		this.post.setOnClickListener(this);
@@ -45,7 +46,7 @@ public class MyFeed extends RelativeLayout
 		this.list = (RecyclerView) findViewById(R.id.activity);
 		RecyclerHelper.createLayoutManager(list, true, false);
 		RecyclerHelper.createDivider(list);
-		return presenter = MyFeedPresenter.factory.getPresenter(this, id, args);
+		return presenter = MyFeedPresenter.factory.getPresenter(this, id, peer, args);
 	}
 
 	private static final int ALL_FEEDS=1;
@@ -56,13 +57,13 @@ public class MyFeed extends RelativeLayout
 	public boolean onMenuItemClick(MenuItem menuItem) {
 		switch(menuItem.getItemId()){
 			case ALL_FEEDS:
-				activity.go(Navigation.AllFeeds, null);
+				activity.go(Navigation.AllFeeds);
 				return true;
 			case CONTACTS:
-				activity.go(Navigation.Contacts, null);
+				activity.go(Navigation.Contacts);
 				return true;
 			case BLOCKED:
-				activity.go(Navigation.Blocked, null);
+				activity.go(Navigation.Blocked);
 				return true;
 		}
 		return false;

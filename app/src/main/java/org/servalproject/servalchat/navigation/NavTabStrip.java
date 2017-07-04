@@ -8,7 +8,10 @@ import android.util.AttributeSet;
 import android.widget.LinearLayout;
 
 import org.servalproject.mid.Identity;
+import org.servalproject.mid.Peer;
 import org.servalproject.servalchat.R;
+import org.servalproject.servaldna.SigningKey;
+import org.servalproject.servaldna.Subscriber;
 
 /**
  * Created by jeremy on 7/06/16.
@@ -27,7 +30,7 @@ public class NavTabStrip extends LinearLayout implements IContainerView, INaviga
 	}
 
 	@Override
-	public ViewState activate(Navigation n, Identity identity, Bundle args) {
+	public ViewState activate(Navigation n, Identity identity, Peer peer, Bundle args) {
 		for (int i = 0; i < adapter.screens.length; i++) {
 			HistoryItem screen = adapter.screens[i];
 			if (screen.key.equals(n)) {
@@ -40,12 +43,14 @@ public class NavTabStrip extends LinearLayout implements IContainerView, INaviga
 	}
 
 	@Override
-	public ILifecycle onAttach(MainActivity activity, Navigation n, Identity id, Bundle args) {
+	public ILifecycle onAttach(MainActivity activity, Navigation n, Identity id, Peer peer, Bundle args) {
 		HistoryItem items[] = new HistoryItem[n.children.size()];
 		// use the same arguments for all tabs
+		SigningKey key = id == null ? null : id.subscriber.signingKey;
+		Subscriber subscriber = peer == null ? null : peer.getSubscriber();
 		for (int i = 0; i < n.children.size(); i++)
-			items[i] = new HistoryItem(n.children.get(i), args);
-		adapter = new NavPageAdapter(activity, id, items);
+			items[i] = new HistoryItem(n.children.get(i), key, subscriber, args);
+		adapter = new NavPageAdapter(activity, id, peer, items);
 		pager = (ViewPager) findViewById(R.id.pager);
 		adapter.setViewPager(pager);
 		TabLayout tabs = (TabLayout) findViewById(R.id.sliding_tabs);

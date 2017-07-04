@@ -5,6 +5,8 @@ import android.os.Bundle;
 import org.servalproject.mid.FeedList;
 import org.servalproject.mid.Identity;
 import org.servalproject.mid.KnownPeers;
+import org.servalproject.mid.Peer;
+import org.servalproject.mid.Serval;
 import org.servalproject.servalchat.navigation.Navigation;
 import org.servalproject.servalchat.views.Presenter;
 import org.servalproject.servalchat.views.PresenterFactory;
@@ -24,7 +26,7 @@ public class PublicFeedsPresenter extends Presenter<PublicFeedsList> {
 			= new PresenterFactory<PublicFeedsList, PublicFeedsPresenter>() {
 
 		@Override
-		protected PublicFeedsPresenter create(String key, Identity id) {
+		protected PublicFeedsPresenter create(String key, Identity id, Peer peer) {
 			return new PublicFeedsPresenter(this, key, id);
 		}
 	};
@@ -45,11 +47,10 @@ public class PublicFeedsPresenter extends Presenter<PublicFeedsList> {
 		if (list == null)
 			return;
 		if (identity.subscriber.equals(subscriber)) {
-			list.activity.go(identity, Navigation.MyFeed, null);
+			list.activity.go(Navigation.MyFeed);
 		} else {
-			Bundle args = new Bundle();
-			KnownPeers.saveSubscriber(subscriber, args);
-			list.activity.go(identity, Navigation.PeerFeed, args);
+			Peer peer = Serval.getInstance().knownPeers.getPeer(subscriber);
+			list.activity.go(Navigation.PeerFeed, peer, null);
 		}
 	}
 

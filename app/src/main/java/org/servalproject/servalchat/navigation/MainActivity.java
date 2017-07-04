@@ -24,10 +24,12 @@ import android.widget.LinearLayout;
 
 import org.servalproject.mid.Identity;
 import org.servalproject.mid.ListObserver;
+import org.servalproject.mid.Peer;
 import org.servalproject.mid.Serval;
 import org.servalproject.servalchat.App;
 import org.servalproject.servalchat.BuildConfig;
 import org.servalproject.servalchat.R;
+import org.servalproject.servaldna.Subscriber;
 
 import java.io.File;
 import java.util.Stack;
@@ -113,7 +115,9 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 	private void go() {
 		HistoryItem item = history.getTop();
 		Navigation n = item.key;
+		Subscriber peerSubscriber = item.peer;
 		Bundle args = item.args;
+		Peer peer = null;
 
 		if (identity == null && history.identity != null)
 			identity = serval.identities.getIdentity(history.identity);
@@ -123,6 +127,7 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 			serval.identities.listObservers.add(idLoaded);
 			n = Navigation.Spinner;
 			args = null;
+			peerSubscriber = null;
 		}
 
 		if (identity != null)
@@ -136,7 +141,11 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 		if (n.requiresId && identity == null) {
 			n = Navigation.IdentityList;
 			args = null;
+			peerSubscriber = null;
 		}
+
+		if (peerSubscriber != null)
+			peer = serval.knownPeers.getPeer(peerSubscriber);
 
 		if (!n.children.isEmpty())
 			throw new IllegalStateException();
@@ -164,7 +173,7 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 			IContainerView container = (parent == null) ? this : parent.getContainer();
 			if (container == null)
 				throw new NullPointerException();
-			parent = container.activate(n, identity, args);
+			parent = container.activate(n, identity, peer, args);
 			if (parent == null)
 				throw new NullPointerException();
 			viewStack.add(parent);
@@ -188,7 +197,7 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 			imm.hideSoftInputFromWindow(findViewById(android.R.id.content).getWindowToken(), 0);
 	}
 
-	public static Intent getIntentFor(Context context, Identity identity, Navigation key, Bundle args) {
+	public static Intent getIntentFor(Context context, Navigation key, Identity identity, Peer peer, Bundle args) {
 		// Spawn new task
 		Intent intent = new Intent();
 		Class<?> activity = MainActivity.class;
@@ -218,22 +227,34 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 		}
 		intent.addFlags(flags);
 		intent.setClass(context, activity);
-		intent.putExtras(NavHistory.prepareNew(identity == null ? null : identity.subscriber.sid, key, args));
+		intent.putExtras(NavHistory.prepareNew(
+				key,
+				identity == null ? null : identity.subscriber.signingKey,
+				peer == null ? null : peer.getSubscriber(),
+				args));
 		return intent;
 	}
 
-	public void go(Identity identity, Navigation key, Bundle args) {
+	public void go(Navigation key, Identity identity, Peer peer, Bundle args) {
 		if (this.identity == identity) {
-			go(key, args);
+			go(key, peer, args);
 			return;
 		}
 
-		startActivity(getIntentFor(this, identity, key, args));
+		startActivity(getIntentFor(this, key, identity, peer, args));
 	}
 
-	public void go(Navigation key, Bundle args) {
+	public void go(Navigation key) {
+		go(key, null, null);
+	}
+	public void go(Navigation key, Peer peer, Bundle args) {
 		// record the change first, then create views
-		if (history.add(key, args, false))
+		if (history.add(
+				key,
+				identity == null ? null : this.identity.subscriber.signingKey,
+				peer == null ? null : peer.getSubscriber(),
+				args,
+				false))
 			go();
 	}
 
@@ -384,8 +405,8 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 	}
 
 	@Override
-	public ViewState activate(Navigation n, Identity identity, Bundle args) {
-		ViewState ret = ViewState.Inflate(this, n, identity, args);
+	public ViewState activate(Navigation n, Identity identity, Peer peer, Bundle args) {
+		ViewState ret = ViewState.Inflate(this, n, identity, peer, args);
 		ret.view.setLayoutParams(new LinearLayout.LayoutParams(
 				ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 		rootLayout.addView(ret.view);
@@ -393,7 +414,7 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 		if (isStarted && lifecycle != null)
 			lifecycle.onVisible();
 		// TODO observe identity and update title
-		CharSequence title = n.getTitle(this, identity);
+		CharSequence title = n.getTitle(this, identity, peer);
 		getSupportActionBar().setTitle(title);
 		if (Build.VERSION.SDK_INT>=21) {
 			setTaskDescription(new ActivityManager.TaskDescription(title.toString(), identity == null ? null : identity.getBitmap()));

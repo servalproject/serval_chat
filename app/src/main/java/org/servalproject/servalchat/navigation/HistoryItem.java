@@ -2,16 +2,23 @@ package org.servalproject.servalchat.navigation;
 
 import android.os.Bundle;
 
+import org.servalproject.servaldna.SigningKey;
+import org.servalproject.servaldna.Subscriber;
+
 /**
  * Created by jeremy on 20/07/16.
  */
 public class HistoryItem {
 	public final Navigation key;
+	public final SigningKey identity;
+	public final Subscriber peer;
 	public final Bundle args;
 
-	public HistoryItem(Navigation key, Bundle args) {
+	public HistoryItem(Navigation key, SigningKey identity, Subscriber peer, Bundle args) {
 		this.key = key;
 		this.args = args;
+		this.identity = identity;
+		this.peer = peer;
 	}
 
 	@Override

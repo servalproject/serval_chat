@@ -52,8 +52,6 @@ public class PeerHolder extends RecyclerView.ViewHolder implements View.OnClickL
 
 	@Override
 	public void onClick(View v) {
-		Bundle args = new Bundle();
-		KnownPeers.saveSubscriber(peer.getSubscriber(), args);
-		activity.go(Navigation.PeerDetails, args);
+		activity.go(Navigation.PeerDetails, peer, null);
 	}
 }

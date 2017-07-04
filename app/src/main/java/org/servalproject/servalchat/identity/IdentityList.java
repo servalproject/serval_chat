@@ -111,7 +111,7 @@ public class IdentityList
 	public boolean onMenuItemClick(MenuItem item) {
 		switch (item.getItemId()) {
 			case ADD:
-				activity.go(Navigation.NewIdentityDetails, null);
+				activity.go(Navigation.NewIdentityDetails);
 				return true;
 		}
 		return false;
@@ -131,7 +131,7 @@ public class IdentityList
 
 		@Override
 		public void onClick(View v) {
-			activity.go(id, Navigation.MyFeed, null);
+			activity.go(Navigation.MyFeed, id, null, null);
 		}
 	}
 }

@@ -122,7 +122,7 @@ public class Contacts extends SimpleRecyclerView<Peer, PeerHolder>
 	}
 
 	@Override
-	public ILifecycle onAttach(MainActivity activity, Navigation n, Identity id, Bundle args) {
+	public ILifecycle onAttach(MainActivity activity, Navigation n, Identity id, Peer peer, Bundle args) {
 		this.activity = activity;
 		this.identity = id;
 		return this;

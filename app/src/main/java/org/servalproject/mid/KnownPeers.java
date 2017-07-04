@@ -73,17 +73,6 @@ public class KnownPeers {
 		args.putBoolean(THEIR_COMBINED, subscriber.combined);
 	}
 
-	public static Subscriber getSubscriber(Bundle args) throws AbstractId.InvalidBinaryException {
-		byte[] theirSid = args.getByteArray(THEIR_SID);
-		byte[] theirSign = args.getByteArray(THEIR_SIGN);
-		boolean combined = args.getBoolean(THEIR_COMBINED);
-		return new Subscriber(theirSid, theirSign, combined);
-	}
-
-	public Peer getPeer(Bundle args) throws AbstractId.InvalidBinaryException {
-		return getPeer(getSubscriber(args));
-	}
-
 	private Peer getPeer(SubscriberId sid){
 		if (sid==null)
 			return null;
