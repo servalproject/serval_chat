@@ -51,9 +51,9 @@ public class Identity {
 		return new ActivityList(serval, this);
 	}
 
-	public void alterSubscription(MeshMBCommon.SubscriptionAction action, MessageFeed feed) throws ServalDInterfaceException, IOException {
-		serval.getResultClient().meshmbAlterSubscription(subscriber, action, feed.getId(), feed.getName());
-		messaging.subscriptionAltered(action, feed);
+	public void alterSubscription(MeshMBCommon.SubscriptionAction action, Peer peer) throws ServalDInterfaceException, IOException {
+		serval.getResultClient().meshmbAlterSubscription(subscriber, action, peer.getSubscriber(), peer.getFeedName());
+		messaging.subscriptionAltered(action, peer);
 	}
 
 	public void update(KeyringIdentity id) {

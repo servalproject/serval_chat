@@ -2,6 +2,7 @@ package org.servalproject.servalchat.feeds;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
@@ -71,10 +72,16 @@ public class MyFeed extends RelativeLayout
 
 	@Override
 	public void populateItems(Menu menu) {
-		menu.add(Menu.NONE, CONTACTS, Menu.NONE, R.string.contacts)
-				.setOnMenuItemClickListener(this);
+		MenuItem item;
+
+		item = menu.add(Menu.NONE, CONTACTS, Menu.NONE, R.string.contacts)
+				.setOnMenuItemClickListener(this)
+				.setIcon(R.drawable.ic_contacts);
+		MenuItemCompat.setShowAsAction(item, MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
+
 		menu.add(Menu.NONE, ALL_FEEDS, Menu.NONE, R.string.all_feeds)
 				.setOnMenuItemClickListener(this);
+
 		menu.add(Menu.NONE, BLOCKED, Menu.NONE, R.string.blocked)
 				.setOnMenuItemClickListener(this);
 	}

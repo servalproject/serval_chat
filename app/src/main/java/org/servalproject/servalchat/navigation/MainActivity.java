@@ -5,12 +5,14 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -24,12 +26,14 @@ import android.widget.LinearLayout;
 
 import org.servalproject.mid.Identity;
 import org.servalproject.mid.ListObserver;
+import org.servalproject.mid.Messaging;
 import org.servalproject.mid.Peer;
 import org.servalproject.mid.Serval;
 import org.servalproject.servalchat.App;
 import org.servalproject.servalchat.BuildConfig;
 import org.servalproject.servalchat.R;
 import org.servalproject.servaldna.Subscriber;
+import org.servalproject.servaldna.meshmb.MeshMBCommon;
 
 import java.io.File;
 import java.util.Stack;
@@ -42,6 +46,7 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 	private NavHistory history;
 	private Serval serval;
 	private Identity identity;
+	private Peer peer;
 	private InputMethodManager imm;
 
 	@Override
@@ -117,7 +122,7 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 		Navigation n = item.key;
 		Subscriber peerSubscriber = item.peer;
 		Bundle args = item.args;
-		Peer peer = null;
+		peer = null;
 
 		if (identity == null && history.identity != null)
 			identity = serval.identities.getIdentity(history.identity);
@@ -321,12 +326,63 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 		}
 	}
 
+	private void alterSubscription(final MeshMBCommon.SubscriptionAction action){
+		final Peer alterPeer = peer;
+		new AsyncTask<Void, Void, Void>(){
+			private Exception e;
+
+			@Override
+			protected void onPostExecute(Void aVoid) {
+				super.onPostExecute(aVoid);
+
+				if (e != null)
+					showError(e);
+				else {
+					int r=-1;
+					switch (action){
+						case Follow:
+							r = R.string.followed;
+							break;
+						case Ignore:
+							r = R.string.ignored;
+							break;
+						case Block:
+							r = R.string.blocked;
+							break;
+					}
+					showSnack(r, Snackbar.LENGTH_SHORT);
+					supportInvalidateOptionsMenu();
+				}
+			}
+
+			@Override
+			protected Void doInBackground(Void... voids) {
+				try {
+					identity.alterSubscription(action, alterPeer);
+				} catch (Exception e) {
+					this.e = e;
+				}
+				return null;
+			}
+		}.execute();
+
+	}
+
 	@Override
 	public boolean onMenuItemClick(MenuItem item) {
 		switch (item.getItemId()) {
 			case SHARE_APK:
 				shareFile(serval.apkFile, "image/apk");
-				break;
+				return true;
+			case FOLLOW:
+				alterSubscription(MeshMBCommon.SubscriptionAction.Follow);
+				return true;
+			case IGNORE:
+				alterSubscription(MeshMBCommon.SubscriptionAction.Ignore);
+				return true;
+			case BLOCK:
+				alterSubscription(MeshMBCommon.SubscriptionAction.Block);
+				return true;
 		}
 		return false;
 	}
@@ -344,11 +400,40 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 		}
 	}
 
+	private static final int FOLLOW = 2;
+	private static final int IGNORE = 3;
+	private static final int BLOCK = 4;
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		if (!App.isTesting()) {
 			menu.add(Menu.NONE, SHARE_APK, Menu.NONE, R.string.share_app)
 					.setOnMenuItemClickListener(this);
+		}
+
+		if (identity != null && peer != null && peer.getSubscriber().signingKey != null){
+			Messaging.SubscriptionState state = identity.messaging.getSubscriptionState(peer.getSubscriber());
+
+			if (state != null) {
+				if (state != Messaging.SubscriptionState.Ignored) {
+					MenuItem item = menu.add(Menu.NONE, IGNORE, Menu.NONE, R.string.ignore_feed)
+							.setOnMenuItemClickListener(this)
+							.setIcon(R.drawable.ic_remove_contact);
+					MenuItemCompat.setShowAsAction(item, MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
+				}
+				if (state != Messaging.SubscriptionState.Followed) {
+					MenuItem item = menu.add(Menu.NONE, FOLLOW, Menu.NONE, R.string.follow_feed)
+							.setOnMenuItemClickListener(this)
+							.setIcon(R.drawable.ic_add_contact);
+					MenuItemCompat.setShowAsAction(item, MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
+				}
+				if (state != Messaging.SubscriptionState.Blocked) {
+					MenuItem item = menu.add(Menu.NONE, BLOCK, Menu.NONE, R.string.block_contact)
+							.setOnMenuItemClickListener(this)
+							.setIcon(R.drawable.ic_block_contact);
+					MenuItemCompat.setShowAsAction(item, MenuItemCompat.SHOW_AS_ACTION_NEVER);
+				}
+			}
 		}
 		populateMenu(menu, viewStack.peek().view);
 		super.onCreateOptionsMenu(menu);

@@ -103,7 +103,7 @@ public class IdentityList
 	public void populateItems(Menu menu) {
 		MenuItem add = menu.add(Menu.NONE, ADD, Menu.NONE, R.string.add_identity)
 				.setOnMenuItemClickListener(this)
-				.setIcon(R.drawable.ic_add_circle);
+				.setIcon(R.drawable.ic_add_account);
 		MenuItemCompat.setShowAsAction(add, MenuItemCompat.SHOW_AS_ACTION_IF_ROOM);
 	}
 

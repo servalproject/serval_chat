@@ -27,7 +27,7 @@ import org.servalproject.servaldna.meshmb.MeshMBCommon;
  * Created by jeremy on 3/08/16.
  */
 public class PeerFeed extends LinearLayout
-		implements INavigate, IHaveMenu, MenuItem.OnMenuItemClickListener {
+		implements INavigate {
 
 	RecyclerView list;
 	PeerFeedPresenter presenter;
@@ -35,44 +35,6 @@ public class PeerFeed extends LinearLayout
 
 	public PeerFeed(Context context, @Nullable AttributeSet attrs) {
 		super(context, attrs);
-	}
-
-	private static final int FOLLOW = 1;
-	private static final int IGNORE = 2;
-	private static final int BLOCK = 3;
-
-	@Override
-	public void populateItems(Menu menu) {
-		Messaging.SubscriptionState state = presenter.getSubscriptionState();
-		if (state == null)
-			return;
-		if (state != Messaging.SubscriptionState.Ignored)
-			menu.add(Menu.NONE, IGNORE, Menu.NONE, R.string.ignore_feed)
-					.setOnMenuItemClickListener(this);
-		if (state != Messaging.SubscriptionState.Followed)
-			menu.add(Menu.NONE, FOLLOW, Menu.NONE, R.string.follow_feed)
-					.setOnMenuItemClickListener(this);
-		if (state != Messaging.SubscriptionState.Blocked)
-			menu.add(Menu.NONE, BLOCK, Menu.NONE, R.string.block_contact)
-					.setOnMenuItemClickListener(this);
-	}
-
-	@Override
-	public boolean onMenuItemClick(MenuItem item) {
-		switch (item.getItemId()) {
-			case FOLLOW:
-				presenter.subscribe(MeshMBCommon.SubscriptionAction.Follow);
-				break;
-			case IGNORE:
-				presenter.subscribe(MeshMBCommon.SubscriptionAction.Ignore);
-				break;
-			case BLOCK:
-				presenter.subscribe(MeshMBCommon.SubscriptionAction.Block);
-				break;
-			default:
-				return false;
-		}
-		return true;
 	}
 
 	@Override

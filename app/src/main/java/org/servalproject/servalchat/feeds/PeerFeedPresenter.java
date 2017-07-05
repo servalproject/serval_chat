@@ -24,11 +24,9 @@ import org.servalproject.servaldna.meshmb.MeshMBSubscription;
  */
 public class PeerFeedPresenter extends Presenter<PeerFeed> {
 
-	private Serval serval;
 	private FeedAdapter adapter;
 	private final Peer peer;
 	private MessageFeed feed;
-	private boolean busy;
 
 	private Observer<Peer> peerObserver = new Observer<Peer>() {
 		@Override
@@ -68,7 +66,6 @@ public class PeerFeedPresenter extends Presenter<PeerFeed> {
 
 	@Override
 	protected void restore(Bundle config) {
-		serval = Serval.getInstance();
 		feed = peer.getFeed();
 		adapter = new FeedAdapter(feed);
 	}
@@ -85,56 +82,5 @@ public class PeerFeedPresenter extends Presenter<PeerFeed> {
 		super.onHidden();
 		adapter.onHidden();
 		peer.observers.removeUI(this.peerObserver);
-	}
-
-	public Messaging.SubscriptionState getSubscriptionState(){
-		if (feed == null || feed.getId() == null)
-			return null;
-		return identity.messaging.getSubscriptionState(feed.getId());
-	}
-
-	public void subscribe(final MeshMBCommon.SubscriptionAction action){
-		busy = true;
-		new AsyncTask<Void, Void, Void>(){
-			private Exception e;
-
-			@Override
-			protected void onPostExecute(Void aVoid) {
-				super.onPostExecute(aVoid);
-				busy = false;
-				PeerFeed view = getView();
-				if (view == null)
-					return;
-
-				if (e != null)
-					view.activity.showError(e);
-				else {
-					int r=-1;
-					switch (action){
-						case Follow:
-							r = R.string.followed;
-							break;
-						case Ignore:
-							r = R.string.ignored;
-							break;
-						case Block:
-							r = R.string.blocked;
-							break;
-					}
-					view.activity.showSnack(r, Snackbar.LENGTH_SHORT);
-					view.activity.supportInvalidateOptionsMenu();
-				}
-			}
-
-			@Override
-			protected Void doInBackground(Void... voids) {
-				try {
-					identity.alterSubscription(action, feed);
-				} catch (Exception e) {
-					this.e = e;
-				}
-				return null;
-			}
-		}.execute();
 	}
 }

@@ -154,10 +154,8 @@ public class Messaging {
 		return subscriptionsBySid.get(subscriber);
 	}
 */
-	void subscriptionAltered(MeshMBCommon.SubscriptionAction action, MessageFeed feed){
-		Subscriber id = feed.getId();
-		SigningKey key = id.signingKey;
-		Peer peer = feed.getPeer();
+	void subscriptionAltered(MeshMBCommon.SubscriptionAction action, Peer peer){
+		Subscriber id = peer.getSubscriber();
 
 		switch (action){
 			case Follow:

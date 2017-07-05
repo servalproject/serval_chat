@@ -84,7 +84,7 @@ public class SampleData {
 					if ((i+j)%4==2)
 						continue;
 
-					id.alterSubscription(MeshMBCommon.SubscriptionAction.Follow, p.getFeed());
+					id.alterSubscription(MeshMBCommon.SubscriptionAction.Follow, p);
 				}
 			}
 
