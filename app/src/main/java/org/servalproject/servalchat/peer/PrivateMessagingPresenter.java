@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
@@ -33,6 +34,7 @@ public final class PrivateMessagingPresenter extends Presenter<PrivateMessaging>
 	private static final String TAG = "PrivateMessaging";
 	private boolean sending = false;
 	private ScrollingAdapter<MeshMSMessage, ItemHolder> adapter;
+	private MeshMSMessage delivered;
 
 	private PrivateMessagingPresenter(PresenterFactory<PrivateMessaging, ?> factory, String key, Identity identity, Peer peer) {
 		super(factory, key, identity);
@@ -64,15 +66,22 @@ public final class PrivateMessagingPresenter extends Presenter<PrivateMessaging>
 			@Override
 			public ItemHolder create(ViewGroup parent, int viewType) {
 				LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-				boolean mine = MeshMSMessage.Type.values()[viewType] == MeshMSMessage.Type.MESSAGE_SENT;
-				return new ItemHolder(inflater, parent, mine);
+				switch (MeshMSMessage.Type.values()[viewType]){
+					default:
+						return new TextItemHolder(inflater, parent, true);
+					case MESSAGE_RECEIVED:
+						return new TextItemHolder(inflater, parent, false);
+					case ACK_RECEIVED:
+						return new AckHolder(inflater, parent);
+				}
 			}
 
 			@Override
 			protected void addItem(int index, MeshMSMessage item) {
 				if (item.type == MeshMSMessage.Type.ACK_RECEIVED) {
-					// TODO display "delivered" marker
-					return;
+					if (delivered!=null)
+						items.removeItem(delivered);
+					delivered = item;
 				}
 				super.addItem(index, item);
 			}
@@ -84,13 +93,26 @@ public final class PrivateMessagingPresenter extends Presenter<PrivateMessaging>
 			@Override
 			public void insertedItem(MeshMSMessage item, int position) {
 				super.insertedItem(item, position);
-				if (position+1<getItemCount())
-					notifyItemChanged(position +1);
+				while((++position)+1<getItemCount()){
+					if (getItem(position).type != MeshMSMessage.Type.ACK_RECEIVED){
+						notifyItemChanged(position);
+						break;
+					}
+				}
+			}
+
+			private MeshMSMessage previousMessage(int position){
+				while(--position>=0){
+					MeshMSMessage item = getItem(position);
+					if (item.type!=MeshMSMessage.Type.ACK_RECEIVED)
+						return item;
+				}
+				return null;
 			}
 
 			@Override
 			protected void bindItem(ItemHolder holder, int position) {
-				holder.bind(getItem(position), position>0?getItem(position -1):null);
+				holder.bind(getItem(position), previousMessage(position));
 			}
 
 			@Override
@@ -191,11 +213,18 @@ public final class PrivateMessagingPresenter extends Presenter<PrivateMessaging>
 		sender.execute();
 	}
 
+	private abstract class ItemHolder extends BasicViewHolder {
+		public ItemHolder(View itemView) {
+			super(itemView);
+		}
+		public abstract void bind(MeshMSMessage item, MeshMSMessage previous);
+	}
 
-	public class ItemHolder extends BasicViewHolder {
+	private class TextItemHolder extends ItemHolder{
 		TextView message;
 		TimestampView age;
-		public ItemHolder(LayoutInflater inflater, ViewGroup parent, boolean myMessage) {
+
+		public TextItemHolder(LayoutInflater inflater, ViewGroup parent, boolean myMessage) {
 			super(inflater.inflate(myMessage ? R.layout.my_message : R.layout.their_message, parent, false));
 			this.message = (TextView) this.itemView.findViewById(R.id.message);
 			this.age = (TimestampView) this.itemView.findViewById(R.id.age);
@@ -204,6 +233,16 @@ public final class PrivateMessagingPresenter extends Presenter<PrivateMessaging>
 		public void bind(MeshMSMessage item, MeshMSMessage previous) {
 			message.setText(item.text);
 			age.setDates(item.date, previous==null?null:previous.date);
+		}
+	}
+
+	private class AckHolder extends ItemHolder{
+		public AckHolder(LayoutInflater inflater, ViewGroup parent) {
+			super(inflater.inflate(R.layout.ack_message, parent, false));
+		}
+
+		@Override
+		public void bind(MeshMSMessage item, MeshMSMessage previous) {
 		}
 	}
 }

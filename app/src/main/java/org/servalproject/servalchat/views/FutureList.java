@@ -84,6 +84,14 @@ public class FutureList<T>
 		return ret;
 	}
 
+	public boolean removeItem(T item) {
+		int index = Collections.binarySearch((List<? extends Comparable<? super T>>) this, item);
+		if (index<0)
+			return false;
+		remove(index);
+		return true;
+	}
+
 	@Override
 	public void clear() {
 		past.clear();
