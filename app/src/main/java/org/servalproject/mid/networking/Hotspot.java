@@ -58,12 +58,16 @@ public class Hotspot extends NetworkInfo {
 	}
 
 	private void testUserConfig(){
-		WifiConfiguration current = getWifiApConfiguration();
-		if (current!=null && !isEqual(current, servalConfiguration)) {
-			saveProfile(profileName, current);
-			saved = current;
+		try {
+			WifiConfiguration current = getWifiApConfiguration();
+			if (current != null && !isEqual(current, servalConfiguration)) {
+				saveProfile(profileName, current);
+				saved = current;
+			}
+			this.current = current;
+		}catch (SecurityException e){
+			Log.e(TAG, e.getMessage(), e);
 		}
-		this.current = current;
 	}
 
 	public static Hotspot getHotspot(Serval serval){
@@ -95,6 +99,9 @@ public class Hotspot extends NetworkInfo {
 			// shouldn't happen
 			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
+			Throwable cause = e.getCause();
+			if (cause instanceof SecurityException)
+				throw (SecurityException)cause;
 			// shouldn't happen
 			throw new IllegalStateException(e);
 		}
