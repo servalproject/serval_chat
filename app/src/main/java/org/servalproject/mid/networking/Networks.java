@@ -201,6 +201,9 @@ public class Networks implements Observer<NetworkInfo> {
 	private Runnable progress = new Runnable() {
 		@Override
 		public void run() {
+			if (goal == null)
+				return;
+
 			switch (goal){
 				case Off:
 					if (turnOffHotspot())
