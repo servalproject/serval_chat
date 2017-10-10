@@ -1,5 +1,6 @@
 package org.servalproject.servalchat;
 
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -143,6 +144,7 @@ public class Notifications {
 					new NotificationCompat.Builder(context)
 							.setAutoCancel(true)
 							.setSmallIcon(R.mipmap.serval_head)
+							.setDefaults(Notification.DEFAULT_ALL)
 							.setContentTitle(context.getString(R.string.private_messaging_title))
 							.setContentText(context.getResources().getQuantityString(R.plurals.private_messages, unreadCount, id.getName(), unreadCount))
 							.setContentIntent(pending);
