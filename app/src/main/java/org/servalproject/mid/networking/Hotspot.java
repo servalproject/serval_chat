@@ -31,6 +31,7 @@ public class Hotspot extends NetworkInfo {
 	WifiConfiguration servalConfiguration;
 	WifiConfiguration current;
 	boolean restoring = false;
+	private String lastError = null;
 
 	private final WifiManager mgr;
 
@@ -92,29 +93,42 @@ public class Hotspot extends NetworkInfo {
 		return new Hotspot(serval);
 	}
 
+	private void testCause(InvocationTargetException e){
+		Throwable cause = e.getCause();
+		if (cause!=null) {
+			lastError = cause.getMessage();
+			if (cause instanceof RuntimeException)
+				throw (RuntimeException) cause;
+			throw new IllegalStateException(cause);
+		}
+	}
+
 	public WifiConfiguration getWifiApConfiguration(){
 		try {
+			lastError = null;
 			return (WifiConfiguration) getWifiApConfiguration.invoke(mgr);
 		} catch (IllegalAccessException e) {
 			// shouldn't happen
+			lastError = e.getMessage();
 			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
-			Throwable cause = e.getCause();
-			if (cause instanceof SecurityException)
-				throw (SecurityException)cause;
-			// shouldn't happen
+			testCause(e);
+			lastError = e.getMessage();
 			throw new IllegalStateException(e);
 		}
 	}
 
 	public boolean isWifiApEnabled(){
 		try {
+			lastError = null;
 			return (Boolean) isWifiApEnabled.invoke(mgr);
 		} catch (IllegalAccessException e) {
 			// shouldn't happen
+			lastError = e.getMessage();
 			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
-			// shouldn't happen
+			testCause(e);
+			lastError = e.getMessage();
 			throw new IllegalStateException(e);
 		}
 	}
@@ -142,12 +156,15 @@ public class Hotspot extends NetworkInfo {
 
 	public State getWifiApState(){
 		try {
+			lastError = null;
 			return statusToState((Integer) getWifiApState.invoke(mgr));
 		} catch (IllegalAccessException e) {
 			// shouldn't happen
+			lastError = e.getMessage();
 			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
-			// shouldn't happen
+			testCause(e);
+			lastError = e.getMessage();
 			throw new IllegalStateException(e);
 		}
 	}
@@ -165,14 +182,15 @@ public class Hotspot extends NetworkInfo {
 		if (config!=null)
 			testUserConfig();
 		try {
+			lastError = null;
 			return (Boolean) setWifiApEnabled.invoke(mgr, config, enabled);
 		} catch (IllegalAccessException e) {
 			// shouldn't happen
+			lastError = e.getMessage();
 			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
-			// shouldn't happen?
-			if (e.getCause()!=null)
-				throw new IllegalStateException(e.getCause());
+			testCause(e);
+			lastError = e.getMessage();
 			throw new IllegalStateException(e);
 		}
 	}
@@ -225,6 +243,8 @@ public class Hotspot extends NetworkInfo {
 
 	@Override
 	public String getStatus(Context context) {
+		if (lastError != null)
+			return lastError;
 		if (restoring)
 			return context.getString(R.string.restore_hotspot);
 

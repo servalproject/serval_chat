@@ -166,33 +166,38 @@ public class Networks implements Observer<NetworkInfo> {
 	}
 
 	private boolean turnOffHotspot(){
-		if (wifiHotspot == null)
-			return false;
+		try {
+			if (wifiHotspot == null)
+				return false;
 
-		boolean shouldRestore = wifiHotspot.saved!=null && wifiHotspot.isServalConfig();
-		if (shouldRestore)
-			wifiHotspot.restoring = true;
+			boolean shouldRestore = wifiHotspot.saved!=null && wifiHotspot.isServalConfig();
+			if (shouldRestore)
+				wifiHotspot.restoring = true;
 
-		NetworkInfo.State state = wifiHotspot.getState();
-		if (state == NetworkInfo.State.On) {
-			Log.v(TAG, "Turning hotspot off");
-			wifiHotspot.setWifiApEnabled(null, false);
-		}
-
-		if (state == NetworkInfo.State.Off && shouldRestore){
-			if (wifiClient.getState() == NetworkInfo.State.On){
-				Log.v(TAG, "Turning wifi off so we can restore hotspot config");
-				wifiClient.setEnabled(false);
+			NetworkInfo.State state = wifiHotspot.getState();
+			if (state == NetworkInfo.State.On) {
+				Log.v(TAG, "Turning hotspot off");
+				wifiHotspot.setWifiApEnabled(null, false);
 			}
-			if (wifiClient.getState() != NetworkInfo.State.Off)
-				return true;
-			Log.v(TAG, "Turning hotspot back on to restore config");
-			wifiHotspot.setWifiApEnabled(wifiHotspot.saved, true);
-			return true;
-		}
 
-		if (state != NetworkInfo.State.Off)
-			return true;
+			if (state == NetworkInfo.State.Off && shouldRestore) {
+				if (wifiClient.getState() == NetworkInfo.State.On) {
+					Log.v(TAG, "Turning wifi off so we can restore hotspot config");
+					wifiClient.setEnabled(false);
+				}
+				if (wifiClient.getState() != NetworkInfo.State.Off)
+					return true;
+				Log.v(TAG, "Turning hotspot back on to restore config");
+				wifiHotspot.setWifiApEnabled(wifiHotspot.saved, true);
+				return true;
+			}
+
+			if (state != NetworkInfo.State.Off)
+				return true;
+
+		}catch (SecurityException e){
+			Log.e(TAG, e.getMessage(), e);
+		}
 
 		wifiHotspot.restoring = false;
 		return false;
@@ -204,64 +209,69 @@ public class Networks implements Observer<NetworkInfo> {
 			if (goal == null)
 				return;
 
-			switch (goal){
-				case Off:
-					if (turnOffHotspot())
-						return;
-					if (turnOffClient())
-						return;
-					goal = null;
-					break;
-
-				case ClientOn:
-					if (turnOffHotspot())
-						return;
-
-					NetworkInfo.State clientState = wifiClient.getState();
-					if (clientState == NetworkInfo.State.Off) {
-						wifiClient.setEnabled(true);
-						Log.v(TAG, "Enabling wifi client");
-					}
-					if (clientState == NetworkInfo.State.On)
+			try {
+				switch (goal) {
+					case Off:
+						if (turnOffHotspot())
+							return;
+						if (turnOffClient())
+							return;
 						goal = null;
-					break;
+						break;
 
-				case HotspotOn:
-				case HotspotOnServalConfig:
-					if (wifiHotspot==null)
-						throw new NullPointerException();
-
-					if (turnOffClient())
-						return;
-
-					NetworkInfo.State state = wifiHotspot.getState();
-					WifiConfiguration config = null;
-					boolean goalIsServal = (goal == WifiGoal.HotspotOnServalConfig);
-					switch (state){
-						case Starting:
-						case Stopping:
-						case Error:
+					case ClientOn:
+						if (turnOffHotspot())
 							return;
 
-						case Off:
-							if (wifiHotspot.isServalConfig() != goalIsServal)
-								config = goalIsServal ? wifiHotspot.servalConfiguration : wifiHotspot.saved;
-							Log.v(TAG, "Disabling hotspot "+(config==null?"":"and changing config"));
-							wifiHotspot.setWifiApEnabled(config, true);
-							break;
+						NetworkInfo.State clientState = wifiClient.getState();
+						if (clientState == NetworkInfo.State.Off) {
+							wifiClient.setEnabled(true);
+							Log.v(TAG, "Enabling wifi client");
+						}
+						if (clientState == NetworkInfo.State.On)
+							goal = null;
+						break;
 
-						case On:
-							if (wifiHotspot.isServalConfig() != goalIsServal){
-								Log.v(TAG, "Disabling hotspot to change config");
-								wifiHotspot.setWifiApEnabled(null, false);
-							}else{
-								wifiHotspot.restoring = false;
-								goal = null;
-							}
-							break;
-					}
+					case HotspotOn:
+					case HotspotOnServalConfig:
+						if (wifiHotspot == null)
+							throw new NullPointerException();
 
-					break;
+						if (turnOffClient())
+							return;
+
+						NetworkInfo.State state = wifiHotspot.getState();
+						WifiConfiguration config = null;
+						boolean goalIsServal = (goal == WifiGoal.HotspotOnServalConfig);
+						switch (state) {
+							case Starting:
+							case Stopping:
+							case Error:
+								return;
+
+							case Off:
+								if (wifiHotspot.isServalConfig() != goalIsServal)
+									config = goalIsServal ? wifiHotspot.servalConfiguration : wifiHotspot.saved;
+								Log.v(TAG, "Enabling hotspot" + (config == null ? "" : " and changing config"));
+								wifiHotspot.setWifiApEnabled(config, true);
+								break;
+
+							case On:
+								if (wifiHotspot.isServalConfig() != goalIsServal) {
+									Log.v(TAG, "Disabling hotspot to change config");
+									wifiHotspot.setWifiApEnabled(null, false);
+								} else {
+									wifiHotspot.restoring = false;
+									goal = null;
+								}
+								break;
+						}
+
+						break;
+				}
+			}catch (Exception e){
+				Log.e(TAG, e.getMessage(), e);
+				goal = null;
 			}
 
 			// TODO re-run ourself to keep trying??
