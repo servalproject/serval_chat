@@ -48,8 +48,8 @@ if (project.hasProperty("ServalChat.properties")) {
 }
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.2"
+    compileSdkVersion 26
+    buildToolsVersion "26.0.2"
     ext.appName = "ServalChat"
 
     ext.commitCount = "git rev-list --count HEAD".execute().text.toInteger();
@@ -74,7 +74,7 @@ android {
     defaultConfig {
         applicationId "org.servalproject.servalchat"
         minSdkVersion 9
-        targetSdkVersion 25
+        targetSdkVersion 26
         versionCode commitCount
         versionName gitDescribe
         // unique, deterministic identifier for an apk compiled from this source code
