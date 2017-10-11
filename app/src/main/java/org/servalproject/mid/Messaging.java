@@ -116,6 +116,7 @@ public class Messaging {
 				continue;
 			}
 			following.add(subscription.subscriber);
+			followingSids.add(subscription.subscriber.sid);
 			Peer p = serval.knownPeers.getPeer(subscription.subscriber);
 			this.contacts.add(p);
 			// Don't overwrite the feed name with a cached name that might be stale
