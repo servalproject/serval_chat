@@ -112,6 +112,7 @@ public abstract class ScrollingAdapter<T, VH extends BasicViewHolder>
 		fetching = true;
 
 		final AsyncTask<Void, Object, Void> fetch = new AsyncTask<Void, Object, Void>() {
+			RuntimeException ex;
 			@Override
 			protected Void doInBackground(Void... params) {
 				try {
@@ -122,8 +123,10 @@ public abstract class ScrollingAdapter<T, VH extends BasicViewHolder>
 						if (msg == null)
 							break;
 					}
+				} catch (RuntimeException e){
+					ex = e;
 				} catch (Exception e) {
-					throw new IllegalStateException(e);
+					ex = new IllegalStateException(e);
 				}
 				return null;
 			}
@@ -131,6 +134,8 @@ public abstract class ScrollingAdapter<T, VH extends BasicViewHolder>
 			@Override
 			protected void onPostExecute(Void aVoid) {
 				super.onPostExecute(aVoid);
+				if (ex != null)
+					throw ex;
 				fetching = false;
 				testPosition();
 			}
