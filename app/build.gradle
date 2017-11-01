@@ -50,26 +50,28 @@ if (project.hasProperty("ServalChat.properties")) {
 android {
     compileSdkVersion 26
     buildToolsVersion "26.0.2"
-    ext.appName = "ServalChat"
 
-    ext.commitCount = "git rev-list --count HEAD".execute().text.toInteger();
-    ext.gitDescribe = "git describe --always --dirty --tags".execute().text.trim();
-    ext.commitSha = "git rev-parse HEAD".execute().text.trim();
-    ext.cleanBuild = !gitDescribe.contains('-dirty')
-    ext.releaseType = "development"
-    ext.buildTime = System.currentTimeMillis();
+    ext{
+        appName = "ServalChat"
+        commitCount = "git rev-list --count HEAD".execute().text.toInteger();
+        gitDescribe = "git describe --always --dirty --tags".execute().text.trim();
+        commitSha = "git rev-parse HEAD".execute().text.trim();
+        libSodiumStatus = "git describe --always --dirty --tags".execute(null, file('src/main/jni/libsodium')).text.trim();
+        cleanBuild = !gitDescribe.contains('-dirty')
+        releaseType = "development"
+        buildTime = System.currentTimeMillis();
 
-    if (cleanBuild) {
-        // work out what kind of build this is based on the most recent git tag
-        if (gitDescribe ==~ /[\d.]+/)
-            releaseType = "release"
-        else if (gitDescribe ==~ /[\d.]+.RC\d+/)
-            releaseType = "beta"
-        else
-            releaseType = "alpha"
+        if (cleanBuild) {
+            // work out what kind of build this is based on the most recent git tag
+            if (gitDescribe ==~ /[\d.]+/)
+                releaseType = "release"
+            else if (gitDescribe ==~ /[\d.]+.RC\d+/)
+                releaseType = "beta"
+            else
+                releaseType = "alpha"
+        }
+        println "Version $commitCount - $releaseType - $gitDescribe"
     }
-
-    println "Version $commitCount - $releaseType - $gitDescribe"
 
     defaultConfig {
         applicationId "org.servalproject.servalchat"
@@ -125,13 +127,15 @@ android {
     }
 
     task libsodiumBuild(type: Exec) {
-        // since there's no defined inputs, this should only run once.
-        // TODO force re-run when submodule updated
+        // this should only run when the libsodium submodule changes
+        inputs.property("commit", libSodiumStatus);
         outputs.file('src/main/jni/libsodium/libsodium-android-armv6/lib/libsodium.a')
         workingDir 'src/main/jni/libsodium'
+        executable 'sh'
+
+        args = ['-c', 'dist-build/android-arm.sh']
         environment ANDROID_NDK_HOME: "$android.ndkDirectory"
         environment NDK_PLATFORM: "android-16"
-        commandLine 'dist-build/android-arm.sh'
     }
 
     task ndkClean(type: Exec) {
