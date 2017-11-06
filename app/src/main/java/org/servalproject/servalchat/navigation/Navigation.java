@@ -38,14 +38,6 @@ public class Navigation {
 			containedIn.children.add(this);
 	}
 
-	public Navigation(String name, int titleResource, int layoutResource) {
-		this(name, true, titleResource, layoutResource, null, null);
-	}
-
-	public Navigation(String name, int titleResource, int layoutResource, Navigation defaultParent) {
-		this(name, true, titleResource, layoutResource, defaultParent, null);
-	}
-
 	public Navigation(String name, int titleResource, int layoutResource, Navigation defaultParent, Navigation containedIn) {
 		this(name, true, titleResource, layoutResource, defaultParent, containedIn);
 	}
@@ -61,28 +53,30 @@ public class Navigation {
 	}
 
 	public static final Map<String, Navigation> NavMap = new HashMap<>();
+	public static final Navigation Root = new Navigation("Root", false, R.string.app_name, R.layout.main, null, null);
+
 	// launcher..
-	public static final Navigation Launcher = new Navigation("Launcher", false, R.string.app_name, R.layout.main_tabs, null, null);
+	public static final Navigation Launcher = new Navigation("Launcher", false, R.string.app_name, R.layout.main_tabs, null, Root);
 	public static final Navigation IdentityList = new Navigation("IdentityList", false, R.string.my_details, R.layout.identity_list, null, Launcher);
 	public static final Navigation Networking = new Navigation("Networking", false, R.string.networking, R.layout.networking, null, Launcher);
-	public static final Navigation NewIdentityDetails = new Navigation("NewDetails", false, R.string.identity_details, R.layout.identity_details, IdentityList, null);
+	public static final Navigation NewIdentityDetails = new Navigation("NewDetails", false, R.string.identity_details, R.layout.identity_details, IdentityList, Root);
 
 	// main screen
 	// TODO sidebar menu for details, peer list, block list etc.
-	public static final Navigation Spinner = new Navigation("Spinner", false, R.string.app_name, R.layout.progress, null, null);
+	public static final Navigation Spinner = new Navigation("Spinner", false, R.string.app_name, R.layout.progress, null, Root);
 
-	public static final Navigation Main = new Navigation("Main", R.string.app_name, R.layout.main_tabs);
+	public static final Navigation Main = new Navigation("Main", R.string.app_name, R.layout.main_tabs, null, Root);
 	public static final Navigation IdentityDetails = new Navigation("Details", R.string.identity_details, R.layout.identity_details, null, Main);
 	public static final Navigation MyFeed = new Navigation("MyFeed", R.string.my_feed, R.layout.my_feed, null, Main);
-	public static final Navigation AllFeeds = new Navigation("AllFeeds", R.string.all_feeds, R.layout.feed_list, MyFeed, null);
-	public static final Navigation Contacts = new Navigation("Contacts", R.string.contacts, R.layout.contacts, MyFeed, null);
+	public static final Navigation AllFeeds = new Navigation("AllFeeds", R.string.all_feeds, R.layout.feed_list, MyFeed, Root);
+	public static final Navigation Contacts = new Navigation("Contacts", R.string.contacts, R.layout.contacts, MyFeed, Root);
 	public static final Navigation Inbox = new Navigation("Inbox", R.string.conversation_list, R.layout.conversation_list, null, Main);
-	public static final Navigation Requests = new Navigation("Requests", R.string.requests, R.layout.conversation_list, Inbox, null);
-	public static final Navigation Blocked = new Navigation("Blocked", R.string.blocked, R.layout.block_list, Inbox, null);
+	public static final Navigation Requests = new Navigation("Requests", R.string.requests, R.layout.conversation_list, Inbox, Root);
+	public static final Navigation Blocked = new Navigation("Blocked", R.string.blocked, R.layout.block_list, Inbox, Root);
 	public static final Navigation PeerList = new Navigation("PeerList", R.string.peer_list, R.layout.peer_list, null, Main);
-	public static final Navigation PeerMap = new Navigation("PeerMap", R.string.peer_map, R.layout.peer_map, PeerList, null);
+	public static final Navigation PeerMap = new Navigation("PeerMap", R.string.peer_map, R.layout.peer_map, PeerList, Root);
 
-	public static final Navigation PeerTabs = new Navigation("PeerTabs", R.string.app_name, R.layout.main_tabs);
+	public static final Navigation PeerTabs = new Navigation("PeerTabs", R.string.app_name, R.layout.main_tabs, null, Root);
 	public static final Navigation PeerDetails = new Navigation("PeerDetails", R.string.peer_details, R.layout.peer_details, null, PeerTabs);
 	public static final Navigation PeerFeed = new Navigation("PeerFeed", R.string.peer_feed, R.layout.peer_feed, null, PeerTabs);
 	public static final Navigation PrivateMessages = new Navigation("PeerMessaging", R.string.message_list, R.layout.message_list, Inbox, PeerTabs);

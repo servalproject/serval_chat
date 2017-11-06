@@ -16,6 +16,7 @@ import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -41,7 +42,6 @@ import java.util.Stack;
 public class MainActivity extends AppCompatActivity implements IContainerView, MenuItem.OnMenuItemClickListener {
 
 	private static final String TAG = "Activity";
-	private LinearLayout rootLayout;
 	private CoordinatorLayout coordinator;
 	private NavHistory history;
 	private Serval serval;
@@ -54,12 +54,7 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 		super.onCreate(savedInstanceState);
 		imm = (InputMethodManager)getSystemService(Activity.INPUT_METHOD_SERVICE);
 		serval = Serval.getInstance();
-		setContentView(R.layout.main);
-		rootLayout = (LinearLayout) findViewById(R.id.root_layout);
-		Toolbar toolbar = (Toolbar) findViewById(R.id.app_toolbar);
-		coordinator = (CoordinatorLayout) findViewById(R.id.coordinator);
 
-		setSupportActionBar(toolbar);
 
 		Intent intent = getIntent();
 		init(intent, savedInstanceState);
@@ -112,7 +107,7 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 			ViewState v = viewStack.get(j);
 			// remove views from their containers (if required)
 			IContainerView container = j > 0 ? viewStack.get(j - 1).getContainer() : this;
-			container.deactivate(v, configChange);
+			container.deactivate(v, configChange, isStarted);
 			viewStack.remove(j);
 		}
 	}
@@ -178,7 +173,7 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 			IContainerView container = (parent == null) ? this : parent.getContainer();
 			if (container == null)
 				throw new NullPointerException();
-			parent = container.activate(n, identity, peer, args);
+			parent = container.activate(n, identity, peer, args, isStarted);
 			if (parent == null)
 				throw new NullPointerException();
 			viewStack.add(parent);
@@ -480,30 +475,26 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 	}
 
 	@Override
-	public void deactivate(ViewState state, boolean configChange) {
+	public void deactivate(ViewState state, boolean configChange, boolean visible) {
 		ILifecycle lifecycle = state.getLifecycle();
-		if (isStarted && lifecycle != null)
+		if (visible && lifecycle != null)
 			lifecycle.onHidden();
 		if (lifecycle != null)
 			lifecycle.onDetach(configChange);
-		rootLayout.removeView(state.view);
+		ViewGroup root = (ViewGroup)findViewById(android.R.id.content);
+		root.removeView(state.view);
 	}
 
 	@Override
-	public ViewState activate(Navigation n, Identity identity, Peer peer, Bundle args) {
+	public ViewState activate(Navigation n, Identity identity, Peer peer, Bundle args, boolean visible) {
 		ViewState ret = ViewState.Inflate(this, n, identity, peer, args);
 		ret.view.setLayoutParams(new LinearLayout.LayoutParams(
 				ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-		rootLayout.addView(ret.view);
+		setContentView(ret.view);
+		coordinator = (CoordinatorLayout)findViewById(R.id.coordinator);
 		ILifecycle lifecycle = ret.getLifecycle();
-		if (isStarted && lifecycle != null)
+		if (visible && lifecycle != null)
 			lifecycle.onVisible();
-		// TODO observe identity and update title
-		CharSequence title = n.getTitle(this, identity, peer);
-		getSupportActionBar().setTitle(title);
-		if (Build.VERSION.SDK_INT>=21) {
-			setTaskDescription(new ActivityManager.TaskDescription(title.toString(), identity == null ? null : identity.getBitmap()));
-		}
 		return ret;
 	}
 
@@ -517,7 +508,7 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 	}
 
 	private class CrashReportException extends RuntimeException{
-		public CrashReportException(Exception e) {
+		CrashReportException(Exception e) {
 			super(e);
 		}
 	}

@@ -25,12 +25,12 @@ public class NavTabStrip extends LinearLayout implements IContainerView, INaviga
 	}
 
 	@Override
-	public void deactivate(ViewState viewState, boolean configChange) {
+	public void deactivate(ViewState viewState, boolean configChange, boolean visible) {
 		// Noop, handled by viewpager
 	}
 
 	@Override
-	public ViewState activate(Navigation n, Identity identity, Peer peer, Bundle args) {
+	public ViewState activate(Navigation n, Identity identity, Peer peer, Bundle args, boolean visible) {
 		for (int i = 0; i < adapter.screens.length; i++) {
 			HistoryItem screen = adapter.screens[i];
 			if (screen.key.equals(n)) {
