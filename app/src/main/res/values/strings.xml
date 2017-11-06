@@ -75,4 +75,7 @@
     <string name="new_version_title">Software Update</string>
     <string name="new_version_message">A new version of Serval Chat is available</string>
     <string name="contacts">Contacts</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
 </resources>

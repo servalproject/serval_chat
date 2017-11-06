@@ -5,8 +5,10 @@ import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
+import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
@@ -18,9 +20,9 @@ import org.servalproject.servalchat.R;
  * Created by jeremy on 6/11/17.
  */
 
-public class RootAppbar extends CoordinatorLayout implements IContainerView, INavigate {
+public class RootAppbar extends CoordinatorLayout implements IRootContainer, INavigate {
 	private ViewGroup rootLayout;
-	private Toolbar toolbar;
+	Toolbar toolbar;
 	private MainActivity activity;
 	private static final String TAG = "RootAppbar";
 
@@ -51,20 +53,49 @@ public class RootAppbar extends CoordinatorLayout implements IContainerView, INa
 		ILifecycle lifecycle = ret.getLifecycle();
 		if (visible && lifecycle != null)
 			lifecycle.onVisible();
+
+		activity.setSupportActionBar(toolbar);
+		CharSequence title = n.getTitle(activity, identity, peer);
+		toolbar.setTitle(title);
+		if (Build.VERSION.SDK_INT>=21) {
+			activity.setTaskDescription(new ActivityManager.TaskDescription(title.toString(), identity == null ? null : identity.getBitmap()));
+		}
+
 		return ret;
 	}
 
 	@Override
 	public ILifecycle onAttach(MainActivity activity, Navigation n, Identity id, Peer peer, Bundle args) {
 		this.activity = activity;
-		toolbar = (Toolbar) findViewById(R.id.app_toolbar);
 		rootLayout = (ViewGroup) findViewById(R.id.root_layout);
-		activity.setSupportActionBar(toolbar);
-		CharSequence title = n.getTitle(getContext(), id, peer);
-		toolbar.setTitle(title);
-		if (Build.VERSION.SDK_INT>=21) {
-			activity.setTaskDescription(new ActivityManager.TaskDescription(title.toString(), id == null ? null : id.getBitmap()));
-		}
+		toolbar = (Toolbar) findViewById(R.id.app_toolbar);
 		return null;
+	}
+
+	@Override
+	public Toolbar getToolbar() {
+		return toolbar;
+	}
+
+	@Override
+	public CoordinatorLayout getCoordinator() {
+		return (CoordinatorLayout)findViewById(R.id.coordinator);
+	}
+
+	@Override
+	public void updateToolbar(boolean canGoBack) {
+		ActionBar bar = activity.getSupportActionBar();
+		bar.setDisplayOptions(
+				ActionBar.DISPLAY_SHOW_HOME | (canGoBack ? ActionBar.DISPLAY_HOME_AS_UP : 0),
+				ActionBar.DISPLAY_SHOW_HOME | ActionBar.DISPLAY_HOME_AS_UP);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+			case android.R.id.home:
+				return activity.goBack();
+		}
+		return false;
 	}
 }

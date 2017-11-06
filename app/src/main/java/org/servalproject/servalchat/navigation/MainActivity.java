@@ -1,7 +1,6 @@
 package org.servalproject.servalchat.navigation;
 
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -10,14 +9,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -31,7 +27,6 @@ import org.servalproject.mid.Messaging;
 import org.servalproject.mid.Peer;
 import org.servalproject.mid.Serval;
 import org.servalproject.servalchat.App;
-import org.servalproject.servalchat.BuildConfig;
 import org.servalproject.servalchat.R;
 import org.servalproject.servaldna.Subscriber;
 import org.servalproject.servaldna.meshmb.MeshMBCommon;
@@ -39,10 +34,10 @@ import org.servalproject.servaldna.meshmb.MeshMBCommon;
 import java.io.File;
 import java.util.Stack;
 
-public class MainActivity extends AppCompatActivity implements IContainerView, MenuItem.OnMenuItemClickListener {
+public class MainActivity extends AppCompatActivity implements IContainerView, MenuItem.OnMenuItemClickListener{
 
 	private static final String TAG = "Activity";
-	private CoordinatorLayout coordinator;
+	private IRootContainer rootContainer;
 	private NavHistory history;
 	private Serval serval;
 	private Identity identity;
@@ -54,7 +49,6 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 		super.onCreate(savedInstanceState);
 		imm = (InputMethodManager)getSystemService(Activity.INPUT_METHOD_SERVICE);
 		serval = Serval.getInstance();
-
 
 		Intent intent = getIntent();
 		init(intent, savedInstanceState);
@@ -182,10 +176,7 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 			n = newViews.empty() ? null : newViews.pop();
 		}
 
-		ActionBar bar = getSupportActionBar();
-		bar.setDisplayOptions(
-				ActionBar.DISPLAY_SHOW_HOME | (history.canGoBack() ? ActionBar.DISPLAY_HOME_AS_UP : 0),
-				ActionBar.DISPLAY_SHOW_HOME | ActionBar.DISPLAY_HOME_AS_UP);
+		rootContainer.updateToolbar(history.canGoBack());
 		supportInvalidateOptionsMenu();
 
 		View firstInput = null;
@@ -245,17 +236,23 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 	}
 
 	public void go(Navigation key) {
-		go(key, null, null);
+		go(key, false);
 	}
+
+	public void go(Navigation key, boolean replace) {
+		go(key, null, null, replace);
+	}
+
 	public void go(Navigation key, Peer peer, Bundle args) {
-		// record the change first, then create views
-		if (history.add(
-				key,
+		go(key, peer, args, false);
+	}
+
+	public void go(Navigation key, Peer peer, Bundle args, boolean replace) {
+		HistoryItem item =new HistoryItem(key,
 				identity == null ? null : this.identity.subscriber.signingKey,
 				peer == null ? null : peer.getSubscriber(),
-				args,
-				false))
-			go();
+				args);
+		go(item, replace);
 	}
 
 	public void go(HistoryItem item) {
@@ -280,25 +277,33 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 		history.save(outState);
 	}
 
-	@Override
-	public void onBackPressed() {
+	public boolean goBack(){
+		for(ViewState s :viewStack){
+			if (s.visit(new ViewState.ViewVisitor() {
+				@Override
+				public boolean visit(View view) {
+					return view instanceof IOnBack && ((IOnBack) view).onBack();
+				}
+			}))
+				return true;
+		}
 		if (history.back()) {
 			go();
-		} else {
-			super.onBackPressed();
+			return true;
 		}
+		return false;
+	}
+
+	@Override
+	public void onBackPressed() {
+		if (!goBack())
+			super.onBackPressed();
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-			case android.R.id.home:
-				if (history.back()) {
-					go();
-					return true;
-				}
-				break;
-		}
+		if (rootContainer.onOptionsItemSelected(item))
+			return true;
 		return super.onOptionsItemSelected(item);
 	}
 
@@ -488,10 +493,21 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 	@Override
 	public ViewState activate(Navigation n, Identity identity, Peer peer, Bundle args, boolean visible) {
 		ViewState ret = ViewState.Inflate(this, n, identity, peer, args);
+
+		if (!ret.visit(new ViewState.ViewVisitor() {
+			@Override
+			public boolean visit(View view) {
+				if (view instanceof IRootContainer)
+					rootContainer = (IRootContainer) view;
+				return rootContainer!=null;
+			}
+		}))
+			throw new IllegalStateException();
+
 		ret.view.setLayoutParams(new LinearLayout.LayoutParams(
 				ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 		setContentView(ret.view);
-		coordinator = (CoordinatorLayout)findViewById(R.id.coordinator);
+
 		ILifecycle lifecycle = ret.getLifecycle();
 		if (visible && lifecycle != null)
 			lifecycle.onVisible();
@@ -534,7 +550,7 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 	}
 
 	public void showSnack(CharSequence message, int length, CharSequence actionLabel, View.OnClickListener action) {
-		Snackbar s = Snackbar.make(coordinator, message, length);
+		Snackbar s = Snackbar.make(rootContainer.getCoordinator(), message, length);
 		if (action != null && actionLabel != null)
 			s.setAction(actionLabel, action);
 		s.show();

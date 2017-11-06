@@ -30,27 +30,45 @@ public class ViewState {
 		return firstInput;
 	}
 
-	private void attach(MainActivity activity, Navigation key, Identity identity, Peer peer, Bundle args, View view) {
-		if (view instanceof INavigate) {
-			INavigate navigate = (INavigate) view;
-			lifecycle = navigate.onAttach(activity, key, identity, peer, args);
-		}
-		if (view.onCheckIsTextEditor() && firstInput == null)
-			firstInput = view;
-		if (view instanceof IContainerView)
-			container = (IContainerView) view;
-		if (view instanceof ViewGroup) {
-			ViewGroup g = (ViewGroup) view;
-			for (int i = 0; i < g.getChildCount(); i++)
-				attach(activity, key, identity, peer, args, g.getChildAt(i));
-		}
+	public interface ViewVisitor{
+		boolean visit(View view);
 	}
 
-	public static ViewState Inflate(MainActivity activity, Navigation key, Identity identity, Peer peer, Bundle args) {
+	public boolean visitViews(View view, ViewVisitor visitor){
+		if (visitor.visit(view))
+			return true;
+		if (view instanceof ViewGroup) {
+			ViewGroup g = (ViewGroup) view;
+			for (int i = 0; i < g.getChildCount(); i++) {
+				if (visitViews(g.getChildAt(i), visitor))
+					return true;
+			}
+		}
+		return false;
+	}
+
+	public boolean visit(ViewVisitor visitor){
+		return visitViews(view, visitor);
+	}
+
+	public static ViewState Inflate(final MainActivity activity, final Navigation key, final Identity identity, final Peer peer, final Bundle args) {
 		LayoutInflater inflater = LayoutInflater.from(activity);
 		View view = inflater.inflate(key.layoutResource, null);
-		ViewState ret = new ViewState(key, view);
-		ret.attach(activity, key, identity, peer, args, view);
+		final ViewState ret = new ViewState(key, view);
+		ret.visit(new ViewVisitor() {
+			@Override
+			public boolean visit(View view) {
+				if (view instanceof INavigate) {
+					INavigate navigate = (INavigate) view;
+					ret.lifecycle = navigate.onAttach(activity, key, identity, peer, args);
+				}
+				if (view.onCheckIsTextEditor() && ret.firstInput == null)
+					ret.firstInput = view;
+				if (view instanceof IContainerView && ret.container == null)
+					ret.container = (IContainerView) view;
+				return false;
+			}
+		});
 		return ret;
 	}
 

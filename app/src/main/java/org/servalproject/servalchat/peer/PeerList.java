@@ -3,16 +3,11 @@ package org.servalproject.servalchat.peer;
 import android.content.Context;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.ViewGroup;
 
 import org.servalproject.mid.ListObserverSet;
 import org.servalproject.mid.Peer;
 import org.servalproject.mid.Serval;
-import org.servalproject.servalchat.R;
-import org.servalproject.servalchat.navigation.IHaveMenu;
-import org.servalproject.servalchat.navigation.Navigation;
 import org.servalproject.servalchat.views.ObservedRecyclerView;
 import org.servalproject.servalchat.views.RecyclerHelper;
 import org.servalproject.servaldna.SubscriberId;
@@ -26,8 +21,7 @@ import java.util.Set;
 /**
  * Created by jeremy on 31/05/16.
  */
-public class PeerList extends ObservedRecyclerView<Peer, PeerHolder>
-		implements IHaveMenu, MenuItem.OnMenuItemClickListener {
+public class PeerList extends ObservedRecyclerView<Peer, PeerHolder>{
 	private Serval serval;
 	private static final String TAG = "PeerList";
 	private List<Peer> items = new ArrayList<Peer>();
@@ -69,22 +63,6 @@ public class PeerList extends ObservedRecyclerView<Peer, PeerHolder>
 	}
 
 	private static final int MAP = 1;
-
-	@Override
-	public void populateItems(Menu menu) {
-		menu.add(Menu.NONE, MAP, Menu.NONE, R.string.peer_map)
-				.setOnMenuItemClickListener(this);
-	}
-
-	@Override
-	public boolean onMenuItemClick(MenuItem menuItem) {
-		switch(menuItem.getItemId()) {
-			case MAP:
-				activity.go(Navigation.PeerMap, identity, null, null);
-				return true;
-		}
-		return false;
-	}
 
 	private boolean sorted = false;
 	private final Set<SubscriberId> addedPeers = new HashSet<>();
