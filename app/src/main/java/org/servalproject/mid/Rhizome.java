@@ -8,6 +8,7 @@ import android.os.Environment;
 import android.util.Log;
 
 import org.servalproject.servaldna.ServalDFailureException;
+import org.servalproject.servaldna.ServalDInterfaceException;
 import org.servalproject.servaldna.rhizome.RhizomeBundleList;
 import org.servalproject.servaldna.rhizome.RhizomeListBundle;
 
@@ -85,9 +86,9 @@ public class Rhizome extends BroadcastReceiver {
 					}
 					Thread.sleep(5000);
 				}
-			} catch (IllegalStateException e) {
-				throw e;
-			} catch (Exception e) {
+			} catch (InterruptedException |
+					ServalDInterfaceException |
+					IOException e) {
 				throw new IllegalStateException(e);
 			}
 		}
@@ -136,7 +137,7 @@ public class Rhizome extends BroadcastReceiver {
 		try {
 			serval.config.sync();
 		} catch (ServalDFailureException e) {
-			Log.e(TAG, e.getMessage(), e);
+			throw new IllegalStateException(e);
 		}
 		observers.onUpdate();
 

@@ -14,18 +14,19 @@ import org.servalproject.servalchat.BuildConfig;
 import org.servalproject.servalchat.R;
 import org.servalproject.servaldna.AbstractId;
 import org.servalproject.servaldna.BundleId;
-import org.servalproject.servaldna.ServalDClient;
-import org.servalproject.servaldna.ServalDCommand;
+import org.servalproject.servaldna.ServalDInterfaceException;
 import org.servalproject.servaldna.rhizome.RhizomeCommon;
+import org.servalproject.servaldna.rhizome.RhizomeException;
 import org.servalproject.servaldna.rhizome.RhizomeImportStatus;
 import org.servalproject.servaldna.rhizome.RhizomeListBundle;
 import org.servalproject.servaldna.rhizome.RhizomeManifest;
 import org.servalproject.servaldna.rhizome.RhizomeManifestBundle;
+import org.servalproject.servaldna.rhizome.RhizomeManifestParseException;
+import org.servalproject.servaldna.rhizome.RhizomeManifestSizeException;
 import org.servalproject.servaldna.rhizome.RhizomePayloadRawBundle;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
+import java.io.IOException;
 
 /**
  * Created by jeremy on 12/04/17.
@@ -130,7 +131,8 @@ public class SelfUpdater {
 			RhizomeManifestBundle result = serval.getResultClient().rhizomeManifest(ourBundle);
 			if (result!=null)
 				return result.manifest;
-		}catch (Exception e) {
+		} catch (ServalDInterfaceException |
+				IOException e) {
 			Log.e(TAG, e.getMessage(), e);
 		}
 		return null;
@@ -166,8 +168,10 @@ public class SelfUpdater {
 			e.apply();
 
 			notifyUpgrade(upgradeFile);
-		} catch (Exception e) {
-			Log.e(TAG, e.getMessage(), e);
+		} catch (RhizomeManifestSizeException |
+				ServalDInterfaceException |
+				IOException e) {
+			Log.v(TAG, e.getMessage(),e);
 		}
 	}
 
@@ -212,11 +216,11 @@ public class SelfUpdater {
 		try {
 			RhizomeManifest manifest = ourManifest();
 
-			if (manifest!=null){
-				if(manifest.version == BuildConfig.ManifestVersion) {
+			if (manifest != null) {
+				if (manifest.version == BuildConfig.ManifestVersion) {
 					uptoDate();
 					return;
-				}else if(manifest.version > BuildConfig.ManifestVersion){
+				} else if (manifest.version > BuildConfig.ManifestVersion) {
 					exportApk(manifest);
 					return;
 				}
@@ -244,7 +248,11 @@ public class SelfUpdater {
 				default:
 					throw new IllegalStateException("Import returned " + status.bundleStatus);
 			}
-		} catch (Exception e) {
+		} catch (ServalDInterfaceException
+				| RhizomeException
+				| RhizomeManifestSizeException
+				| RhizomeManifestParseException
+				| IOException e) {
 			Log.v(TAG, e.getMessage(),e);
 		}
 	}

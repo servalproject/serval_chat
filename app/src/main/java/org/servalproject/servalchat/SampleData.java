@@ -8,8 +8,11 @@ import org.servalproject.mid.Observer;
 import org.servalproject.mid.Peer;
 import org.servalproject.mid.Serval;
 import org.servalproject.mid.Server;
+import org.servalproject.servaldna.ServalDInterfaceException;
 import org.servalproject.servaldna.meshmb.MeshMBCommon;
+import org.servalproject.servaldna.meshms.MeshMSException;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -88,7 +91,9 @@ public class SampleData {
 				}
 			}
 
-		}catch (Exception e){
+		}catch (ServalDInterfaceException |
+				MeshMSException |
+				IOException e){
 			throw new IllegalStateException(e);
 		}
 	}

@@ -87,7 +87,8 @@ public class Identities {
 					if (pin == null)
 						loaded = true;
 					listObservers.onReset();
-				} catch (Exception e) {
+				} catch (ServalDInterfaceException |
+						IOException e) {
 					throw new IllegalStateException(e);
 				}
 			}

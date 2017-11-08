@@ -203,8 +203,6 @@ public class PeerState implements Runnable {
 			}
 		} catch (InterruptedException e) {
 			Log.e(TAG, e.getMessage(), e);
-		} catch (Exception e) {
-			Log.e(TAG, e.getMessage(), e);
 		}
 
 		if (writerThread == Thread.currentThread())

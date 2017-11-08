@@ -5,6 +5,7 @@ import android.os.SystemClock;
 import android.util.Log;
 
 import java.io.EOFException;
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -69,13 +70,14 @@ class PeerReader implements Runnable, Comparable<PeerReader> {
 				lastReceived = SystemClock.elapsedRealtime();
 				offset += len;
 			}
-		} catch (Exception e) {
+		} catch (IOException e) {
 			Log.e(name, e.getMessage(), e);
-		}
-		if (thread == Thread.currentThread())
-			thread = null;
+		}finally {
+			if (thread == Thread.currentThread())
+				thread = null;
 
-		peer.onClosed(this);
+			peer.onClosed(this);
+		}
 	}
 
 	@Override

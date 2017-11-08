@@ -91,6 +91,8 @@ public abstract class AbstractFutureList<T, E extends Exception>
 				// ignore if we caused this deliberately in another thread.
 				if (polling)
 					throw new IllegalStateException(e);
+			} catch (RuntimeException e) {
+				throw e;
 			} catch (Exception e) {
 				throw new IllegalStateException(e);
 			}

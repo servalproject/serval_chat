@@ -9,6 +9,7 @@ import org.servalproject.servaldna.meshmb.MeshMBSubscription;
 import org.servalproject.servaldna.meshmb.MeshMBSubscriptionList;
 import org.servalproject.servaldna.meshms.MeshMSConversation;
 import org.servalproject.servaldna.meshms.MeshMSConversationList;
+import org.servalproject.servaldna.meshms.MeshMSException;
 import org.servalproject.servaldna.rhizome.RhizomeListBundle;
 
 import java.io.IOException;
@@ -254,7 +255,9 @@ public class Messaging {
 					Messaging.this.requestsUnread = requestsUnread;
 				}
 				observers.onReset();
-			} catch (Exception e) {
+			} catch (ServalDInterfaceException |
+					MeshMSException |
+					IOException e) {
 				throw new IllegalStateException(e);
 			} finally {
 				synchronized (Messaging.this) {
