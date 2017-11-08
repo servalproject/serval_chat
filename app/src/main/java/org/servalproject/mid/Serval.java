@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 import android.os.HandlerThread;
 import android.preference.PreferenceManager;
 
-import org.servalproject.servalchat.App;
 import org.servalproject.servalchat.BuildConfig;
 import org.servalproject.servaldna.ChannelSelector;
 import org.servalproject.servaldna.ServalDClient;
@@ -117,7 +116,7 @@ public class Serval {
 	private String restfulPassword;
 	private ServalDClient client;
 	public final ChannelSelector selector;
-	final File instancePath;
+	public final File instancePath;
 
 	void onServerStarted() {
 		try {

@@ -37,6 +37,7 @@ import java.util.Stack;
 public class MainActivity extends AppCompatActivity implements IContainerView, MenuItem.OnMenuItemClickListener{
 
 	private static final String TAG = "Activity";
+	private App app;
 	private IRootContainer rootContainer;
 	private NavHistory history;
 	private Serval serval;
@@ -47,6 +48,7 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 	@Override
 	protected void onCreate(@Nullable Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		app = (App)getApplication();
 		imm = (InputMethodManager)getSystemService(Activity.INPUT_METHOD_SERVICE);
 		serval = Serval.getInstance();
 
@@ -532,11 +534,12 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 	public void showError(final Exception e) {
 		if (App.isTesting())
 			throw new CrashReportException(e);
-		showSnack(e.getMessage(), Snackbar.LENGTH_LONG, getString(R.string.crash),
+		showSnack(e.getMessage(), Snackbar.LENGTH_LONG, getString(R.string.email_log),
 				new View.OnClickListener() {
 					@Override
 					public void onClick(View v) {
-						throw new CrashReportException(e);
+						final Intent i = app.getErrorIntent(e);
+						startActivity(i);
 					}
 				});
 	}

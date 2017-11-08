@@ -3,7 +3,10 @@
     <string name="my_details">Identity</string>
 
     <string name="placeholder">Placeholder</string>
-    <string name="crash">Crash!</string>
+
+    <string name="background_error">A background error has occurred</string>
+    <string name="email_log">Email Log</string>
+    <string name="please_email_log">Please send an error report</string>
 
     <string name="share_app">Share App</string>
 
