@@ -7,6 +7,7 @@ import org.servalproject.mid.Identity;
 import org.servalproject.mid.KnownPeers;
 import org.servalproject.mid.Peer;
 import org.servalproject.mid.Serval;
+import org.servalproject.servalchat.navigation.MainActivity;
 import org.servalproject.servalchat.navigation.Navigation;
 import org.servalproject.servalchat.views.Presenter;
 import org.servalproject.servalchat.views.PresenterFactory;
@@ -52,6 +53,11 @@ public class PublicFeedsPresenter extends Presenter<PublicFeedsList> {
 			Peer peer = Serval.getInstance().knownPeers.getPeer(subscriber);
 			list.activity.go(Navigation.PeerFeed, peer, null);
 		}
+	}
+
+	protected MainActivity getActivity() {
+		PublicFeedsList view = getView();
+		return view == null ? null : view.activity;
 	}
 
 	@Override

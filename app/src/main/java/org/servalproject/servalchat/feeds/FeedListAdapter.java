@@ -10,6 +10,7 @@ import android.widget.TextView;
 import org.servalproject.mid.FeedList;
 import org.servalproject.mid.Messaging;
 import org.servalproject.servalchat.R;
+import org.servalproject.servalchat.navigation.MainActivity;
 import org.servalproject.servalchat.views.BasicViewHolder;
 import org.servalproject.servalchat.views.Identicon;
 import org.servalproject.servalchat.views.ScrollingAdapter;
@@ -59,6 +60,11 @@ public class FeedListAdapter extends ScrollingAdapter<RhizomeListBundle, FeedLis
 			bundles.add(id);
 		}
 		super.addItem(index, item);
+	}
+
+	@Override
+	protected MainActivity getActivity() {
+		return presenter.getActivity();
 	}
 
 	@Override

@@ -8,6 +8,7 @@ import android.widget.TextView;
 
 import org.servalproject.mid.MessageFeed;
 import org.servalproject.servalchat.R;
+import org.servalproject.servalchat.navigation.MainActivity;
 import org.servalproject.servalchat.views.BasicViewHolder;
 import org.servalproject.servalchat.views.ScrollingAdapter;
 import org.servalproject.servalchat.views.TimestampView;
@@ -16,7 +17,7 @@ import org.servalproject.servaldna.meshmb.PlyMessage;
 /**
  * Created by jeremy on 8/08/16.
  */
-public class FeedAdapter extends ScrollingAdapter<PlyMessage, FeedAdapter.MessageHolder> {
+public abstract class FeedAdapter extends ScrollingAdapter<PlyMessage, FeedAdapter.MessageHolder> {
 	public FeedAdapter(MessageFeed feed) {
 		super(feed);
 	}

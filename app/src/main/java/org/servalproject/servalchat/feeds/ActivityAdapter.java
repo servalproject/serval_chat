@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import org.servalproject.mid.IObservableList;
 import org.servalproject.servalchat.R;
+import org.servalproject.servalchat.navigation.MainActivity;
 import org.servalproject.servalchat.views.BasicViewHolder;
 import org.servalproject.servalchat.views.Identicon;
 import org.servalproject.servalchat.views.ScrollingAdapter;
@@ -44,6 +45,11 @@ public class ActivityAdapter extends ScrollingAdapter<MeshMBActivityMessage, Act
 		super.insertedItem(item, position);
 		if (position+1<getItemCount())
 			notifyItemChanged(position +1);
+	}
+
+	@Override
+	protected MainActivity getActivity() {
+		return presenter.getActivity();
 	}
 
 	@Override

@@ -1,6 +1,5 @@
 package org.servalproject.servalchat.identity;
 
-import android.os.AsyncTask;
 import android.view.View;
 
 import org.servalproject.mid.Identity;
@@ -8,7 +7,7 @@ import org.servalproject.mid.Peer;
 import org.servalproject.mid.Serval;
 import org.servalproject.servalchat.App;
 import org.servalproject.servalchat.navigation.Navigation;
-import org.servalproject.servalchat.views.Identicon;
+import org.servalproject.servalchat.views.BackgroundWorker;
 import org.servalproject.servalchat.views.Presenter;
 import org.servalproject.servalchat.views.PresenterFactory;
 
@@ -65,54 +64,39 @@ public class IdentityDetailsPresenter extends Presenter<IdentityDetails> {
 		if (view == null)
 			return;
 
-		AsyncTask<String, Void, Exception> updater = new AsyncTask<String, Void, Exception>() {
+		updating = true;
+		view.update.setEnabled(!updating);
+		final String name = view.name.getText().toString();
+
+		new BackgroundWorker() {
 			private Identity result;
 
 			@Override
-			protected void onPostExecute(Exception e) {
+			protected void onBackGround() throws Exception {
+				Serval serval = Serval.getInstance();
+				if (identity == null) {
+					result = serval.identities.addIdentity("", name, "");
+				} else {
+					serval.identities.updateIdentity(
+							identity, "", name, "");
+					result = identity;
+				}
+			}
+
+			@Override
+			protected void onComplete(Throwable t) {
 				updating = false;
 				IdentityDetails view = getView();
-
-				if (view != null) {
-					view.update.setEnabled(!updating);
-					if (e != null)
-						view.activity.showError(e);
-					else {
-						view.activity.go(Navigation.MyFeed, result, null, null);
-					}
-				}
-			}
-
-			@Override
-			protected void onPreExecute() {
-				super.onPreExecute();
-				updating = true;
-				IdentityDetails view = getView();
-				if (view != null)
-					view.update.setEnabled(!updating);
-			}
-
-			@Override
-			protected Exception doInBackground(String... params) {
-				try {
-					Serval serval = Serval.getInstance();
-					if (serval == null)
-						return null;
-
-					if (identity == null) {
-						result = serval.identities.addIdentity(params[0], params[1], params[2]);
+				if (t != null) {
+					if (view == null) {
+						rethrow(t);
 					} else {
-						result = identity;
-						serval.identities.updateIdentity(
-								identity, params[0], params[1], params[2]);
+						view.activity.showError(t);
 					}
-				} catch (Exception e) {
-					return e;
+				} else {
+					view.activity.go(Navigation.MyFeed, result, null, null);
 				}
-				return null;
 			}
-		};
-
-		updater.execute("", view.name.getText().toString(), "");
+		}.execute();
 	}
 }

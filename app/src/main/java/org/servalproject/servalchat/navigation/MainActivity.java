@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -28,6 +27,7 @@ import org.servalproject.mid.Peer;
 import org.servalproject.mid.Serval;
 import org.servalproject.servalchat.App;
 import org.servalproject.servalchat.R;
+import org.servalproject.servalchat.views.BackgroundWorker;
 import org.servalproject.servaldna.Subscriber;
 import org.servalproject.servaldna.meshmb.MeshMBCommon;
 
@@ -330,15 +330,16 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 
 	private void alterSubscription(final MeshMBCommon.SubscriptionAction action){
 		final Peer alterPeer = peer;
-		new AsyncTask<Void, Void, Void>(){
-			private Exception e;
+		new BackgroundWorker(){
+			@Override
+			protected void onBackGround() throws Exception {
+				identity.alterSubscription(action, alterPeer);
+			}
 
 			@Override
-			protected void onPostExecute(Void aVoid) {
-				super.onPostExecute(aVoid);
-
-				if (e != null)
-					showError(e);
+			protected void onComplete(Throwable t) {
+				if (t != null)
+					showError(t);
 				else {
 					int r=-1;
 					switch (action){
@@ -356,18 +357,7 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 					supportInvalidateOptionsMenu();
 				}
 			}
-
-			@Override
-			protected Void doInBackground(Void... voids) {
-				try {
-					identity.alterSubscription(action, alterPeer);
-				} catch (Exception e) {
-					this.e = e;
-				}
-				return null;
-			}
 		}.execute();
-
 	}
 
 	@Override
@@ -526,12 +516,12 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 	}
 
 	private class CrashReportException extends RuntimeException{
-		CrashReportException(Exception e) {
+		CrashReportException(Throwable e) {
 			super(e);
 		}
 	}
 
-	public void showError(final Exception e) {
+	public void showError(final Throwable e) {
 		if (App.isTesting())
 			throw new CrashReportException(e);
 		showSnack(e.getMessage(), Snackbar.LENGTH_LONG, getString(R.string.email_log),

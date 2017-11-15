@@ -164,6 +164,8 @@ public class Serval {
 	}
 
 	public static Serval getInstance() {
+		if (instance == null)
+			throw new IllegalStateException();
 		return instance;
 	}
 

@@ -1,12 +1,15 @@
 package org.servalproject.servalchat.views;
 
-import android.os.AsyncTask;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 
 import org.servalproject.mid.IObservableList;
 import org.servalproject.mid.ListObserver;
+import org.servalproject.servalchat.navigation.MainActivity;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by jeremy on 8/08/16.
@@ -17,7 +20,7 @@ public abstract class ScrollingAdapter<T, VH extends BasicViewHolder>
 	private IObservableList<T, ?> list;
 	protected final FutureList<T> items = new FutureList<>(this);
 	private boolean hasMore = true;
-	private boolean fetching = false;
+	private int fetchCount;
 	private static final int SPINNER = 0;
 
 	public ScrollingAdapter(IObservableList<T, ?> list) {
@@ -99,60 +102,56 @@ public abstract class ScrollingAdapter<T, VH extends BasicViewHolder>
 		return getItemType(getItem(position)) + 1;
 	}
 
+	private BackgroundWorker fetcher = new BackgroundWorker(){
+		List<T> results = new ArrayList<T>();
+		@Override
+		protected void onBackGround() throws Exception {
+			for (int i = 0; i < fetchCount; i++) {
+				T msg;
+				results.add(msg = list.next());
+				if (msg == null)
+					break;
+			}
+		}
+
+		@Override
+		protected void onComplete(Throwable t) {
+			for (T msg : results){
+				if (msg == null) {
+					hasMore = false;
+					notifyItemRemoved(items.size());
+				} else {
+					addPast(msg);
+				}
+			}
+			results.clear();
+			if (t!=null){
+				MainActivity activity = getActivity();
+				if (activity!=null){
+					activity.showError(t);
+				}else{
+					if (t instanceof RuntimeException)
+						throw (RuntimeException)t;
+					throw new IllegalStateException(t);
+				}
+			}
+			testPosition();
+		}
+	};
+
+	protected abstract MainActivity getActivity();
+
 	private void testPosition() {
-		if (fetching || !hasMore || layoutManager == null)
+		if (fetcher.isRunning() || !hasMore || layoutManager == null)
 			return;
 
 		int lastVisible = layoutManager.findLastVisibleItemPosition();
-		final int fetchCount = lastVisible + 15 - (items.size());
+		fetchCount = lastVisible + 15 - (items.size());
 
 		if (fetchCount <= 0)
 			return;
 
-		fetching = true;
-
-		final AsyncTask<Void, Object, Void> fetch = new AsyncTask<Void, Object, Void>() {
-			RuntimeException ex;
-			@Override
-			protected Void doInBackground(Void... params) {
-				try {
-					for (int i = 0; i < fetchCount; i++) {
-						T msg = list.next();
-						//noinspection unchecked
-						publishProgress(msg);
-						if (msg == null)
-							break;
-					}
-				} catch (RuntimeException e){
-					ex = e;
-				} catch (Exception e) {
-					ex = new IllegalStateException(e);
-				}
-				return null;
-			}
-
-			@Override
-			protected void onPostExecute(Void aVoid) {
-				super.onPostExecute(aVoid);
-				if (ex != null)
-					throw ex;
-				fetching = false;
-				testPosition();
-			}
-
-			@Override
-			protected final void onProgressUpdate(Object... values) {
-				super.onProgressUpdate(values);
-				@SuppressWarnings("unchecked")
-				T msg = (T)values[0];
-				if (msg == null) {
-					hasMore = false;
-					notifyItemRemoved(items.size());
-				} else
-					addPast(msg);
-			}
-		};
-		fetch.execute();
+		fetcher.execute();
 	}
 
 	@Override

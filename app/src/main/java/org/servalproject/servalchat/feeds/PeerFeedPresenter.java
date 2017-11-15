@@ -1,23 +1,14 @@
 package org.servalproject.servalchat.feeds;
 
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
 
 import org.servalproject.mid.Identity;
-import org.servalproject.mid.KnownPeers;
 import org.servalproject.mid.MessageFeed;
-import org.servalproject.mid.Messaging;
 import org.servalproject.mid.Observer;
 import org.servalproject.mid.Peer;
-import org.servalproject.mid.Serval;
-import org.servalproject.servalchat.R;
+import org.servalproject.servalchat.navigation.MainActivity;
 import org.servalproject.servalchat.views.Presenter;
 import org.servalproject.servalchat.views.PresenterFactory;
-import org.servalproject.servaldna.AbstractId;
-import org.servalproject.servaldna.Subscriber;
-import org.servalproject.servaldna.meshmb.MeshMBCommon;
-import org.servalproject.servaldna.meshmb.MeshMBSubscription;
 
 /**
  * Created by jeremy on 3/08/16.
@@ -34,7 +25,12 @@ public class PeerFeedPresenter extends Presenter<PeerFeed> {
 			// if we discover a peer signing key, reset our adapter
 			if (obj.getSubscriber().signingKey != null && (feed == null || feed.getId() == null)){
 				feed = peer.getFeed();
-				adapter = new FeedAdapter(feed);
+				adapter = new FeedAdapter(feed) {
+					@Override
+					protected MainActivity getActivity() {
+						return PeerFeedPresenter.this.getActivity();
+					}
+				};
 				PeerFeed view = getView();
 				if (view != null) {
 					view.list.setAdapter(adapter);
@@ -67,7 +63,17 @@ public class PeerFeedPresenter extends Presenter<PeerFeed> {
 	@Override
 	protected void restore(Bundle config) {
 		feed = peer.getFeed();
-		adapter = new FeedAdapter(feed);
+		adapter = new FeedAdapter(feed) {
+			@Override
+			protected MainActivity getActivity() {
+				return PeerFeedPresenter.this.getActivity();
+			}
+		};
+	}
+
+	protected MainActivity getActivity() {
+		PeerFeed view = getView();
+		return view == null ? null : view.activity;
 	}
 
 	@Override

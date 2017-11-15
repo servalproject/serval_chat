@@ -1,29 +1,28 @@
 package org.servalproject.servalchat.peer;
 
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import org.servalproject.mid.Identity;
-import org.servalproject.mid.KnownPeers;
 import org.servalproject.mid.MessageList;
 import org.servalproject.mid.Peer;
-import org.servalproject.mid.Serval;
 import org.servalproject.servalchat.App;
 import org.servalproject.servalchat.R;
+import org.servalproject.servalchat.navigation.MainActivity;
+import org.servalproject.servalchat.views.BackgroundWorker;
 import org.servalproject.servalchat.views.BasicViewHolder;
 import org.servalproject.servalchat.views.Presenter;
 import org.servalproject.servalchat.views.PresenterFactory;
 import org.servalproject.servalchat.views.ScrollingAdapter;
 import org.servalproject.servalchat.views.TimestampView;
-import org.servalproject.servaldna.AbstractId;
-import org.servalproject.servaldna.Subscriber;
+import org.servalproject.servaldna.ServalDInterfaceException;
+import org.servalproject.servaldna.meshms.MeshMSException;
 import org.servalproject.servaldna.meshms.MeshMSMessage;
+
+import java.io.IOException;
 
 /**
  * Created by jeremy on 27/07/16.
@@ -121,6 +120,12 @@ public final class PrivateMessagingPresenter extends Presenter<PrivateMessaging>
 			}
 
 			@Override
+			protected MainActivity getActivity() {
+				PrivateMessaging view = getView();
+				return view == null ? null : view.activity;
+			}
+
+			@Override
 			public long getItemId(int position) {
 				MeshMSMessage item = getItem(position);
 				if (item == null)
@@ -133,16 +138,23 @@ public final class PrivateMessagingPresenter extends Presenter<PrivateMessaging>
 
 	private void markRead(){
 		if (!messages.isRead()) {
-			Serval.getInstance().runOnThreadPool(new Runnable() {
+			new BackgroundWorker() {
 				@Override
-				public void run() {
-					try {
-						messages.markRead();
-					} catch (Exception e) {
-						throw new IllegalStateException(e);
-					}
+				protected void onBackGround() throws Exception {
+					messages.markRead();
 				}
-			});
+
+				@Override
+				protected void onComplete(Throwable t) {
+					if (t==null)
+						return;
+					PrivateMessaging view = getView();
+					if (view!=null)
+						view.activity.showError(t);
+					else
+						rethrow(t);
+				}
+			}.execute();
 		}
 	}
 
@@ -171,43 +183,30 @@ public final class PrivateMessagingPresenter extends Presenter<PrivateMessaging>
 		final String message = view.message.getText().toString();
 		if ("".equals(message))
 			return;
-		view.message.setText("");
 
-		AsyncTask<Void, Void, Void> sender = new AsyncTask<Void, Void, Void>() {
-			private Exception e;
+		sending = true;
+		view.send.setEnabled(false);
 
+		BackgroundWorker sender = new BackgroundWorker() {
 			@Override
-			protected void onPreExecute() {
-				super.onPreExecute();
-				sending = true;
-				PrivateMessaging view = getView();
-				if (view!=null)
-					view.send.setEnabled(false);
-				markRead();
+			protected void onBackGround() throws ServalDInterfaceException, MeshMSException, IOException {
+				messages.sendMessage(message);
+				messages.markRead();
 			}
 
 			@Override
-			protected void onPostExecute(Void aVoid) {
-				super.onPostExecute(aVoid);
-				PrivateMessaging view = getView();
-				if (view == null)
-					return;
-				if (e != null) {
-					view.activity.showError(e);
-				}
-				view.send.setEnabled(true);
+			protected void onComplete(Throwable t) {
 				sending = false;
-			}
-
-			@Override
-			protected Void doInBackground(Void... params) {
-				try {
-					messages.sendMessage(message);
-				} catch (Exception e) {
-					Log.e(TAG, e.getMessage(), e);
-					this.e = e;
+				PrivateMessaging view = getView();
+				if (view!=null) {
+					view.send.setEnabled(true);
+					if (t == null)
+						view.message.setText("");
+					else
+						view.activity.showError(t);
+				} else {
+					rethrow(t);
 				}
-				return null;
 			}
 		};
 		sender.execute();

@@ -1,15 +1,15 @@
 package org.servalproject.servalchat.feeds;
 
-import android.os.AsyncTask;
 import android.os.Bundle;
 
 import org.servalproject.mid.Identity;
 import org.servalproject.mid.IdentityFeed;
-import org.servalproject.mid.KnownPeers;
 import org.servalproject.mid.Peer;
 import org.servalproject.mid.Serval;
 import org.servalproject.servalchat.App;
+import org.servalproject.servalchat.navigation.MainActivity;
 import org.servalproject.servalchat.navigation.Navigation;
+import org.servalproject.servalchat.views.BackgroundWorker;
 import org.servalproject.servalchat.views.Presenter;
 import org.servalproject.servalchat.views.PresenterFactory;
 import org.servalproject.servaldna.Subscriber;
@@ -65,42 +65,28 @@ public class MyFeedPresenter extends Presenter<MyFeed> {
 		if ("".equals(message))
 			return;
 
-		AsyncTask<Void, Void, Void> sendTask = new AsyncTask<Void, Void, Void>() {
-			Exception e;
-
+		posting = true;
+		setEnabled();
+		new BackgroundWorker() {
 			@Override
-			protected void onPreExecute() {
-				super.onPreExecute();
-				posting = true;
-				setEnabled();
+			protected void onBackGround() throws Exception {
+				feed.sendMessage(message);
 			}
 
 			@Override
-			protected void onPostExecute(Void aVoid) {
-				super.onPostExecute(aVoid);
+			protected void onComplete(Throwable t) {
 				posting = false;
 				MyFeed view = getView();
-				if (view == null)
-					return;
-				if (e == null) {
-					view.message.setText("");
-				} else {
-					view.activity.showError(e);
-				}
-				setEnabled();
+				if (view != null) {
+					if (t == null)
+						view.message.setText("");
+					else
+						view.activity.showError(t);
+					setEnabled();
+				}else
+					rethrow(t);
 			}
-
-			@Override
-			protected Void doInBackground(Void... params) {
-				try {
-					feed.sendMessage(message);
-				} catch (Exception e) {
-					this.e = e;
-				}
-				return null;
-			}
-		};
-		sendTask.execute();
+		}.execute();
 	}
 
 	public void openFeed(Subscriber subscriber, long offset) {
@@ -112,6 +98,12 @@ public class MyFeedPresenter extends Presenter<MyFeed> {
 		args.putLong("offset", offset);
 		view.activity.go(Navigation.PeerFeed, peer, args);
 	}
+
+	protected MainActivity getActivity() {
+		MyFeed view = getView();
+		return view == null ? null : view.activity;
+	}
+
 
 	@Override
 	public void onVisible() {
