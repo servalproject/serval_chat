@@ -72,6 +72,7 @@ public class Serval {
 			restfulPassword = new BigInteger(130, new SecureRandom()).toString(32);
 			config.set("api.restful.users." + restfulUsername + ".password", restfulPassword);
 			config.set("api.restful.newsince_timeout", "3600"); // 1 hour...
+			// Match any wifi or cabled ethernet network interface
 			config.set("interfaces.0.match", "*");
 			config.set("interfaces.0.match_type", "wifi");
 			config.set("interfaces.0.type", "wifi");
@@ -80,6 +81,11 @@ public class Serval {
 			config.set("interfaces.1.match_type", "ethernet");
 			config.set("interfaces.1.type", "ethernet");
 			config.set("interfaces.1.default_route", "on");
+			// fall back to these interface names if we can't read from /sys/net/<name>/
+			config.set("interfaces.2.match", "eth0,tiwlan0,wlan0,wl0.1,tiap0");
+			config.set("interfaces.2.match_type", "other");
+			config.set("interfaces.2.type", "wifi");
+			config.set("interfaces.2.default_route", "on");
 			config.set("mdp.enable_inet", "on");
 			config.set("log.android.show_pid", "0");
 			config.set("log.android.show_time", "0");
