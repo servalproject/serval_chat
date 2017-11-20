@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.os.HandlerThread;
 import android.preference.PreferenceManager;
 
+import org.servalproject.servalchat.App;
 import org.servalproject.servalchat.BuildConfig;
 import org.servalproject.servaldna.ChannelSelector;
 import org.servalproject.servaldna.ServalDClient;
@@ -83,7 +84,9 @@ public class Serval {
 			config.set("log.android.show_pid", "0");
 			config.set("log.android.show_time", "0");
 
-			if (BuildConfig.BUILD_TYPE.equals("release")) {
+			if (App.isTesting()){
+				config.set("log.android.level", "DEBUG");
+			} else if (BuildConfig.BUILD_TYPE.equals("release")) {
 				config.set("log.android.level", "WARN");
 				config.set("log.android.dump_config", "0");
 				config.set("log.file.dump_config", "0");
