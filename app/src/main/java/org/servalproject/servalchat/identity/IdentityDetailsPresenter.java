@@ -6,6 +6,7 @@ import org.servalproject.mid.Identity;
 import org.servalproject.mid.Peer;
 import org.servalproject.mid.Serval;
 import org.servalproject.servalchat.App;
+import org.servalproject.servalchat.R;
 import org.servalproject.servalchat.navigation.Navigation;
 import org.servalproject.servalchat.views.BackgroundWorker;
 import org.servalproject.servalchat.views.Presenter;
@@ -36,6 +37,7 @@ public class IdentityDetailsPresenter extends Presenter<IdentityDetails> {
 			view.name.setText(identity.getName());
 			view.sid.setText(identity.subscriber.sid.toHex());
 			view.icon.setImageDrawable(identity.getIcon());
+			view.update.setText(R.string.identity_update);
 			view.sidLabel.setVisibility(View.VISIBLE);
 			view.sid.setVisibility(View.VISIBLE);
 			view.icon.setVisibility(View.VISIBLE);
@@ -43,6 +45,7 @@ public class IdentityDetailsPresenter extends Presenter<IdentityDetails> {
 			view.sidLabel.setVisibility(View.GONE);
 			view.sid.setVisibility(View.GONE);
 			view.icon.setVisibility(View.GONE);
+			view.update.setText(R.string.add_identity);
 			if (App.isTesting())
 				view.name.setText("Test User");
 		}
@@ -94,7 +97,10 @@ public class IdentityDetailsPresenter extends Presenter<IdentityDetails> {
 						view.activity.showError(t);
 					}
 				} else {
-					view.activity.go(Navigation.MyFeed, result, null, null);
+					if (identity == null)
+						view.activity.go(Navigation.MyFeed, result, null, null, true);
+					else
+						view.activity.go(Navigation.MyFeed);
 				}
 			}
 		}.execute();

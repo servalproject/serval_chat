@@ -228,12 +228,13 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 		return intent;
 	}
 
-	public void go(Navigation key, Identity identity, Peer peer, Bundle args) {
+	public void go(Navigation key, Identity identity, Peer peer, Bundle args, boolean replace) {
 		if (this.identity == identity) {
-			go(key, peer, args);
+			go(key, peer, args, replace);
 			return;
 		}
-
+		if (replace && history.back())
+			go();
 		startActivity(getIntentFor(this, key, identity, peer, args));
 	}
 

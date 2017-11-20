@@ -59,12 +59,13 @@ public class Navigation {
 	public static final Navigation Launcher = new Navigation("Launcher", false, R.string.app_name, R.layout.main_tabs, null, Root);
 	public static final Navigation IdentityList = new Navigation("IdentityList", false, R.string.my_details, R.layout.identity_list, null, Launcher);
 	public static final Navigation Networking = new Navigation("Networking", false, R.string.networking, R.layout.networking, null, Launcher);
+	// TODO dialog...
 	public static final Navigation NewIdentityDetails = new Navigation("NewDetails", false, R.string.identity_details, R.layout.identity_details, IdentityList, Root);
 
-	// main screen
-	// TODO sidebar menu for details, peer list, block list etc.
+	// spin while waiting for startup to complete
 	public static final Navigation Spinner = new Navigation("Spinner", false, R.string.app_name, R.layout.progress, null, Root);
 
+	// main screen
 	public static final Navigation Main = new Navigation("Main", R.string.app_name, R.layout.main_sidebar, null, null);
 	public static final Navigation IdentityDetails = new Navigation("Details", R.string.identity_details, R.layout.identity_details, null, Main);
 	public static final Navigation MyFeed = new Navigation("MyFeed", R.string.my_feed, R.layout.my_feed, null, Main);
