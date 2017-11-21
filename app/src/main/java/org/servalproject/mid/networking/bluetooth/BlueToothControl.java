@@ -37,7 +37,7 @@ public class BlueToothControl extends AbstractExternalInterface {
 	private long lastScan;
 	private boolean scanAgain = false;
 	private boolean scanCancelled = false;
-	private HashMap<String, PeerState> peers = new HashMap<String, PeerState>();
+	private final HashMap<String, PeerState> peers = new HashMap<String, PeerState>();
 	private Listener secureListener, insecureListener;
 	static final int MTU = 1200;
 	private static final String TAG = "BlueToothControl";
@@ -180,10 +180,12 @@ public class BlueToothControl extends AbstractExternalInterface {
 				Log.e(TAG, e.getMessage(), e);
 			}
 
-			for (PeerState p : peers.values()) {
-				p.disconnect();
+			synchronized (peers) {
+				for (PeerState p : peers.values()) {
+					p.disconnect();
+				}
+				peers.clear();
 			}
-			peers.clear();
 
 			if (secureListener != null) {
 				secureListener.close();
@@ -201,7 +203,9 @@ public class BlueToothControl extends AbstractExternalInterface {
 		PeerState s = this.peers.get(device.getAddress());
 		if (s == null) {
 			s = new PeerState(this, device, getAddress(device));
-			this.peers.put(device.getAddress(), s);
+			synchronized (peers) {
+				this.peers.put(device.getAddress(), s);
+			}
 		}
 		return s;
 	}
