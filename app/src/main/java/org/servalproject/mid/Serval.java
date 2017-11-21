@@ -17,6 +17,8 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -36,6 +38,18 @@ public class Serval {
 		File appFolder = context.getFilesDir().getParentFile();
 		instancePath = new File(appFolder, "instance");
 		uiHandler = new CallbackHandler(context.getMainLooper());
+
+		// default interface types, collected from various old phones
+		interfaces.put(WIFI_INTERFACE, "eth0,wlan0,tiwlan0,wlp1s0");
+		interfaces.put(WIFI_DIRECT_INTERFACE, "p2p0");
+		interfaces.put(HOTSPOT_INTERFACE, "wl0.1,tiap0,ap0");
+
+		// get the actual wifi interfaces from system properties, if they are defined
+		for(String prop : new String[]{WIFI_INTERFACE, WIFI_DIRECT_INTERFACE, HOTSPOT_INTERFACE}){
+			String value = System.getProperty(prop);
+			if (value != null)
+				interfaces.put(prop, value);
+		}
 
 		HandlerThread handlerThread = new HandlerThread("BackgroundHandler");
 		handlerThread.start();
@@ -61,6 +75,32 @@ public class Serval {
 		});
 	}
 
+	public static final String WIFI_INTERFACE="wifi.interface";
+	public static final String WIFI_DIRECT_INTERFACE="wifi.direct.interface";
+	public static final String HOTSPOT_INTERFACE="wifi.tethering.interface";
+
+	private Map<String, String> interfaces = new HashMap<>();
+	public void setInterface(String type, String name) throws ServalDFailureException {
+		if (name.equals(interfaces.get(type)))
+			return;
+
+		interfaces.put(type, name);
+		config.set("interfaces.2.match", getInterfaces());
+		config.sync();
+	}
+
+	private String getInterfaces(){
+		StringBuilder sb = new StringBuilder();
+		for(String i : interfaces.values()){
+			if ("".equals(i)||i==null)
+				continue;
+			if (sb.length()>0)
+				sb.append(",");
+			sb.append(i);
+		}
+		return sb.toString();
+	}
+
 	private void startup() {
 		try {
 			ServalDCommand.setInstancePath(instancePath.getPath());
@@ -81,8 +121,9 @@ public class Serval {
 			config.set("interfaces.1.match_type", "ethernet");
 			config.set("interfaces.1.type", "ethernet");
 			config.set("interfaces.1.default_route", "on");
+
 			// fall back to these interface names if we can't read from /sys/net/<name>/
-			config.set("interfaces.2.match", "eth0,tiwlan0,wlan0,wl0.1,tiap0");
+			config.set("interfaces.2.match", getInterfaces());
 			config.set("interfaces.2.match_type", "other");
 			config.set("interfaces.2.type", "wifi");
 			config.set("interfaces.2.default_route", "on");
@@ -90,9 +131,9 @@ public class Serval {
 			config.set("log.android.show_pid", "0");
 			config.set("log.android.show_time", "0");
 
-			if (App.isTesting()){
+			if (App.isTesting() || BuildConfig.BUILD_TYPE.equals("debug")){
 				config.set("log.android.level", "DEBUG");
-			} else if (BuildConfig.BUILD_TYPE.equals("release")) {
+			} else {
 				config.set("log.android.level", "WARN");
 				config.set("log.android.dump_config", "0");
 				config.set("log.file.dump_config", "0");

@@ -15,6 +15,7 @@ import android.util.Log;
 import org.servalproject.mid.Serval;
 import org.servalproject.servalchat.BuildConfig;
 import org.servalproject.servalchat.R;
+import org.servalproject.servaldna.ServalDFailureException;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -234,6 +235,17 @@ public class Hotspot extends NetworkInfo {
 	void onStateChanged(Intent intent) {
 		testUserConfig();
 		setState(statusToState(intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, -1)));
+		// New in Android O...
+		//int errorCode = intent.getIntExtra("wifi_ap_error_code", WifiManager.HOTSPOT_NO_ERROR);
+		//boolean localOnly = intent.getIntExtra("wifi_ap_mode", -1) == 2;
+		String ifaceName = intent.getStringExtra("wifi_ap_interface_name");
+		if (ifaceName!=null){
+			try {
+				serval.setInterface(Serval.HOTSPOT_INTERFACE, ifaceName);
+			} catch (ServalDFailureException e) {
+				throw new IllegalStateException(e);
+			}
+		}
 	}
 
 	@Override

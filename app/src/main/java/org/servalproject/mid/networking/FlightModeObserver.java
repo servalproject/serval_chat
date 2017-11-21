@@ -45,6 +45,7 @@ public class FlightModeObserver extends ContentObserver {
 		onChange(selfChange, null);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void onChange(boolean selfChange, Uri uri) {
 		boolean airplaneMode;
