@@ -68,6 +68,12 @@ public class Messaging {
 
 		// TODO add restful api for conversation list updates?
 		serval.rhizome.observerSet.addBackground(rhizomeObserver);
+		serval.rhizome.observers.addBackground(new Observer<Rhizome>() {
+			@Override
+			public void updated(Rhizome obj) {
+				refresh();
+			}
+		});
 		refresh();
 	}
 
@@ -98,6 +104,8 @@ public class Messaging {
 	private Refresh refreshing;
 
 	void refresh() {
+		if (!serval.rhizome.isEnabled())
+			return;
 		synchronized (this) {
 			Refresh refreshing = this.refreshing;
 			if (refreshing != null)
