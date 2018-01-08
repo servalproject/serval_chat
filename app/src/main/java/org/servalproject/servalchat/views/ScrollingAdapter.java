@@ -134,6 +134,10 @@ public abstract class ScrollingAdapter<T, VH extends BasicViewHolder>
 						throw (RuntimeException)t;
 					throw new IllegalStateException(t);
 				}
+				if (hasMore){
+					hasMore = false;
+					notifyItemRemoved(items.size());
+				}
 			}
 			testPosition();
 		}

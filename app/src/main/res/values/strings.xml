@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">Serval Chat</string>
     <string name="my_details">Identity</string>
+    <string name="startup">Please wait …</string>
+    <string name="rhizome_disabled">Insert sdcard to continue</string>
 
     <string name="placeholder">Placeholder</string>
 

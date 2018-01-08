@@ -12,7 +12,6 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,11 +22,14 @@ import android.widget.LinearLayout;
 import org.servalproject.mid.Identity;
 import org.servalproject.mid.ListObserver;
 import org.servalproject.mid.Messaging;
+import org.servalproject.mid.Observer;
 import org.servalproject.mid.Peer;
+import org.servalproject.mid.Rhizome;
 import org.servalproject.mid.Serval;
 import org.servalproject.servalchat.App;
 import org.servalproject.servalchat.R;
 import org.servalproject.servalchat.views.BackgroundWorker;
+import org.servalproject.servalchat.views.DisplayError;
 import org.servalproject.servaldna.Subscriber;
 import org.servalproject.servaldna.meshmb.MeshMBCommon;
 
@@ -98,6 +100,13 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 		}
 	};
 
+	private final Observer<Rhizome> rhizomeObserver = new Observer<Rhizome>() {
+		@Override
+		public void updated(Rhizome obj) {
+			go();
+		}
+	};
+
 	private void popViewsTo(int offset, boolean configChange) {
 		for (int j = viewStack.size() - 1; j >= offset; j--) {
 			ViewState v = viewStack.get(j);
@@ -121,8 +130,16 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 		if (n.requiresId && identity == null && !serval.identities.isLoaded()) {
 			// go() again if the identity appears
 			serval.identities.listObservers.add(idLoaded);
-			n = Navigation.Spinner;
-			args = null;
+			n = Navigation.Error;
+			args = new Bundle();
+			args.putInt(DisplayError.MESSAGE, R.string.startup);
+			peerSubscriber = null;
+		}
+
+		if (n.requiresRhizome && !serval.rhizome.isEnabled()){
+			n = Navigation.Error;
+			args = new Bundle();
+			args.putInt(DisplayError.MESSAGE, R.string.rhizome_disabled);
 			peerSubscriber = null;
 		}
 
@@ -481,6 +498,7 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 			lifecycle.onDetach(configChange);
 		ViewGroup root = (ViewGroup)findViewById(android.R.id.content);
 		root.removeView(state.view);
+		serval.rhizome.observers.removeUI(rhizomeObserver);
 	}
 
 	@Override
@@ -500,6 +518,8 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 		ret.view.setLayoutParams(new LinearLayout.LayoutParams(
 				ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 		setContentView(ret.view);
+
+		serval.rhizome.observers.addUI(rhizomeObserver);
 
 		ILifecycle lifecycle = ret.getLifecycle();
 		if (visible && lifecycle != null)
@@ -525,7 +545,7 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 	public void showError(final Throwable e) {
 		if (App.isTesting())
 			throw new CrashReportException(e);
-		showSnack(e.getMessage(), Snackbar.LENGTH_LONG, getString(R.string.email_log),
+		showSnack(e.getMessage(), Snackbar.LENGTH_INDEFINITE, getString(R.string.email_log),
 				new View.OnClickListener() {
 					@Override
 					public void onClick(View v) {
