@@ -50,8 +50,8 @@
         <item quantity="other">%1$s has %2$d unread conversations</item>
     </plurals>
 
-    <string name="foreground_title">Keep alive</string>
-    <string name="foreground_text">We have a network, don\'t kill us android</string>
+    <string name="foreground_title">Active Network</string>
+    <string name="foreground_text">Scanning for network neighbours</string>
 
     <string name="networking">Networks</string>
     <string name="starting">Turning On</string>
