@@ -45,6 +45,8 @@ public class FeedList extends AbstractFutureList<RhizomeListBundle, IOException>
 	private void updatePeer(RhizomeListBundle item) {
 		// TODO verify that the sender and id are for the same identity!
 		// for now we can assume this, but we might break this rule in a future version
+		if (item.author == null && item.manifest.sender == null)
+			return;
 		Subscriber subscriber = new Subscriber(
 				item.author != null ? item.author : item.manifest.sender,
 				item.manifest.id, true);

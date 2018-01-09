@@ -16,6 +16,7 @@ import org.servalproject.servalchat.views.Identicon;
 import org.servalproject.servalchat.views.ScrollingAdapter;
 import org.servalproject.servaldna.BundleId;
 import org.servalproject.servaldna.Subscriber;
+import org.servalproject.servaldna.SubscriberId;
 import org.servalproject.servaldna.rhizome.RhizomeListBundle;
 
 import java.util.HashSet;
@@ -45,6 +46,8 @@ public class FeedListAdapter extends ScrollingAdapter<RhizomeListBundle, FeedLis
 
 	@Override
 	protected void addItem(int index, RhizomeListBundle item) {
+		if (item.author == null && item.manifest.sender == null)
+			return;
 		Subscriber subscriber = new Subscriber(
 				item.author != null ? item.author : item.manifest.sender,
 				item.manifest.id, true);
