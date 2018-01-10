@@ -19,6 +19,7 @@ import org.servalproject.mid.Serval;
 import org.servalproject.servalchat.R;
 import org.servalproject.servalchat.navigation.IHaveMenu;
 import org.servalproject.servalchat.navigation.Navigation;
+import org.servalproject.servalchat.views.BasicViewHolder;
 import org.servalproject.servalchat.views.Identicon;
 import org.servalproject.servalchat.views.ObservedRecyclerView;
 import org.servalproject.servalchat.views.RecyclerHelper;
@@ -46,7 +47,7 @@ public class IdentityList
 	}
 
 	public IdentityList(Context context, @Nullable AttributeSet attrs) {
-		super(getObserver(), context, attrs);
+		super(getObserver(), context, attrs, R.string.empty_identity_list);
 		serval = Serval.getInstance();
 		if (serval == null) {
 			// example data for editing layouts
@@ -67,8 +68,7 @@ public class IdentityList
 
 	@Override
 	public IdentityHolder createHolder(ViewGroup parent, int viewType) {
-		View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.identity, parent, false);
-		return new IdentityHolder(view);
+		return new IdentityHolder(parent, R.layout.identity);
 	}
 
 	@Override
@@ -117,13 +117,13 @@ public class IdentityList
 		return false;
 	}
 
-	public class IdentityHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+	public class IdentityHolder extends BasicViewHolder implements View.OnClickListener {
 		private final TextView name;
 		private final ImageView icon;
 		private Identity id;
 
-		public IdentityHolder(View view) {
-			super(view);
+		public IdentityHolder(ViewGroup parent, int layoutId) {
+			super(layoutId, parent);
 			name = (TextView) this.itemView.findViewById(R.id.name);
 			icon = (ImageView) this.itemView.findViewById(R.id.identicon);
 			this.itemView.setOnClickListener(this);

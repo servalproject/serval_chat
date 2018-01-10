@@ -21,6 +21,7 @@ import org.servalproject.mid.networking.NetworkInfo;
 import org.servalproject.mid.networking.Networks;
 import org.servalproject.servalchat.App;
 import org.servalproject.servalchat.R;
+import org.servalproject.servalchat.views.BasicViewHolder;
 import org.servalproject.servalchat.views.ObservedRecyclerView;
 import org.servalproject.servalchat.views.RecyclerHelper;
 
@@ -33,7 +34,7 @@ public class NetworkList extends ObservedRecyclerView<NetworkInfo, NetworkList.N
 	private static final String TAG = "NetworkList";
 
 	public NetworkList(Context context, @Nullable AttributeSet attrs) {
-		super(null, context, attrs);
+		super(null, context, attrs, -1);
 		serval = Serval.getInstance();
 		setHasFixedSize(true);
 		RecyclerHelper.createLayoutManager(this, true, false);
@@ -69,7 +70,7 @@ public class NetworkList extends ObservedRecyclerView<NetworkInfo, NetworkList.N
 		holder.setItem(null);
 	}
 
-	public class NetworkHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+	public class NetworkHolder extends BasicViewHolder implements View.OnClickListener {
 		TextView name;
 		TextView status;
 		ImageView icon;

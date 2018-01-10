@@ -20,6 +20,7 @@ import org.servalproject.servalchat.navigation.ILifecycle;
 import org.servalproject.servalchat.navigation.INavigate;
 import org.servalproject.servalchat.navigation.MainActivity;
 import org.servalproject.servalchat.navigation.Navigation;
+import org.servalproject.servalchat.views.BasicViewHolder;
 import org.servalproject.servalchat.views.Identicon;
 import org.servalproject.servalchat.views.ObservedRecyclerView;
 import org.servalproject.servalchat.views.RecyclerHelper;
@@ -41,7 +42,7 @@ public class ConversationList
 	private final Serval serval;
 
 	public ConversationList(Context context, @Nullable AttributeSet attrs) {
-		super(null, context, attrs);
+		super(null, context, attrs, R.string.empty_conversation_list);
 		this.serval = Serval.getInstance();
 		setHasFixedSize(true);
 		RecyclerHelper.createLayoutManager(this, true, false);
@@ -99,7 +100,7 @@ public class ConversationList
 	}
 
 	public class ConversationHolder
-			extends RecyclerView.ViewHolder
+			extends BasicViewHolder
 			implements View.OnClickListener, Observer<Peer> {
 		final TextView name;
 		final ImageView icon;

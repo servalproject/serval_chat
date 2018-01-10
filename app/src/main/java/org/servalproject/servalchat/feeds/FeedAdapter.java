@@ -19,7 +19,7 @@ import org.servalproject.servaldna.meshmb.PlyMessage;
  */
 public abstract class FeedAdapter extends ScrollingAdapter<PlyMessage, FeedAdapter.MessageHolder> {
 	public FeedAdapter(MessageFeed feed) {
-		super(feed);
+		super(feed, R.string.empty_feed);
 	}
 
 	@Override

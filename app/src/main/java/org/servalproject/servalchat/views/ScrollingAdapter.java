@@ -20,11 +20,14 @@ public abstract class ScrollingAdapter<T, VH extends BasicViewHolder>
 	private IObservableList<T, ?> list;
 	protected final FutureList<T> items = new FutureList<>(this);
 	private boolean hasMore = true;
+	private final int emptyResource;
 	private int fetchCount;
 	private static final int SPINNER = 0;
+	private static final int EMPTY = 1;
 
-	public ScrollingAdapter(IObservableList<T, ?> list) {
+	public ScrollingAdapter(IObservableList<T, ?> list, int emptyResource) {
 		this.list = list;
+		this.emptyResource = emptyResource;
 		if (list == null)
 			hasMore = false;
 	}
@@ -38,7 +41,7 @@ public abstract class ScrollingAdapter<T, VH extends BasicViewHolder>
 
 	@Override
 	public void onBindViewHolder(BasicViewHolder holder, int position) {
-		if (holder instanceof SpinnerViewHolder)
+		if (holder instanceof SpinnerViewHolder || holder instanceof MessageViewHolder)
 			return; // nothing to bind
 		bindItem((VH)holder, position);
 	}
@@ -47,12 +50,17 @@ public abstract class ScrollingAdapter<T, VH extends BasicViewHolder>
 	public BasicViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 		if (viewType==SPINNER)
 			return new SpinnerViewHolder(parent);
-		return create(parent, viewType - 1);
+		if (viewType==EMPTY)
+			return new MessageViewHolder(emptyResource, parent);
+		return create(parent, viewType - 2);
 	}
 
 	// override to track where it was inserted
 	public void insertedItem(T item, int position){
-		notifyItemInserted(position);
+		if (emptyResource!=-1 && getItemCount()==1)
+			notifyItemChanged(position);
+		else
+			notifyItemInserted(position);
 		if (layoutManager != null && position == 0)
 			layoutManager.scrollToPosition(0);
 	}
@@ -79,6 +87,8 @@ public abstract class ScrollingAdapter<T, VH extends BasicViewHolder>
 		int count = items.size();
 		if (hasMore)
 			count++;
+		if (count==0 && emptyResource!=-1)
+			count++;
 		return count;
 	}
 
@@ -96,10 +106,9 @@ public abstract class ScrollingAdapter<T, VH extends BasicViewHolder>
 
 	@Override
 	public int getItemViewType(int position) {
-		T item = getItem(position);
-		if (item == null)
-			return SPINNER;
-		return getItemType(getItem(position)) + 1;
+		if (position==items.size())
+			return hasMore ? SPINNER : EMPTY;
+		return getItemType(getItem(position)) + 2;
 	}
 
 	private BackgroundWorker fetcher = new BackgroundWorker(){

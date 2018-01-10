@@ -83,4 +83,14 @@
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="empty_blocklist">You haven\'t blocked anyone</string>
+    <string name="empty_contacts">You have no contacts</string>
+    <string name="empty_conversation_list">You aren\'t talking to anyone</string>
+    <string name="empty_identity_list">You haven\'t created any identities</string>
+    <string name="empty_peer_list">You have no network neighbours</string>
+    <string name="empty_conversation">You haven\'t said anything yet</string>
+    <string name="empty_activity">You haven\'t posted anything or followed anyone yet</string>
+    <string name="empty_feed">This person hasn\'t said anything publicly</string>
+    <string name="empty_feed_list">You haven\'t aquired anyone\'s feed yet</string>
 </resources>

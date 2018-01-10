@@ -25,7 +25,7 @@ public class ActivityAdapter extends ScrollingAdapter<MeshMBActivityMessage, Act
 	private final MyFeedPresenter presenter;
 
 	public ActivityAdapter(IObservableList<MeshMBActivityMessage, ?> list, MyFeedPresenter presenter) {
-		super(list);
+		super(list, R.string.empty_activity);
 		this.presenter = presenter;
 	}
 

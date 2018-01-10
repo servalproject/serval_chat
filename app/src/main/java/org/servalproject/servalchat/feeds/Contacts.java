@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import org.servalproject.mid.Identity;
 import org.servalproject.mid.ListObserver;
 import org.servalproject.mid.Peer;
+import org.servalproject.servalchat.R;
 import org.servalproject.servalchat.navigation.ILifecycle;
 import org.servalproject.servalchat.navigation.INavigate;
 import org.servalproject.servalchat.navigation.MainActivity;
@@ -33,7 +34,7 @@ public class Contacts extends SimpleRecyclerView<Peer, PeerHolder>
 	private static final String TAG = "Contacts";
 
 	public Contacts(Context context, @Nullable AttributeSet attrs) {
-		super(context, attrs);
+		super(context, attrs, R.string.empty_contacts);
 		listAdapter.setHasStableIds(true);
 		setHasFixedSize(true);
 		RecyclerHelper.createLayoutManager(this, true, false);

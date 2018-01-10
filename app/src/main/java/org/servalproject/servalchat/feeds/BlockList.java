@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import org.servalproject.mid.Identity;
 import org.servalproject.mid.ListObserver;
 import org.servalproject.mid.Peer;
+import org.servalproject.servalchat.R;
 import org.servalproject.servalchat.navigation.ILifecycle;
 import org.servalproject.servalchat.navigation.INavigate;
 import org.servalproject.servalchat.navigation.MainActivity;
@@ -31,7 +32,7 @@ public class BlockList extends SimpleRecyclerView<Peer, PeerHolder>
 	private int generation = -1;
 
 	public BlockList(Context context, @Nullable AttributeSet attrs) {
-		super(context, attrs);
+		super(context, attrs, R.string.empty_blocklist);
 		listAdapter.setHasStableIds(true);
 		setHasFixedSize(true);
 		RecyclerHelper.createLayoutManager(this, true, false);

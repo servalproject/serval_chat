@@ -30,7 +30,7 @@ public class FeedListAdapter extends ScrollingAdapter<RhizomeListBundle, FeedLis
 	private HashSet<BundleId> bundles = new HashSet<>();
 
 	public FeedListAdapter(FeedList list, PublicFeedsPresenter presenter) {
-		super(list);
+		super(list, R.string.empty_feed_list);
 		this.presenter = presenter;
 	}
 

@@ -11,12 +11,18 @@ import android.view.ViewGroup;
 /**
  * Created by jeremy on 11/07/16.
  */
-public abstract class SimpleRecyclerView<T, H extends RecyclerView.ViewHolder>
+public abstract class SimpleRecyclerView<T, H extends BasicViewHolder>
 		extends RecyclerView {
 	protected final ListAdapter listAdapter;
+	private final int emptyResource;
 
 	public SimpleRecyclerView(Context context, @Nullable AttributeSet attrs) {
+		this(context, attrs, -1);
+	}
+
+	public SimpleRecyclerView(Context context, @Nullable AttributeSet attrs, int emptyResource) {
 		super(context, attrs);
+		this.emptyResource = emptyResource;
 		listAdapter = new ListAdapter();
 	}
 
@@ -49,36 +55,51 @@ public abstract class SimpleRecyclerView<T, H extends RecyclerView.ViewHolder>
 		listAdapter.notifyDataSetChanged();
 	}
 
-	public class ListAdapter extends RecyclerView.Adapter<H> {
+	public class ListAdapter extends RecyclerView.Adapter<BasicViewHolder> {
 		@Override
-		public H onCreateViewHolder(ViewGroup parent, int viewType) {
-			return createHolder(parent, viewType);
+		public BasicViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+			if (viewType == 0)
+				return new MessageViewHolder(emptyResource, parent);
+			return createHolder(parent, viewType -1);
 		}
 
 		@Override
-		public void onViewRecycled(H holder) {
+		public void onViewRecycled(BasicViewHolder holder) {
+			if (holder instanceof MessageViewHolder)
+				return;
 			int position = holder.getAdapterPosition();
 			if (position != NO_POSITION)
-				unBind(holder, get(position));
+				//noinspection unchecked
+				unBind((H)holder, get(position));
 		}
 
 		@Override
-		public void onBindViewHolder(H holder, int position) {
-			bind(holder, get(position));
+		public void onBindViewHolder(BasicViewHolder holder, int position) {
+			if (holder instanceof MessageViewHolder)
+				return;
+			//noinspection unchecked
+			bind((H)holder, get(position));
 		}
 
 		@Override
 		public int getItemCount() {
+			int count = getCount();
+			if (count == 0 && emptyResource!=-1)
+				return 1;
 			return getCount();
 		}
 
 		public long getItemId(int position) {
+			if (getCount()==0)
+				return -1;
 			return getId(get(position));
 		}
 
 		@Override
 		public int getItemViewType(int position) {
-			return getItemType(get(position));
+			if (getCount()==0)
+				return 0;
+			return getItemType(get(position))+1;
 		}
 	}
 

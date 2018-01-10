@@ -18,7 +18,7 @@ import org.servalproject.servalchat.navigation.Navigation;
 /**
  * Created by jeremy on 20/06/16.
  */
-public abstract class ObservedRecyclerView<T, H extends RecyclerView.ViewHolder>
+public abstract class ObservedRecyclerView<T, H extends BasicViewHolder>
 		extends SimpleRecyclerView<T, H>
 		implements ILifecycle, INavigate, ListObserver<T> {
 
@@ -48,12 +48,8 @@ public abstract class ObservedRecyclerView<T, H extends RecyclerView.ViewHolder>
 		notifyChanged();
 	}
 
-	public ObservedRecyclerView(Context context, @Nullable AttributeSet attrs) {
-		this(null, context, attrs);
-	}
-
-	public ObservedRecyclerView(ListObserverSet<T> observerSet, Context context, @Nullable AttributeSet attrs) {
-		super(context, attrs);
+	public ObservedRecyclerView(ListObserverSet<T> observerSet, Context context, @Nullable AttributeSet attrs, int emptyResource) {
+		super(context, attrs, emptyResource);
 		this.observerSet = observerSet;
 	}
 

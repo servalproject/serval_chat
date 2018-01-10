@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import org.servalproject.mid.ListObserverSet;
 import org.servalproject.mid.Peer;
 import org.servalproject.mid.Serval;
+import org.servalproject.servalchat.R;
 import org.servalproject.servalchat.views.ObservedRecyclerView;
 import org.servalproject.servalchat.views.RecyclerHelper;
 import org.servalproject.servaldna.SubscriberId;
@@ -34,7 +35,7 @@ public class PeerList extends ObservedRecyclerView<Peer, PeerHolder>{
 	}
 
 	public PeerList(Context context, @Nullable AttributeSet attrs) {
-		super(getObserver(), context, attrs);
+		super(getObserver(), context, attrs, R.string.empty_peer_list);
 		listAdapter.setHasStableIds(true);
 		serval = Serval.getInstance();
 	}

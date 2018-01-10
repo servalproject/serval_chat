@@ -61,7 +61,7 @@ public final class PrivateMessagingPresenter extends Presenter<PrivateMessaging>
 	protected void restore(Bundle config) {
 		// TODO show peer details?
 		messages = identity.messaging.getPrivateMessages(peer.getSubscriber());
-		adapter = new ScrollingAdapter<MeshMSMessage, ItemHolder>(messages) {
+		adapter = new ScrollingAdapter<MeshMSMessage, ItemHolder>(messages, R.string.empty_conversation) {
 			@Override
 			public ItemHolder create(ViewGroup parent, int viewType) {
 				LayoutInflater inflater = LayoutInflater.from(parent.getContext());

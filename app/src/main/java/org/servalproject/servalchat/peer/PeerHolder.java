@@ -13,13 +13,14 @@ import org.servalproject.mid.Peer;
 import org.servalproject.servalchat.R;
 import org.servalproject.servalchat.navigation.MainActivity;
 import org.servalproject.servalchat.navigation.Navigation;
+import org.servalproject.servalchat.views.BasicViewHolder;
 import org.servalproject.servalchat.views.Identicon;
 import org.servalproject.servaldna.SigningKey;
 
 /**
  * Created by jeremy on 30/05/17.
  */
-public class PeerHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+public class PeerHolder extends BasicViewHolder implements View.OnClickListener {
 	private final ImageView icon;
 	private final TextView name;
 	private final MainActivity activity;

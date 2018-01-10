@@ -9,7 +9,7 @@ import android.view.ViewGroup;
  * Created by jeremy on 30/01/17.
  */
 
-public class BasicViewHolder extends RecyclerView.ViewHolder {
+public abstract class BasicViewHolder extends RecyclerView.ViewHolder {
 	public BasicViewHolder(View itemView) {
 		super(itemView);
 	}
