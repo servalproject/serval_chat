@@ -178,101 +178,111 @@ dependencies {
     testImplementation 'junit:junit:4.12'
 }
 
-afterEvaluate {
-    def keyring = project.findProperty("serval.keyring")
-    def keyringFile = keyring ? file(keyring) : null
-    if (keyringFile && !keyringFile.exists())
-        keyringFile = null;
-    def entryPin = null;
+def keyring = project.findProperty("serval.keyring")
+def keyringFile = keyring ? file(keyring) : null
+if (keyringFile && !keyringFile.exists())
+    keyringFile = null;
+def entryPin = null;
 
-    android.applicationVariants.all { variant ->
-        // run ndk build
-        def variantName = variant.name.capitalize()
+android.applicationVariants.all { variant ->
 
-        tasks["externalNativeBuild$variantName"].dependsOn libsodiumBuild
+    def variantName = variant.name.capitalize()
+    def confType = "debug"
+    if (variant.buildType.name == "release")
+        confType = android.releaseType
 
-        // Prompt for key passwords, if the signing config came from this build file
-        // (Android studio gui has a way to trigger this from an external singing config)
-        if (project.tasks.findByName("install$variantName")) {
-            // add a manifest to any built apk, based on user config
-            def confType = "debug"
-            if (variant.name == "release")
-                confType = android.releaseType
+    def manifestId = project.findProperty("${confType}.manifest.id");
+    def secret = project.findProperty("${confType}.manifest.secret");
+    def author = project.findProperty("${confType}.manifest.author");
+    def bk = project.findProperty("${confType}.manifest.bk");
 
-            def manifestId = project.findProperty("${confType}.manifest.id");
-            def secret = project.findProperty("${confType}.manifest.secret");
-            def author = project.findProperty("${confType}.manifest.author");
-            def bk = project.findProperty("${confType}.manifest.bk");
+    tasks["externalNativeBuild$variantName"].dependsOn libsodiumBuild
 
-            def promptTask = "prompt${variantName}Pwd"
-            task "$promptTask" {
-                doLast {
-                    if (variant.buildType.name != "debug"
-                            && variant.signingConfig
-                            && variant.signingConfig.storeFile
-                    ) {
-                        def signConfig = android.signingConfigs.findByName([variant.signingConfig.name]);
-                        if (signConfig != null) {
-                            if (signConfig.storeFile != null && signConfig.storeFile.exists()) {
-                                if (!signConfig.storePassword)
-                                    signConfig.storePassword = readPassword("Enter password for jar signing keystore:")
-                                if (!signConfig.keyPassword)
-                                    signConfig.keyPassword = readPassword("Enter password for jar signing key:")
-                            }
-                        }
-                    }
-                    if (keyringFile != null && author != null && entryPin == null)
-                        entryPin = readPassword("Enter serval keyring entry pin:")
-                }
-            }
-            tasks["validateSigning${variantName}"].dependsOn "$promptTask"
-            // run the prompt task first as it doesn't work well with other parallel tasks
-            preBuild.mustRunAfter "$promptTask"
+    variant.outputs.all { output ->
+        if (confType == "release")
+            output.outputFileName = "${android.appName}-${variant.versionName}.apk"
+        else
+            output.outputFileName = "${android.appName}-${confType}-${variant.versionName}.apk"
+    }
 
-            variant.outputs.all { output ->
-                // TODO supported method to seed the manifest id?
-                if (manifestId && (secret || (author && keyring))) {
-                    def taskName = "manifest$variantName"
-                    task "$taskName"(type: Exec, dependsOn: hostServald) {
-                        environment SERVALINSTANCE_PATH: file('build/serval/').absolutePath
-                        if (keyringFile != null && author != null) {
-                            environment SERVALD_KEYRING_READONLY: "true"
-                            environment SERVALD_KEYRING_PATH: keyring
-                        }
-                        executable = hostServald.outputs.files[0]
-                        doFirst {
-                            args = ['rhizome', 'add', 'file']
-                            if (keyringFile != null && author != null && entryPin)
-                                args += "--entry-pin=$entryPin"
-                            args += [
-                                    '--zip-comment',
-                                    author ?: "",
-                                    output.outputFile,
-                                    '',
-                                    secret ?: "",
-                                    "service=file"
-                            ]
-                            if (manifestId)
-                                args += "id=$manifestId"
-                            if (bk)
-                                args += "BK=$bk"
-                            if (confType == "release")
-                                args += "name=${android.appName}-${variant.versionName}.apk"
-                            else
-                                args += "name=${android.appName}-${confType}-${variant.versionName}.apk"
-                            if (android.cleanBuild && confType != "development")
-                                args += "version=$variant.versionCode"
-                            else
-                                args += "version=$android.buildTime"
-                        }
+    if (project.tasks.findByName("validateSigning${variantName}")){
+        // post process the output apk, but only if it will be signed
+        if (variant.signingConfig && variant.signingConfig.storeFile) {
+            // get a writable ref to the signing config
+            def configName = variant.signingConfig.name
+            def signConfig = android.signingConfigs.findByName(configName);
+            // Note that Android studio can supplying signing config from somewhere else
+            if (signConfig != null && (!signConfig.storePassword || !signConfig.keyPassword)) {
+                if (!project.tasks.findByName("prompt${configName}Pwd")) {
+                    task "prompt${configName}Pwd" {
                         doLast {
-                            delete(file('build/serval/'))
+                            if (!signConfig.storePassword)
+                                signConfig.storePassword = readPassword("Enter password for ${variant.signingConfig.name} jar signing keystore:")
+                            if (!signConfig.keyPassword)
+                                signConfig.keyPassword = readPassword("Enter password for ${variant.signingConfig.name} jar signing key:")
                         }
                     }
-                    tasks["$taskName"].dependsOn "package$variantName"
-
-                    output.assemble.dependsOn "$taskName"
+                    // run prompt tasks first
+                    preBuild.mustRunAfter "prompt${configName}Pwd"
                 }
+                tasks["validateSigning${variantName}"].dependsOn "prompt${configName}Pwd"
+            }
+        }
+
+        if (keyringFile != null && author != null && entryPin == null){
+            if (!project.tasks.findByName("prompt${author}Pin")) {
+                task "prompt${author}Pin" {
+                    doLast {
+                        entryPin = readPassword("Enter ${confType} serval keyring entry pin:")
+                    }
+                }
+                // run prompt tasks first
+                preBuild.mustRunAfter "prompt${author}Pin"
+            }
+            tasks["validateSigning${variantName}"].dependsOn "prompt${author}Pin"
+        }
+
+        variant.outputs.all { output ->
+            // add a manifest to output apk
+            // TODO supported method to seed the manifest id?
+            if (manifestId && (secret || (author && keyring))) {
+                def taskName = "manifest$variantName"
+                task "$taskName"(type: Exec, dependsOn: hostServald) {
+                    environment SERVALINSTANCE_PATH: file('build/serval/').absolutePath
+                    if (keyringFile != null && author != null) {
+                        environment SERVALD_KEYRING_READONLY: "true"
+                        environment SERVALD_KEYRING_PATH: keyring
+                    }
+                    executable = hostServald.outputs.files[0]
+                    doFirst {
+                        args = ['rhizome', 'add', 'file']
+                        if (keyringFile != null && author != null && entryPin)
+                            args += "--entry-pin=$entryPin"
+                        args += [
+                                '--zip-comment',
+                                author ?: "",
+                                output.outputFile,
+                                '',
+                                secret ?: "",
+                                "service=file",
+                                "name=${output.outputFileName}"
+                        ]
+                        if (manifestId)
+                            args += "id=$manifestId"
+                        if (bk)
+                            args += "BK=$bk"
+                        if (android.cleanBuild && confType != "development")
+                            args += "version=$variant.versionCode"
+                        else
+                            args += "version=$android.buildTime"
+                    }
+                    doLast {
+                        delete(file('build/serval/'))
+                    }
+                }
+                tasks["$taskName"].dependsOn "package$variantName"
+
+                output.assemble.dependsOn "$taskName"
             }
         }
     }
