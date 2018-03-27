@@ -48,8 +48,7 @@ if (project.hasProperty("ServalChat.properties")) {
 }
 
 android {
-    compileSdkVersion 26
-    buildToolsVersion "26.0.2"
+    compileSdkVersion 27
 
     ext{
         appName = "ServalChat"
@@ -75,8 +74,8 @@ android {
 
     defaultConfig {
         applicationId "org.servalproject.servalchat"
-        minSdkVersion 9
-        targetSdkVersion 26
+        minSdkVersion 14
+        targetSdkVersion 27
         versionCode commitCount
         versionName gitDescribe
         // unique, deterministic identifier for an apk compiled from this source code
@@ -154,15 +153,15 @@ android {
 }
 
 ext {
-    supportLibraryVersion = '25.3.1'
+    supportLibraryVersion = '27.1.0'
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile "com.android.support:appcompat-v7:$supportLibraryVersion"
-    compile "com.android.support:design:$supportLibraryVersion"
-    compile "com.android.support:recyclerview-v7:$supportLibraryVersion"
-    testCompile 'junit:junit:4.12'
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "com.android.support:appcompat-v7:$supportLibraryVersion"
+    implementation "com.android.support:design:$supportLibraryVersion"
+    implementation "com.android.support:recyclerview-v7:$supportLibraryVersion"
+    testImplementation 'junit:junit:4.12'
 }
 
 afterEvaluate {
@@ -224,9 +223,9 @@ afterEvaluate {
             // run the prompt task first as it doesn't work well with other parallel tasks
             preBuild.mustRunAfter "$promptTask"
 
-            // TODO supported method to seed this id?
-            if (manifestId && (secret || (author && keyring))) {
-                variant.outputs.each { output ->
+            variant.outputs.all { output ->
+                // TODO supported method to seed the manifest id?
+                if (manifestId && (secret || (author && keyring))) {
                     def taskName = "manifest$variantName"
                     task "$taskName"(type: Exec, dependsOn: hostServald) {
                         environment SERVALINSTANCE_PATH: file('build/serval/').absolutePath

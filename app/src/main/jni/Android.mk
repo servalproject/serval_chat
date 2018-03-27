@@ -4,11 +4,14 @@ SODIUM_ARCH_FOLDER := $(TARGET_ARCH)
 ifeq ($(SODIUM_ARCH_FOLDER),arm)
     SODIUM_ARCH_FOLDER = armv6
 endif
-ifeq ($(SODIUM_ARCH_FOLDER),arm-64)
+ifeq ($(SODIUM_ARCH_FOLDER),arm64)
     SODIUM_ARCH_FOLDER = armv8-a
 endif
 ifeq ($(SODIUM_ARCH_FOLDER),x86)
         SODIUM_ARCH_FOLDER = i686
+endif
+ifeq ($(SODIUM_ARCH_FOLDER),x86_64)
+        SODIUM_ARCH_FOLDER = westmere
 endif
 ifeq ($(SODIUM_ARCH_FOLDER),mips)
         SODIUM_ARCH_FOLDER = mips32
