@@ -125,16 +125,26 @@ android {
         jniLibs.srcDirs = ['src/main/libs'] // ndk-build output
     }
 
-    task libsodiumBuild(type: Exec) {
-        // this should only run when the libsodium submodule changes
-        inputs.property("commit", libSodiumStatus);
-        outputs.file('src/main/jni/libsodium/libsodium-android-armv6/lib/libsodium.a')
-        workingDir 'src/main/jni/libsodium'
-        executable 'sh'
+    task libsodiumBuild
 
-        args = ['-c', 'dist-build/android-arm.sh']
-        environment ANDROID_NDK_HOME: "$android.ndkDirectory"
-        environment NDK_PLATFORM: "android-16"
+    [
+        "armv7-a":"armv7-a",
+        "armv8-a":"armv8-a",
+        "x86":"i686",
+        "x86_64":"westmere"
+    ].each { abi,target ->
+        task "libsodium${abi}" (type: Exec) {
+            // this should only run when the libsodium submodule changes
+            inputs.property("commit", libSodiumStatus);
+            outputs.file("src/main/jni/libsodium/libsodium-android-${target}/lib/libsodium.a")
+            workingDir 'src/main/jni/libsodium'
+            executable 'sh'
+
+            args = ['-c', "dist-build/android-${abi}.sh"]
+            environment ANDROID_NDK_HOME: "$android.ndkDirectory"
+            environment NDK_PLATFORM: "android-16"
+        }
+        libsodiumBuild.dependsOn "libsodium${abi}"
     }
 
     task ndkClean(type: Exec) {
