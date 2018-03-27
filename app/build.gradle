@@ -81,6 +81,18 @@ android {
         // unique, deterministic identifier for an apk compiled from this source code
         buildConfigField "String", "BuildStamp", ("\"" + commitSha + (cleanBuild ? "" : "-" + new Date().getTime()) + "\"");
         buildConfigField "String", "CommitSha", ("\"" + commitSha + "\"");
+
+        externalNativeBuild {
+            ndkBuild{
+                arguments += "-j${Runtime.runtime.availableProcessors()}".toString()
+            }
+        }
+    }
+
+    externalNativeBuild {
+        ndkBuild{
+            path = 'src/main/jni/Android.mk'
+        }
     }
 
     signingConfigs {
@@ -120,9 +132,6 @@ android {
 
     sourceSets.main {
         java.srcDirs += 'src/main/jni/serval-dna/java-api/src'
-        // built in ndk support isn't quite ready for what we need, call the old make based ndk-build
-        jni.srcDirs = [] // prevent autogen of Android.mk
-        jniLibs.srcDirs = ['src/main/libs'] // ndk-build output
     }
 
     task libsodiumBuild
@@ -147,10 +156,6 @@ android {
         libsodiumBuild.dependsOn "libsodium${abi}"
     }
 
-    task ndkClean(type: Exec) {
-        commandLine "$android.ndkDirectory/ndk-build", '-C', file('src/main/jni').absolutePath, 'clean'
-    }
-
     task hostServald(type: Exec) {
         // assumes that autoconf && configure have been run manually
         inputs.files(fileTree(dir: 'src/main/jni/serval-dna', includes: ['*.c', '*.h']))
@@ -159,7 +164,6 @@ android {
         commandLine "make", '-j', Runtime.runtime.availableProcessors(), 'servald'
     }
 
-    clean.dependsOn 'ndkClean'
 }
 
 ext {
@@ -184,16 +188,8 @@ afterEvaluate {
     android.applicationVariants.all { variant ->
         // run ndk build
         def variantName = variant.name.capitalize()
-        def ndkTaskName = "build${variantName}Ndk"
 
-        task "$ndkTaskName"(type: Exec, dependsOn: libsodiumBuild) {
-            executable = "$android.ndkDirectory/ndk-build"
-            if (variant.buildType.name == "debug")
-                args += 'NDK_DEBUG=1'
-            args += ['-C', file('src/main/jni').absolutePath, '-j', Runtime.runtime.availableProcessors()]
-        }
-
-        tasks["compile${variantName}Ndk"].dependsOn "$ndkTaskName"
+        tasks["externalNativeBuild$variantName"].dependsOn libsodiumBuild
 
         // Prompt for key passwords, if the signing config came from this build file
         // (Android studio gui has a way to trigger this from an external singing config)
