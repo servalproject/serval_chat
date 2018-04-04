@@ -27,6 +27,7 @@ import org.servalproject.mid.Peer;
 import org.servalproject.mid.Rhizome;
 import org.servalproject.mid.Serval;
 import org.servalproject.servalchat.App;
+import org.servalproject.servalchat.CustomFileProvider;
 import org.servalproject.servalchat.R;
 import org.servalproject.servalchat.views.BackgroundWorker;
 import org.servalproject.servalchat.views.DisplayError;
@@ -329,15 +330,15 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 
 	private static final int SHARE_APK = 1;
 
-	private void shareFile(File file, String type){
+	private void shareApk(){
 		if (App.isTesting()){
 			showSnack("Ignoring firebase testlab", Snackbar.LENGTH_SHORT);
 			return;
 		}
 		try {
 			Intent intent = new Intent(Intent.ACTION_SEND);
-			intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
-			intent.setType(type);
+			intent.putExtra(Intent.EXTRA_STREAM, CustomFileProvider.forPath(CustomFileProvider.APK_NAME));
+			intent.setType("image/apk");
 			intent.addCategory(Intent.CATEGORY_DEFAULT);
 			intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 			startActivity(intent);
@@ -382,7 +383,7 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 	public boolean onMenuItemClick(MenuItem item) {
 		switch (item.getItemId()) {
 			case SHARE_APK:
-				shareFile(serval.apkFile, "image/apk");
+				shareApk();
 				return true;
 			case FOLLOW:
 				alterSubscription(MeshMBCommon.SubscriptionAction.Follow);

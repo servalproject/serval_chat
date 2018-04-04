@@ -48,24 +48,10 @@ public class App extends Application {
 
 		Serval serval = Serval.getInstance();
 		File logFile = new File(serval.instancePath, "serval.log");
-		if (logFile.exists()){
-			try {
-				logFile = logFile.getCanonicalFile();
-				// Copy log file to sdcard
-				File dest = new File(getExternalFilesDir(null), logFile.getName());
-				byte[] buff = new byte[1024];
-				InputStream in = new FileInputStream(logFile);
-				OutputStream out = new FileOutputStream(dest);
-				int read;
-				while((read = in.read(buff))>0)
-					out.write(buff, 0, read);
-				in.close();
-				out.close();
-
-				i.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(dest));
-			} catch (IOException e1) {
-				Log.e("App", e1.getMessage(), e1);
-			}
+		try {
+			i.putExtra(Intent.EXTRA_STREAM, CustomFileProvider.forInstanceFile(serval, logFile));
+		} catch (IOException e1) {
+			Log.e("App", e1.getMessage(), e1);
 		}
 		return i;
 	}

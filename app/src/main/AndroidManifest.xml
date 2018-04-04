@@ -101,6 +101,12 @@
             </intent-filter>
         </receiver>
 
+        <provider
+            android:name=".CustomFileProvider"
+            android:authorities="org.servalproject.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+        </provider>
     </application>
 
 </manifest>
