@@ -144,6 +144,11 @@ public class Server extends BroadcastReceiver implements IJniServer, Runnable, H
 
 	@Override
 	public void started(String instancePath, int pid, int mdpPort, int httpPort) {
+		if (mdpPort<=0)
+			throw new IllegalStateException("MDP port was not set");
+		if (httpPort<=0)
+			throw new IllegalStateException("HTTP port was not set");
+
 		this.mdpPort = mdpPort;
 		this.httpPort = httpPort;
 
