@@ -108,3 +108,5 @@ Known issues;
 
 - Navigating around the application is clunky. There are far too many functions hiding behind menu items. 
   Instead we should implement a navigation drawer, and make this the primary means of switching between screens and identities.
+
+- If we fail to create or open the Rhizome store, no meaningful error is displayed to the user.

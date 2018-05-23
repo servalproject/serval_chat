@@ -9,6 +9,7 @@ import android.util.Log;
 
 import org.servalproject.servaldna.ServalDFailureException;
 import org.servalproject.servaldna.ServalDInterfaceException;
+import org.servalproject.servaldna.ServalDUnexpectedHttpStatus;
 import org.servalproject.servaldna.rhizome.RhizomeBundleList;
 import org.servalproject.servaldna.rhizome.RhizomeListBundle;
 
@@ -26,7 +27,8 @@ public class Rhizome extends BroadcastReceiver {
 	public final ListObserverSet<RhizomeListBundle> observerSet;
 	public final ObserverSet<Rhizome> observers;
 
-	File rhizomeFolder;
+	private File rhizomeFolder;
+	private boolean watching = false;
 
 	Rhizome(Serval serval, Context context) {
 		this.serval = serval;
@@ -36,8 +38,12 @@ public class Rhizome extends BroadcastReceiver {
 		observers = new ObserverSet<>(serval, this);
 	}
 
+	// Since anything could go wrong when the daemon attempts to open the database,
+	// setting the rhizome content folder is not sufficient to ensure future rhizome
+	// requests will succeed. So, only consider rhizome to be enabled if we have
+	// successfully opened our rhizomeListBundlesSince request
 	public boolean isEnabled(){
-		return rhizomeFolder!=null;
+		return rhizomeFolder!=null && watching;
 	}
 
 	void onStart() {
@@ -47,9 +53,17 @@ public class Rhizome extends BroadcastReceiver {
 		filter.addAction(Intent.ACTION_MEDIA_MOUNTED);
 		context.registerReceiver(this, filter);
 
-		observers.onUpdate();
-		if (isEnabled())
+		if (rhizomeFolder!=null)
 			serval.runOnThreadPool(watchBundles);
+
+		observers.onUpdate();
+	}
+
+	private void setWatching(boolean value){
+		if (watching == value)
+			return;
+		watching=value;
+		observers.onUpdate();
 	}
 
 	private String token = null;
@@ -58,7 +72,7 @@ public class Rhizome extends BroadcastReceiver {
 		@Override
 		public void run() {
 			try {
-				while (isEnabled()) {
+				while (rhizomeFolder != null) {
 					// TODO add a magic token for the current end of list
 					if (token == null) {
 						RhizomeBundleList lastList = serval.getResultClient().rhizomeListBundles();
@@ -70,6 +84,7 @@ public class Rhizome extends BroadcastReceiver {
 						}
 					}
 					RhizomeBundleList list = watchList = serval.getResultClient().rhizomeListBundlesSince(token);
+					setWatching(true);
 					try {
 						RhizomeListBundle bundle;
 						while ((bundle = list.next()) != null) {
@@ -83,9 +98,13 @@ public class Rhizome extends BroadcastReceiver {
 						list.close();
 						if (list == watchList)
 							watchList = null;
+						setWatching(false);
 					}
 					Thread.sleep(5000);
 				}
+			} catch (ServalDUnexpectedHttpStatus e){
+				if (e.responseCode!=404)
+					throw new IllegalStateException(e);
 			} catch (InterruptedException |
 					ServalDInterfaceException |
 					IOException e) {
@@ -139,10 +158,9 @@ public class Rhizome extends BroadcastReceiver {
 		} catch (ServalDFailureException e) {
 			throw new IllegalStateException(e);
 		}
-		observers.onUpdate();
-
-		if (isEnabled())
+		if (rhizomeFolder!=null)
 			serval.runOnThreadPool(watchBundles);
+		observers.onUpdate();
 	}
 
 	@Override
