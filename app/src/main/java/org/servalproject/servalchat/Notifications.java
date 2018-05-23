@@ -14,6 +14,7 @@ import org.servalproject.mid.KnownPeers;
 import org.servalproject.mid.ListObserver;
 import org.servalproject.mid.Peer;
 import org.servalproject.mid.Serval;
+import org.servalproject.mid.networking.AbstractListObserver;
 import org.servalproject.servalchat.navigation.MainActivity;
 import org.servalproject.servalchat.navigation.Navigation;
 import org.servalproject.servaldna.meshms.MeshMSConversation;
@@ -30,27 +31,15 @@ public class Notifications {
 	private static final String NotificationTag = "PrivateMessaging";
 
 	static void init(final Serval serval, final Context context) {
-		serval.identities.listObservers.addBackground(new ListObserver<Identity>() {
+		serval.identities.listObservers.addBackground(new AbstractListObserver<Identity>() {
 			@Override
 			public void added(Identity obj) {
 				new Notifications(context, obj);
 			}
-
-			@Override
-			public void removed(Identity obj) {
-			}
-
-			@Override
-			public void updated(Identity obj) {
-			}
-
-			@Override
-			public void reset() {
-			}
 		});
 
 		// track which interfaces are running, start a foreground service whenever an interface is up
-		serval.knownPeers.interfaceObservers.addBackground(new ListObserver<Interface>() {
+		serval.knownPeers.interfaceObservers.addBackground(new AbstractListObserver<Interface>() {
 			private boolean serviceStarted = false;
 
 			@Override
@@ -72,14 +61,6 @@ public class Notifications {
 				context.startService(i);
 				serviceStarted = shouldRun;
 			}
-
-			@Override
-			public void updated(Interface obj) {
-			}
-
-			@Override
-			public void reset() {
-			}
 		});
 	}
 
@@ -89,19 +70,7 @@ public class Notifications {
 		this.context = context;
 		this.id = id;
 		notificationId = ++nextId;
-		id.messaging.observers.addBackground(new ListObserver<MeshMSConversation>() {
-			@Override
-			public void added(MeshMSConversation obj) {
-			}
-
-			@Override
-			public void removed(MeshMSConversation obj) {
-			}
-
-			@Override
-			public void updated(MeshMSConversation obj) {
-			}
-
+		id.messaging.observers.addBackground(new AbstractListObserver<MeshMSConversation>() {
 			@Override
 			public void reset() {
 				updateNotification();

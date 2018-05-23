@@ -21,6 +21,7 @@ import org.servalproject.mid.Interface;
 import org.servalproject.mid.ListObserver;
 import org.servalproject.mid.Peer;
 import org.servalproject.mid.Serval;
+import org.servalproject.mid.networking.AbstractListObserver;
 import org.servalproject.servalchat.R;
 import org.servalproject.servalchat.navigation.ILifecycle;
 import org.servalproject.servalchat.navigation.INavigate;
@@ -171,16 +172,11 @@ public class PeerMap extends View implements INavigate, ILifecycle{
 		gen = serval.knownPeers.peerListObservers.remove(peerObserver);
 	}
 
-	private ListObserver<Peer> peerObserver = new ListObserver<Peer>() {
+	private ListObserver<Peer> peerObserver = new AbstractListObserver<Peer>() {
 		@Override
 		public void added(Peer peer) {
 			add(peer);
 			PeerMap.this.invalidate();
-		}
-
-		@Override
-		public void removed(Peer obj) {
-
 		}
 
 		@Override
@@ -189,11 +185,6 @@ public class PeerMap extends View implements INavigate, ILifecycle{
 			PeerMap.this.invalidate();
 			//DrawPeer draw = peerMap.get(peer);
 			//draw.update();
-		}
-
-		@Override
-		public void reset() {
-
 		}
 	};
 

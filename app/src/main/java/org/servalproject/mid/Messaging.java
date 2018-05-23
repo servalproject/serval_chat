@@ -1,5 +1,6 @@
 package org.servalproject.mid;
 
+import org.servalproject.mid.networking.AbstractListObserver;
 import org.servalproject.servaldna.ServalDInterfaceException;
 import org.servalproject.servaldna.SigningKey;
 import org.servalproject.servaldna.Subscriber;
@@ -77,7 +78,7 @@ public class Messaging {
 		refresh();
 	}
 
-	private final ListObserver<RhizomeListBundle> rhizomeObserver = new ListObserver<RhizomeListBundle>() {
+	private final ListObserver<RhizomeListBundle> rhizomeObserver = new AbstractListObserver<RhizomeListBundle>() {
 		@Override
 		public void added(RhizomeListBundle obj) {
 			if (obj.manifest.service.equals(SERVICE)
@@ -86,18 +87,6 @@ public class Messaging {
 				last = obj;
 				refresh();
 			}
-		}
-
-		@Override
-		public void removed(RhizomeListBundle obj) {
-		}
-
-		@Override
-		public void updated(RhizomeListBundle obj) {
-		}
-
-		@Override
-		public void reset() {
 		}
 	};
 

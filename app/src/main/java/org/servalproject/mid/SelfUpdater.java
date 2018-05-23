@@ -10,6 +10,7 @@ import android.os.Environment;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import org.servalproject.mid.networking.AbstractListObserver;
 import org.servalproject.servalchat.BuildConfig;
 import org.servalproject.servalchat.R;
 import org.servalproject.servaldna.AbstractId;
@@ -74,7 +75,7 @@ public class SelfUpdater {
 			}
 		});
 
-		serval.rhizome.observerSet.addBackground(new ListObserver<RhizomeListBundle>() {
+		serval.rhizome.observerSet.addBackground(new AbstractListObserver<RhizomeListBundle>() {
 			@Override
 			public void added(final RhizomeListBundle obj) {
 				// note, our insert into rhizome should trigger this callback too
@@ -86,21 +87,6 @@ public class SelfUpdater {
 						}
 					});
 				}
-			}
-
-			@Override
-			public void removed(RhizomeListBundle obj) {
-
-			}
-
-			@Override
-			public void updated(RhizomeListBundle obj) {
-
-			}
-
-			@Override
-			public void reset() {
-
 			}
 		});
 	}

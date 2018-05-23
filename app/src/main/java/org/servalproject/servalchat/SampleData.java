@@ -8,6 +8,7 @@ import org.servalproject.mid.Observer;
 import org.servalproject.mid.Peer;
 import org.servalproject.mid.Serval;
 import org.servalproject.mid.Server;
+import org.servalproject.mid.networking.AbstractListObserver;
 import org.servalproject.servaldna.ServalDInterfaceException;
 import org.servalproject.servaldna.meshmb.MeshMBCommon;
 import org.servalproject.servaldna.meshms.MeshMSException;
@@ -26,31 +27,10 @@ public class SampleData {
 	private final Serval serval;
 	public SampleData(final Serval serval) {
 		this.serval = serval;
-		serval.identities.listObservers.addBackground(new ListObserver<Identity>() {
-			@Override
-			public void added(Identity obj) {
-
-			}
-
-			@Override
-			public void removed(Identity obj) {
-
-			}
-
-			@Override
-			public void updated(Identity obj) {
-
-			}
-
+		serval.identities.listObservers.addBackground(new AbstractListObserver<Identity>() {
 			@Override
 			public void reset() {
-				serval.runOnBackground(new Runnable() {
-					@Override
-					public void run() {
-						createTestData(serval);
-					}
-				});
-
+				createTestData(serval);
 			}
 		});
 	}

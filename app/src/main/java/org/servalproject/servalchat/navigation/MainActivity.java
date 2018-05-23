@@ -26,6 +26,7 @@ import org.servalproject.mid.Observer;
 import org.servalproject.mid.Peer;
 import org.servalproject.mid.Rhizome;
 import org.servalproject.mid.Serval;
+import org.servalproject.mid.networking.AbstractListObserver;
 import org.servalproject.servalchat.App;
 import org.servalproject.servalchat.CustomFileProvider;
 import org.servalproject.servalchat.R;
@@ -78,21 +79,11 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 
 	private boolean isStarted = false;
 
-	private final ListObserver<Identity> idLoaded = new ListObserver<Identity>() {
+	private final ListObserver<Identity> idLoaded = new AbstractListObserver<Identity>() {
 		@Override
 		public void added(Identity obj) {
 			if (identity == null && obj.subscriber.equals(history.identity))
 				go();
-		}
-
-		@Override
-		public void removed(Identity obj) {
-
-		}
-
-		@Override
-		public void updated(Identity obj) {
-
 		}
 
 		@Override
