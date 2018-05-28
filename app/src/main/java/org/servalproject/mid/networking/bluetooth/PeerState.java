@@ -18,14 +18,17 @@ import java.util.ListIterator;
 public class PeerState implements Runnable {
 	private final BlueToothControl control;
 	public final BluetoothDevice device;
+	private long lastConnectionAttempt=-240000;
 	private Connector connector;
-	public Date lastScan;
-	public int runningServal = -1;
+	public static final int STATE_NOT_PEER = 1;
+	public static final int STATE_UNKNOWN = 0;
+	public static final int STATE_PEER = 1;
+	public int state = STATE_UNKNOWN;
 
-	LinkedList<PeerReader> readers = new LinkedList<PeerReader>();
-	Thread writerThread;
+	private final LinkedList<PeerReader> readers = new LinkedList<PeerReader>();
+	private Thread writerThread;
 
-	private LinkedList<byte[]> queue = new LinkedList<byte[]>();
+	private final LinkedList<byte[]> queue = new LinkedList<byte[]>();
 	public final byte[] addrBytes;
 	private static final String TAG = "PeerState";
 
@@ -36,7 +39,7 @@ public class PeerState implements Runnable {
 				ListIterator<PeerReader> i = readers.listIterator();
 				while (i.hasNext()) {
 					PeerReader r = i.next();
-					if (SystemClock.elapsedRealtime() - r.lastReceived > 10000) {
+					if (SystemClock.elapsedRealtime() - r.lastReceived > BlueToothControl.TIMEOUT) {
 						Log.v(TAG, "Closing expired connection to " + device.getAddress());
 						i.remove();
 						onClosed(r);
@@ -56,7 +59,7 @@ public class PeerState implements Runnable {
 		this.addrBytes = addrBytes;
 	}
 
-	public void connect() throws IOException {
+	public void connect() {
 		if (connector != null || (!readers.isEmpty()) || (!control.adapter.isEnabled()))
 			return;
 		int bondState = device.getBondState();
@@ -70,29 +73,18 @@ public class PeerState implements Runnable {
 			if (connector != null)
 				return;
 
-			BluetoothSocket socket = null;
-			if (paired) {
-				socket = device.createRfcommSocketToServiceRecord(BlueToothControl.SECURE_UUID);
-			} else {
-				// tested above too....
-				if (Build.VERSION.SDK_INT >= 10) {
-					socket = device.createInsecureRfcommSocketToServiceRecord(BlueToothControl.INSECURE_UUID);
-				}
-			}
-
-			int bias = device.getAddress().toLowerCase().compareTo(control.adapter.getAddress().toLowerCase()) * 500;
-
-			PeerReader r = new PeerReader(control, this, socket, paired, bias);
-			connector = new Connector(control, this, r);
+			connector = new Connector(control, this, paired);
+			control.queue(connector);
 		}
 	}
 
-	public void onConnected(BluetoothSocket socket, boolean secure) {
-		onConnected(new PeerReader(control, this, socket, secure, 0));
-	}
-
-	public synchronized void onConnected(PeerReader reader) {
+	public synchronized void onConnected(BluetoothSocket socket, boolean secure, int bias)
+	{
+		PeerReader reader = new PeerReader(control, this, socket, secure, bias);
 		connector = null;
+		lastConnectionAttempt = SystemClock.elapsedRealtime();
+		state = STATE_PEER;
+
 		synchronized (readers) {
 			boolean notify = readers.isEmpty() && writerThread != null;
 			readers.addFirst(reader);
@@ -107,6 +99,7 @@ public class PeerState implements Runnable {
 			writerThread.start();
 			control.serval.runDelayed(expireConnections, 5000);
 		}
+
 	}
 
 	public void queuePacket(byte payload[]) {
@@ -120,12 +113,7 @@ public class PeerState implements Runnable {
 				queue.notify();
 		}
 
-		try {
-			connect();
-		} catch (IOException e) {
-			Log.e(TAG, e.getMessage(), e);
-			return;
-		}
+		connect();
 	}
 
 	public synchronized void disconnect() {
@@ -165,6 +153,18 @@ public class PeerState implements Runnable {
 	@Override
 	public void run() {
 		try {
+			boolean probe;
+			synchronized (queue) {
+				// poke the serval daemon to send a unicast frame
+				probe = queue.isEmpty();
+			}
+			if (probe) {
+				try {
+					control.discovered(this);
+				} catch (IOException e) {
+					throw new IllegalStateException(e);
+				}
+			}
 			byte buff[] = new byte[BlueToothControl.MTU + 2];
 			while (writerThread == Thread.currentThread()) {
 				byte payload[] = null;
@@ -212,6 +212,19 @@ public class PeerState implements Runnable {
 	}
 
 	public void onConnectionFailed() {
+		lastConnectionAttempt = SystemClock.elapsedRealtime();
 		this.connector = null;
+		if (state == STATE_UNKNOWN)
+			state = STATE_NOT_PEER;
+	}
+
+	public boolean shouldConnect(){
+		return connector == null && writerThread == null
+				&& SystemClock.elapsedRealtime() - lastConnectionAttempt > 300000;
+	}
+
+	@Override
+	public String toString() {
+		return device.getAddress()+", "+device.getName();
 	}
 }

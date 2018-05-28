@@ -21,15 +21,13 @@ public class BluetoothNetworkChanges extends BroadcastReceiver {
 		} else if (action.equals(BluetoothDevice.ACTION_NAME_CHANGED)) {
 			blueTooth.onRemoteNameChanged(intent);
 		} else if (action.equals(BluetoothAdapter.ACTION_DISCOVERY_STARTED)) {
-			blueTooth.onDiscoveryStarted();
+			blueTooth.scanner.onDiscoveryStarted();
 		} else if (action.equals(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)) {
-			blueTooth.onDiscoveryFinished();
+			blueTooth.scanner.onDiscoveryFinished();
 		} else if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
 			blueTooth.onStateChange(intent);
 		} else if (action.equals(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED)) {
-			blueTooth.onScanModeChanged(intent);
-		} else if (action.equals(BluetoothAdapter.ACTION_LOCAL_NAME_CHANGED)) {
-			blueTooth.onNameChanged(intent);
+			blueTooth.scanner.onScanModeChanged(intent);
 		}
 	}
 }

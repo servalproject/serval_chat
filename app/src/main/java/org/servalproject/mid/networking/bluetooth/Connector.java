@@ -1,6 +1,9 @@
 package org.servalproject.mid.networking.bluetooth;
 
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothSocket;
+import android.os.Build;
+import android.os.SystemClock;
 import android.util.Log;
 
 import java.io.IOException;
@@ -8,46 +11,78 @@ import java.io.IOException;
 /**
  * Created by jeremy on 7/04/15.
  */
-class Connector implements Runnable {
+class Connector implements Runnable{
 	private final BlueToothControl control;
 	private final BluetoothAdapter adapter;
-	private final PeerReader reader;
-	private final PeerState peer;
-
-	static boolean connecting = false;
+	public final PeerState peer;
+	private final boolean paired;
+	private long connectionStarted=0;
+	private boolean connecting = false;
+	private BluetoothSocket socket = null;
 
 	private static final String TAG = "Connector";
 
-	Connector(BlueToothControl control, PeerState peer, PeerReader reader) {
+	Connector(BlueToothControl control, PeerState peer, boolean paired) {
 		this.control = control;
 		this.adapter = control.adapter;
 		this.peer = peer;
-		this.reader = reader;
-
-		// use a single thread to ensure connections are serialised
-		// TODO start another worker thread to reduce contention with the rest of the app?
-		control.serval.runOnBackground(this);
+		this.paired = paired;
 	}
 
 	@Override
 	public void run() {
-		try {
-			connecting = true;
-			control.cancelDiscovery();
-			Log.v(reader.name, "Connecting to " + peer.device.getAddress() + " (" + reader.secure + ")");
-			reader.socket.connect();
+		connectionStarted = SystemClock.elapsedRealtime();
 
-			peer.onConnected(reader);
-		} catch (IOException e) {
-			Log.e(TAG, e.getMessage(), e);
-			try {
-				reader.socket.close();
-			} catch (IOException e1) {
+		try {
+			if (paired)
+				socket = peer.device.createRfcommSocketToServiceRecord(BlueToothControl.SECURE_UUID);
+			else if (Build.VERSION.SDK_INT >= 10) {
+				socket = peer.device.createInsecureRfcommSocketToServiceRecord(BlueToothControl.INSECURE_UUID);
 			}
-			peer.onConnectionFailed();
-		} finally {
-			connecting = false;
-			control.onConnectionFinished();
+		} catch (IOException e){
+			Log.v(TAG, "Failed to create socket", e);
 		}
+
+		if (socket!=null) {
+			try {
+				socket.connect();
+				Log.v(TAG, "Connected to " + peer);
+				int bias = peer.device.getName().toLowerCase().compareTo(control.adapter.getName().toLowerCase()) * 500;
+				peer.onConnected(socket, paired, bias);
+			} catch (IOException e) {
+				try {
+					socket.close();
+				} catch (IOException e1) {
+				}
+				Log.v(TAG, "Connection failed to " + peer);
+				peer.onConnectionFailed();
+			}
+			socket = null;
+		}
+		connecting = false;
+		control.remove(this);
+	}
+
+	public void connect() {
+		connecting = true;
+		control.serval.runOnThreadPool(this);
+	}
+
+	public void cancel() {
+		BluetoothSocket s = socket;
+		if (s == null)
+			return;
+		try {
+			Log.v(TAG, "Cancelling connection to " + peer);
+			s.close();
+		} catch (IOException e) {
+		}
+	}
+
+	public synchronized void moveNext() {
+		if (!connecting)
+			connect();
+		else if (connectionStarted!=0 && SystemClock.elapsedRealtime() - connectionStarted > 5000)
+			cancel();
 	}
 }

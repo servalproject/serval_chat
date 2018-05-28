@@ -195,6 +195,10 @@ public class Serval {
 		backgroundHandler.post(r);
 	}
 
+	public void runReplaceDelayed(Runnable r, int delay) {
+		backgroundHandler.removeCallbacks(r);
+		backgroundHandler.postDelayed(r, delay);
+	}
 	public void runDelayed(Runnable r, int delay) {
 		backgroundHandler.postDelayed(r, delay);
 	}
