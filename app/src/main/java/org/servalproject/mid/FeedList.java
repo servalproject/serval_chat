@@ -14,9 +14,11 @@ import java.io.IOException;
  */
 public class FeedList extends AbstractFutureList<RhizomeListBundle, IOException> {
 	private static final String TAG = "FeedList";
+	public final String search;
 
-	public FeedList(Serval serval) {
+	public FeedList(Serval serval, String search) {
 		super(serval);
+		this.search = search;
 	}
 
 	@Override
@@ -30,6 +32,8 @@ public class FeedList extends AbstractFutureList<RhizomeListBundle, IOException>
 	protected AbstractJsonList<RhizomeListBundle, IOException> openPast() throws ServalDInterfaceException, IOException {
 		RhizomeBundleList list = new RhizomeBundleList(serval.getResultClient());
 		list.setServiceFilter(MeshMBCommon.SERVICE);
+		if (search!=null)
+			list.setNameFilter(search);
 		list.connect();
 		return list;
 	}
@@ -38,6 +42,8 @@ public class FeedList extends AbstractFutureList<RhizomeListBundle, IOException>
 	protected AbstractJsonList<RhizomeListBundle, IOException> openFuture() throws ServalDInterfaceException, IOException {
 		RhizomeBundleList list = new RhizomeBundleList(serval.getResultClient(), last == null? "" : last.token);
 		list.setServiceFilter(MeshMBCommon.SERVICE);
+		if (search!=null && !"".equals(search))
+			list.setNameFilter(search);
 		list.connect();
 		return list;
 	}

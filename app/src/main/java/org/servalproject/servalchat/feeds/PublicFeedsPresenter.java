@@ -1,6 +1,7 @@
 package org.servalproject.servalchat.feeds;
 
 import android.os.Bundle;
+import android.util.Log;
 
 import org.servalproject.mid.FeedList;
 import org.servalproject.mid.Identity;
@@ -17,7 +18,10 @@ import org.servalproject.servaldna.Subscriber;
  * Created by jeremy on 11/10/16.
  */
 public class PublicFeedsPresenter extends Presenter<PublicFeedsList> {
+	FeedList list;
 	FeedListAdapter adapter;
+
+	private static final String TAG = "PublicFeedsPresenter";
 
 	protected PublicFeedsPresenter(PresenterFactory<PublicFeedsList, ?> factory, String key, Identity identity) {
 		super(factory, key, identity);
@@ -34,24 +38,24 @@ public class PublicFeedsPresenter extends Presenter<PublicFeedsList> {
 
 	@Override
 	protected void bind(PublicFeedsList view) {
-		view.setAdapter(adapter);
+		view.feedList.setAdapter(adapter);
 	}
 
 	@Override
 	protected void restore(Bundle config) {
-		FeedList feedList = identity.getAllFeeds();
-		adapter = new FeedListAdapter(feedList, this);
+		list = identity.getAllFeeds(null);
+		adapter = new FeedListAdapter(list, this);
 	}
 
 	public void openFeed(Subscriber subscriber) {
-		PublicFeedsList list = getView();
-		if (list == null)
+		PublicFeedsList view = getView();
+		if (view == null)
 			return;
 		if (identity.subscriber.equals(subscriber)) {
-			list.activity.go(Navigation.MyFeed);
+			view.activity.go(Navigation.MyFeed);
 		} else {
 			Peer peer = Serval.getInstance().knownPeers.getPeer(subscriber);
-			list.activity.go(Navigation.PeerFeed, peer, null);
+			view.activity.go(Navigation.PeerFeed, peer, null);
 		}
 	}
 
@@ -70,5 +74,21 @@ public class PublicFeedsPresenter extends Presenter<PublicFeedsList> {
 	public void onHidden() {
 		super.onHidden();
 		adapter.onHidden();
+	}
+
+	public void search(CharSequence search) {
+		String srch = (search == null || search.equals("")) ? null : "%"+search+"%";
+		if (list.search == null && srch == null)
+			return;
+		if (srch != null && srch.equals(list.search))
+			return;
+
+		Log.v(TAG, "Replacing adapter for "+srch);
+		FeedList list = identity.getAllFeeds(srch);
+		FeedListAdapter adapter = new FeedListAdapter(list, this);
+		getView().feedList.setAdapter(adapter);
+		this.adapter.clear();
+		this.list = list;
+		this.adapter = adapter;
 	}
 }

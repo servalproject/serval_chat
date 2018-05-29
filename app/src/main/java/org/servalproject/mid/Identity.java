@@ -43,8 +43,8 @@ public class Identity {
 		return new IdentityFeed(serval, this);
 	}
 
-	public FeedList getAllFeeds() {
-		return new FeedList(serval);
+	public FeedList getAllFeeds(String search) {
+		return new FeedList(serval, search);
 	}
 
 	public ActivityList getActivity() {

@@ -93,4 +93,6 @@
     <string name="empty_activity">You haven\'t posted anything or followed anyone yet</string>
     <string name="empty_feed">This person hasn\'t said anything publicly</string>
     <string name="empty_feed_list">You haven\'t aquired anyone\'s feed yet</string>
+    <string name="search_hint">Search by name</string>
+    <string name="post_hint">What\'s on your mind?</string>
 </resources>

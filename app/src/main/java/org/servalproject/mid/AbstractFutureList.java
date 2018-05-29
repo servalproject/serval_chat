@@ -36,15 +36,8 @@ public abstract class AbstractFutureList<T, E extends Exception>
 	public void stopObserving(ListObserver<T> observer) {
 		observeFuture.remove(observer);
 		if (!observeFuture.hasObservers()) {
-			AbstractJsonList<T, E> list = futureList;
 			polling = false;
-			if (list != null) {
-				try {
-					list.close();
-				} catch (IOException e) {
-				}
-				futureList = null;
-			}
+			closeFuture();
 		}
 	}
 
@@ -74,8 +67,8 @@ public abstract class AbstractFutureList<T, E extends Exception>
 	private Runnable readFuture = new Runnable() {
 		@Override
 		public void run() {
-			try {
-				while (polling) {
+			while (polling) {
+				try {
 					AbstractJsonList<T, E> list = futureList = openFuture();
 					if (list != null) {
 						T item;
@@ -85,30 +78,36 @@ public abstract class AbstractFutureList<T, E extends Exception>
 						// on graceful close from the server, restart
 						list.close();
 					}
-					futureList = null;
-				}
-			} catch (IOException e) {
-				// ignore if we caused this deliberately in another thread.
-				if (polling)
+					if (futureList == list)
+						futureList = null;
+				} catch (IOException e) {
+					// ignore if we caused this deliberately in another thread.
+					if (polling)
+						throw new IllegalStateException(e);
+				} catch (RuntimeException e) {
+					throw e;
+				} catch (Exception e) {
 					throw new IllegalStateException(e);
-			} catch (RuntimeException e) {
-				throw e;
-			} catch (Exception e) {
-				throw new IllegalStateException(e);
+				}
 			}
 		}
 	};
+
+	private void closeFuture(){
+		AbstractJsonList<T, E> list = futureList;
+		if (list != null) {
+			try {
+				list.close();
+			} catch (IOException e) {
+			}
+			futureList = null;
+		}
+	}
 
 	@Override
 	public void close() {
 		super.close();
 		polling = false;
-		if (futureList != null) {
-			try {
-				futureList.close();
-			} catch (IOException e) {
-			}
-			futureList = null;
-		}
+		closeFuture();
 	}
 }

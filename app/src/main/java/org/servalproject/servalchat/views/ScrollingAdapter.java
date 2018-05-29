@@ -1,5 +1,6 @@
 package org.servalproject.servalchat.views;
 
+import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
@@ -28,8 +29,7 @@ public abstract class ScrollingAdapter<T, VH extends BasicViewHolder>
 	public ScrollingAdapter(IObservableList<T, ?> list, int emptyResource) {
 		this.list = list;
 		this.emptyResource = emptyResource;
-		if (list == null)
-			hasMore = false;
+		hasMore  = (list != null);
 	}
 
 	protected abstract void bind(VH holder, T item);
@@ -40,14 +40,15 @@ public abstract class ScrollingAdapter<T, VH extends BasicViewHolder>
 	}
 
 	@Override
-	public void onBindViewHolder(BasicViewHolder holder, int position) {
+	public void onBindViewHolder(@NonNull BasicViewHolder holder, int position) {
 		if (holder instanceof SpinnerViewHolder || holder instanceof MessageViewHolder)
 			return; // nothing to bind
 		bindItem((VH)holder, position);
 	}
 
+	@NonNull
 	@Override
-	public BasicViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+	public BasicViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 		if (viewType==SPINNER)
 			return new SpinnerViewHolder(parent);
 		if (viewType==EMPTY)
@@ -168,7 +169,7 @@ public abstract class ScrollingAdapter<T, VH extends BasicViewHolder>
 	}
 
 	@Override
-	public void onAttachedToRecyclerView(RecyclerView recyclerView) {
+	public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
 		super.onAttachedToRecyclerView(recyclerView);
 		layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
 		recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -181,7 +182,7 @@ public abstract class ScrollingAdapter<T, VH extends BasicViewHolder>
 	}
 
 	@Override
-	public void onDetachedFromRecyclerView(RecyclerView recyclerView) {
+	public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
 		super.onDetachedFromRecyclerView(recyclerView);
 		layoutManager = null;
 	}
