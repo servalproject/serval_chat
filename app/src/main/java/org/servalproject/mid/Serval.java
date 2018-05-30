@@ -111,7 +111,7 @@ public class Serval {
 			// partly for slightly better security
 			restfulPassword = new BigInteger(130, new SecureRandom()).toString(32);
 			config.set("api.restful.users." + restfulUsername + ".password", restfulPassword);
-			config.set("api.restful.newsince_timeout", "3600"); // 1 hour...
+			config.set("api.restful.newsince_timeout", String.valueOf(60*60*24)); // 1 day...
 			// Match any wifi or cabled ethernet network interface
 			config.set("interfaces.0.match", "*");
 			config.set("interfaces.0.match_type", "wifi");

@@ -98,9 +98,8 @@ public class Rhizome extends BroadcastReceiver {
 						list.close();
 						if (list == watchList)
 							watchList = null;
-						setWatching(false);
 					}
-					Thread.sleep(5000);
+					Thread.sleep(500);
 				}
 			} catch (ServalDUnexpectedHttpStatus e){
 				if (e.responseCode!=404)
@@ -109,6 +108,8 @@ public class Rhizome extends BroadcastReceiver {
 					ServalDInterfaceException |
 					IOException e) {
 				throw new IllegalStateException(e);
+			} finally {
+				setWatching(false);
 			}
 		}
 	};
