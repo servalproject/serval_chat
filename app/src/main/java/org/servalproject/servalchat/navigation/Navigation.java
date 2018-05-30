@@ -4,12 +4,11 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 
 import org.servalproject.mid.Identity;
-import org.servalproject.mid.ObserverSet;
+import org.servalproject.mid.KnownPeers;
+import org.servalproject.mid.Messaging;
 import org.servalproject.mid.Peer;
 import org.servalproject.mid.Serval;
-import org.servalproject.servalchat.App;
 import org.servalproject.servalchat.R;
-import org.servalproject.servalchat.identity.InboxTitle;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -126,11 +125,12 @@ public class Navigation {
 	public static final Navigation MyFeed = new Navigation("MyFeed", R.string.my_feed, R.layout.my_feed, Main);
 	public static final Navigation Inbox = new Navigation("Inbox", R.string.conversation_list, R.layout.conversation_list, Main){
 		@Override
-		public NavTitle getTitle(Context context, Identity identity, Peer peer) {
-			return new InboxTitle(identity.messaging, getDefaultTitle(context, identity, peer)){
+		public NavTitle getTitle(Context context, final Identity identity, Peer peer) {
+			return new CountTitle<Messaging>(identity.messaging.observers,
+					getDefaultTitle(context, identity, peer)){
 				@Override
 				public int unreadCount() {
-					return messaging.getUnreadCount();
+					return identity.messaging.getUnreadCount();
 				}
 			};
 		}
@@ -140,18 +140,31 @@ public class Navigation {
 	public static final Navigation Contacts = new Navigation("Contacts", R.string.contacts, R.layout.contacts, Main);
 	public static final Navigation Requests = new Navigation("Requests", R.string.requests, R.layout.conversation_list, Main){
 		@Override
-		public NavTitle getTitle(Context context, Identity identity, Peer peer) {
-			return new InboxTitle(identity.messaging, getDefaultTitle(context, identity, peer)){
+		public NavTitle getTitle(Context context, final Identity identity, Peer peer) {
+			return new CountTitle<Messaging>(identity.messaging.observers,
+					getDefaultTitle(context, identity, peer)){
 				@Override
 				public int unreadCount() {
-					return messaging.getUnreadRequests();
+					return identity.messaging.getUnreadRequests();
 				}
 			};
 		}
 	};
 
 	public static final Navigation Blocked = new Navigation("Blocked", R.string.blocked, R.layout.block_list, Main);
-	public static final Navigation PeerList = new Navigation("PeerList", R.string.peer_list, R.layout.peer_list, Main);
+	public static final Navigation PeerList = new Navigation("PeerList", R.string.peer_list, R.layout.peer_list, Main){
+		@Override
+		public NavTitle getTitle(Context context, Identity identity, Peer peer) {
+			final Serval serval = Serval.getInstance();
+			return new CountTitle<KnownPeers>(serval.knownPeers.observers,
+					getDefaultTitle(context, identity, peer)){
+				@Override
+				public int unreadCount() {
+					return serval.knownPeers.getReachableCount();
+				}
+			};
+		}
+	};
 	public static final Navigation PeerMap = new Navigation("PeerMap", R.string.peer_map, R.layout.peer_map, Main);
 
 	public static final Navigation PeerTabs = new Navigation("PeerTabs", R.string.app_name, R.layout.main_tabs, Root);

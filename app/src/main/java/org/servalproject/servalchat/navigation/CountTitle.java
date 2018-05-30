@@ -1,19 +1,19 @@
-package org.servalproject.servalchat.identity;
+package org.servalproject.servalchat.navigation;
 
 import android.graphics.drawable.Drawable;
 
 import org.servalproject.mid.Messaging;
 import org.servalproject.mid.ObserverProxy;
+import org.servalproject.mid.ObserverSet;
 import org.servalproject.mid.Serval;
 import org.servalproject.servalchat.navigation.NavTitle;
 
-public abstract class InboxTitle extends NavTitle {
+public abstract class CountTitle<T> extends NavTitle {
 	private final CharSequence prefix;
-	protected final Messaging messaging;
-	public InboxTitle(Messaging messaging, CharSequence prefix) {
-		observers = new ObserverProxy<>(Serval.getInstance().uiHandler, messaging.observers, this);
+
+	public CountTitle(ObserverSet<T> observer, CharSequence prefix) {
+		observers = new ObserverProxy<>(Serval.getInstance().uiHandler, observer, this);
 		this.prefix = prefix;
-		this.messaging = messaging;
 	}
 
 	@Override
@@ -25,10 +25,7 @@ public abstract class InboxTitle extends NavTitle {
 
 	@Override
 	public CharSequence getMenuLabel() {
-		int count = unreadCount();
-		//if (count>0)
-			return prefix+" ("+count+")";
-		//return prefix;
+		return prefix+" ("+unreadCount()+")";
 	}
 
 	@Override
