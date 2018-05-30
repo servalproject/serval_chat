@@ -93,7 +93,7 @@ public class ConversationList
 		this.navigation = n;
 		if (this.conversations != list) {
 			this.conversations = list;
-			this.setObserverSet(id.messaging.observers);
+			this.setObserverSet(id.messaging.observeConversations);
 			notifyChanged();
 		}
 		return super.onAttach(activity, n, id, peer, args);

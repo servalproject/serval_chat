@@ -8,13 +8,16 @@ import android.view.ViewGroup;
 import org.servalproject.mid.Identity;
 import org.servalproject.mid.Peer;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by jeremy on 19/07/16.
  */
 public class ViewState {
 	public final Navigation key;
 	private IContainerView container;
-	private ILifecycle lifecycle;
+	private List<ILifecycle> lifecycle = new ArrayList<>();
 	public final View view;
 	private View firstInput = null;
 
@@ -22,7 +25,7 @@ public class ViewState {
 		return container;
 	}
 
-	public ILifecycle getLifecycle() {
+	public List<ILifecycle> getLifecycle() {
 		return lifecycle;
 	}
 
@@ -60,7 +63,9 @@ public class ViewState {
 			public boolean visit(View view) {
 				if (view instanceof INavigate) {
 					INavigate navigate = (INavigate) view;
-					ret.lifecycle = navigate.onAttach(activity, key, identity, peer, args);
+					ILifecycle l = navigate.onAttach(activity, key, identity, peer, args);
+					if (l!=null)
+						ret.lifecycle.add(l);
 				}
 				if (view.onCheckIsTextEditor() && ret.firstInput == null)
 					ret.firstInput = view;

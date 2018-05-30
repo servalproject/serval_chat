@@ -18,6 +18,7 @@ public class NavPageAdapter extends PagerAdapter
 	final Identity identity;
 	final Peer peer;
 	final HistoryItem[] screens;
+	final NavTitle[] titles;
 	private final ViewState[] views;
 	private boolean visible = false;
 	private ViewPager pager;
@@ -27,6 +28,10 @@ public class NavPageAdapter extends PagerAdapter
 		this.identity = identity;
 		this.peer = peer;
 		this.screens = items;
+		titles = new NavTitle[items.length];
+		for(int i=0;i< items.length;i++){
+			titles[i] = items[i].key.getTitle(activity, identity, peer);
+		}
 		this.views = new ViewState[this.screens.length];
 	}
 
@@ -51,9 +56,10 @@ public class NavPageAdapter extends PagerAdapter
 	public Object instantiateItem(ViewGroup group, int position) {
 		ViewState state = getViewState(position);
 		group.addView(state.view);
-		ILifecycle lifecycle = state.getLifecycle();
-		if (visible && lifecycle != null)
-			lifecycle.onVisible();
+		if (visible){
+			for(ILifecycle l : state.getLifecycle())
+				l.onVisible();
+		}
 		return state;
 	}
 
@@ -62,11 +68,10 @@ public class NavPageAdapter extends PagerAdapter
 		if (views[position] == null || views[position] != object)
 			return;
 		ViewState state = ((ViewState) object);
-		ILifecycle lifecycle = state.getLifecycle();
-		if (lifecycle != null) {
+		for(ILifecycle l : state.getLifecycle()){
 			if (visible)
-				lifecycle.onHidden();
-			lifecycle.onDetach(false);
+				l.onHidden();
+			l.onDetach(false);
 		}
 		container.removeView(state.view);
 		views[position] = null;
@@ -92,7 +97,7 @@ public class NavPageAdapter extends PagerAdapter
 
 	@Override
 	public CharSequence getPageTitle(int position) {
-		return screens[position].key.getTitle(activity, identity, peer);
+		return titles[position].getTitle();
 	}
 
 	@Override
@@ -121,9 +126,8 @@ public class NavPageAdapter extends PagerAdapter
 		for (ViewState state : views) {
 			if (state == null)
 				continue;
-			ILifecycle lifecycle = state.getLifecycle();
-			if (lifecycle != null)
-				lifecycle.onVisible();
+			for(ILifecycle l : state.getLifecycle())
+				l.onVisible();
 		}
 	}
 
@@ -133,9 +137,8 @@ public class NavPageAdapter extends PagerAdapter
 		for (ViewState state : views) {
 			if (state == null)
 				continue;
-			ILifecycle lifecycle = state.getLifecycle();
-			if (lifecycle != null)
-				lifecycle.onHidden();
+			for(ILifecycle l : state.getLifecycle())
+				l.onHidden();
 		}
 	}
 }

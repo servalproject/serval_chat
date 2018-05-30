@@ -12,6 +12,8 @@ import org.servalproject.mid.Identity;
 import org.servalproject.mid.Interface;
 import org.servalproject.mid.KnownPeers;
 import org.servalproject.mid.ListObserver;
+import org.servalproject.mid.Messaging;
+import org.servalproject.mid.Observer;
 import org.servalproject.mid.Peer;
 import org.servalproject.mid.Serval;
 import org.servalproject.mid.networking.AbstractListObserver;
@@ -70,9 +72,9 @@ public class Notifications {
 		this.context = context;
 		this.id = id;
 		notificationId = ++nextId;
-		id.messaging.observers.addBackground(new AbstractListObserver<MeshMSConversation>() {
+		id.messaging.observers.addBackground(new Observer<Messaging>() {
 			@Override
-			public void reset() {
+			public void updated(Messaging obj) {
 				updateNotification();
 			}
 		});

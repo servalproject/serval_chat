@@ -1,6 +1,7 @@
 package org.servalproject.servalchat.navigation;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
@@ -9,6 +10,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,8 +19,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.servalproject.mid.Identity;
+import org.servalproject.mid.Observer;
 import org.servalproject.mid.Peer;
 import org.servalproject.servalchat.R;
+import org.servalproject.servalchat.views.UIObserver;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by jeremy on 6/11/17.
@@ -27,9 +34,10 @@ import org.servalproject.servalchat.R;
 public class RootSidebar
 		extends DrawerLayout
 		implements IRootContainer, INavigate, NavigationView.OnNavigationItemSelectedListener,
-			IOnBack, View.OnClickListener {
+			IOnBack, View.OnClickListener, ILifecycle {
 	private MainActivity activity;
 	private RootAppbar root;
+	private List<ILifecycle> lifecycles = new ArrayList<>();
 	private NavigationView navigationView;
 	private Navigation navigation;
 	private ActionBarDrawerToggle toggle;
@@ -47,7 +55,9 @@ public class RootSidebar
 		this.navigation = n;
 		this.activity = activity;
 		root = (RootAppbar)findViewById(R.id.coordinator);
-		ILifecycle lifecycle = root.onAttach(activity, n, id, peer, args);
+		ILifecycle rootLifeCycle = root.onAttach(activity, n, id, peer, args);
+		if (rootLifeCycle !=null)
+			lifecycles.add(rootLifeCycle);
 
 		toggle = new ActionBarDrawerToggle(
 				activity, this, root.toolbar,
@@ -63,18 +73,44 @@ public class RootSidebar
 		ImageView identicon = (ImageView)header.findViewById(R.id.identicon);
 		TextView name = (TextView)header.findViewById(R.id.name);
 
-		identicon.setImageDrawable(id.getIcon());
-		name.setText(id.getName());
-
 		Menu items = navigationView.getMenu();
 		for (int i = 0; i < n.children.size(); i++){
 			Navigation item = n.children.get(i);
-			if (item == Navigation.IdentityDetails)
-				continue;
-			items.add(Menu.NONE, i, Menu.NONE, item.getTitle(activity, id, peer));
+			final NavTitle navTitle = item.getTitle(activity, id, peer);
+
+			CharSequence title = navTitle.getMenuLabel();
+			Drawable icon = navTitle.getIcon();
+
+			if (item.isHeader()){
+				if (icon != null)
+					identicon.setImageDrawable(icon);
+				name.setText(title);
+			}else{
+				final MenuItem menuItem = items.add(Menu.NONE, i, Menu.NONE, title);
+				if (icon != null)
+					menuItem.setIcon(icon);
+				if (navTitle.observers!=null) {
+					NavObserver o = new NavObserver(navTitle, menuItem);
+					lifecycles.add(o);
+				}
+			}
 		}
 
-		return lifecycle;
+		return this;
+	}
+
+	private class NavObserver extends UIObserver<NavTitle> {
+		private final MenuItem item;
+		private NavObserver(NavTitle title, MenuItem item){
+			super(title.observers);
+			this.item = item;
+		}
+
+		@Override
+		public void updated(NavTitle obj) {
+			item.setTitle(obj.getMenuLabel());
+			item.setIcon(obj.getIcon());
+		}
 	}
 
 	@Override
@@ -132,5 +168,26 @@ public class RootSidebar
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		return toggle.onOptionsItemSelected(item);
+	}
+
+	@Override
+	public void onDetach(boolean configChange) {
+		for (ILifecycle l: lifecycles) {
+			l.onDetach(configChange);
+		}
+	}
+
+	@Override
+	public void onVisible() {
+		for (ILifecycle l: lifecycles) {
+			l.onVisible();
+		}
+	}
+
+	@Override
+	public void onHidden() {
+		for (ILifecycle l: lifecycles) {
+			l.onHidden();
+		}
 	}
 }

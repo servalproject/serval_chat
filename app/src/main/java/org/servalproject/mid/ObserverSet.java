@@ -9,7 +9,7 @@ import java.util.Set;
 /**
  * Created by jeremy on 4/05/16.
  */
-public class ObserverSet<T> implements Handler.Callback {
+public class ObserverSet<T> implements Handler.Callback, IObserverSet<T> {
 	private final Set<Observer<T>> UIobservers = new HashSet<>();
 	private final Set<Observer<T>> backgroundObservers = new HashSet<>();
 
@@ -27,18 +27,26 @@ public class ObserverSet<T> implements Handler.Callback {
 		this.obj = obj;
 	}
 
+	public T getObj(){
+		return obj;
+	}
+
+	@Override
 	public void addUI(Observer<T> observer) {
 		UIobservers.add(observer);
 	}
 
+	@Override
 	public void removeUI(Observer<T> observer) {
 		UIobservers.remove(observer);
 	}
 
+	@Override
 	public void addBackground(Observer<T> observer) {
 		backgroundObservers.add(observer);
 	}
 
+	@Override
 	public void removeBackground(Observer<T> observer) {
 		backgroundObservers.remove(observer);
 	}

@@ -1,6 +1,7 @@
 package org.servalproject.servalchat.navigation;
 
 import android.app.Activity;
+import android.arch.lifecycle.Lifecycle;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -36,6 +37,7 @@ import org.servalproject.servaldna.Subscriber;
 import org.servalproject.servaldna.meshmb.MeshMBCommon;
 
 import java.io.File;
+import java.util.List;
 import java.util.Stack;
 
 public class MainActivity extends AppCompatActivity implements IContainerView, MenuItem.OnMenuItemClickListener{
@@ -447,9 +449,8 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 		super.onStop();
 		isStarted = false;
 		for (ViewState state : viewStack) {
-			ILifecycle lifecycle = state.getLifecycle();
-			if (lifecycle != null)
-				lifecycle.onHidden();
+			for(ILifecycle l : state.getLifecycle())
+				l.onHidden();
 		}
 	}
 
@@ -457,9 +458,8 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 	protected void onStart() {
 		isStarted = true;
 		for (ViewState state : viewStack) {
-			ILifecycle lifecycle = state.getLifecycle();
-			if (lifecycle != null)
-				lifecycle.onVisible();
+			for(ILifecycle l : state.getLifecycle())
+				l.onVisible();
 		}
 		super.onStart();
 		changingConfig = false;
@@ -483,11 +483,10 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 
 	@Override
 	public void deactivate(ViewState state, boolean configChange, boolean visible) {
-		ILifecycle lifecycle = state.getLifecycle();
-		if (visible && lifecycle != null)
-			lifecycle.onHidden();
-		if (lifecycle != null)
-			lifecycle.onDetach(configChange);
+		for(ILifecycle l : state.getLifecycle()){
+			l.onHidden();
+			l.onDetach(configChange);
+		}
 		ViewGroup root = (ViewGroup)findViewById(android.R.id.content);
 		root.removeView(state.view);
 		serval.rhizome.observers.removeUI(rhizomeObserver);
@@ -513,9 +512,10 @@ public class MainActivity extends AppCompatActivity implements IContainerView, M
 
 		serval.rhizome.observers.addUI(rhizomeObserver);
 
-		ILifecycle lifecycle = ret.getLifecycle();
-		if (visible && lifecycle != null)
-			lifecycle.onVisible();
+		if (visible) {
+			for(ILifecycle l : ret.getLifecycle())
+				l.onVisible();
+		}
 		return ret;
 	}
 

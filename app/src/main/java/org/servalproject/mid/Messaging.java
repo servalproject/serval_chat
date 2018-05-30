@@ -1,5 +1,7 @@
 package org.servalproject.mid;
 
+import android.util.Log;
+
 import org.servalproject.mid.networking.AbstractListObserver;
 import org.servalproject.servaldna.ServalDInterfaceException;
 import org.servalproject.servaldna.SigningKey;
@@ -44,7 +46,8 @@ public class Messaging {
 	private final Set<Subscriber> blocking = new HashSet<>();
 	private final Set<SubscriberId> blockingSids = new HashSet<>();
 
-	public final ListObserverSet<MeshMSConversation> observers;
+	public final ObserverSet<Messaging> observers;
+	public final ListObserverSet<MeshMSConversation> observeConversations;
 	public final ListObserverSet<Peer> observeContacts;
 	public final ListObserverSet<Peer> observeBlockList;
 
@@ -63,7 +66,8 @@ public class Messaging {
 	Messaging(Serval serval, Identity identity) {
 		this.serval = serval;
 		this.identity = identity;
-		this.observers = new ListObserverSet<>(serval);
+		this.observers = new ObserverSet<>(serval, this);
+		this.observeConversations = new ListObserverSet<>(serval);
 		this.observeContacts = new ListObserverSet<>(serval);
 		this.observeBlockList = new ListObserverSet<>(serval);
 
@@ -251,7 +255,8 @@ public class Messaging {
 					Messaging.this.unreadCount = unreadCount;
 					Messaging.this.requestsUnread = requestsUnread;
 				}
-				observers.onReset();
+				observers.onUpdate();
+				observeConversations.onReset();
 			} catch (ServalDInterfaceException |
 					MeshMSException |
 					IOException e) {

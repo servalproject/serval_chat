@@ -1,10 +1,15 @@
 package org.servalproject.servalchat.navigation;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 
 import org.servalproject.mid.Identity;
+import org.servalproject.mid.ObserverSet;
 import org.servalproject.mid.Peer;
+import org.servalproject.mid.Serval;
+import org.servalproject.servalchat.App;
 import org.servalproject.servalchat.R;
+import org.servalproject.servalchat.identity.InboxTitle;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -44,7 +49,29 @@ public class Navigation {
 		this(name, true, true, titleResource, layoutResource, null, containedIn);
 	}
 
-	public CharSequence getTitle(Context context, Identity identity, Peer peer) {
+	public boolean isHeader(){
+		return false;
+	}
+
+	static class DefaultTitle extends NavTitle{
+		protected final CharSequence title;
+
+		public DefaultTitle(CharSequence title) {
+			this.title = title;
+		}
+
+		@Override
+		public Drawable getIcon() {
+			return null;
+		}
+
+		@Override
+		public CharSequence getTitle() {
+			return title;
+		}
+	}
+
+	protected CharSequence getDefaultTitle(Context context, Identity identity, Peer peer){
 		if (titleResource == R.string.app_name){
 			if (peer != null)
 				return peer.displayName();
@@ -52,6 +79,10 @@ public class Navigation {
 				return identity.getName();
 		}
 		return context.getString(titleResource);
+	}
+
+	public NavTitle getTitle(Context context, Identity identity, Peer peer){
+		return new DefaultTitle(getDefaultTitle(context, identity, peer));
 	}
 
 	public static final Map<String, Navigation> NavMap = new HashMap<>();
@@ -69,12 +100,56 @@ public class Navigation {
 
 	// main screen
 	public static final Navigation Main = new Navigation("Main", R.string.app_name, R.layout.main_sidebar, null);
-	public static final Navigation IdentityDetails = new Navigation("Details", R.string.identity_details, R.layout.identity_details, Main);
+	public static final Navigation IdentityDetails = new Navigation("Details", R.string.identity_details, R.layout.identity_details, Main){
+		@Override
+		public boolean isHeader() {
+			return true;
+		}
+
+		@Override
+		public NavTitle getTitle(Context context, final Identity identity, Peer peer) {
+			return new DefaultTitle(getDefaultTitle(context, identity, peer)) {
+				@Override
+				public Drawable getIcon() {
+					return identity.getIcon();
+				}
+
+				@Override
+				public CharSequence getMenuLabel() {
+					return identity.getName();
+				}
+			};
+		}
+	};
+
+
 	public static final Navigation MyFeed = new Navigation("MyFeed", R.string.my_feed, R.layout.my_feed, Main);
-	public static final Navigation Inbox = new Navigation("Inbox", R.string.conversation_list, R.layout.conversation_list, Main);
+	public static final Navigation Inbox = new Navigation("Inbox", R.string.conversation_list, R.layout.conversation_list, Main){
+		@Override
+		public NavTitle getTitle(Context context, Identity identity, Peer peer) {
+			return new InboxTitle(identity.messaging, getDefaultTitle(context, identity, peer)){
+				@Override
+				public int unreadCount() {
+					return messaging.getUnreadCount();
+				}
+			};
+		}
+	};
+
 	public static final Navigation AllFeeds = new Navigation("AllFeeds", R.string.all_feeds, R.layout.feed_list, Main);
 	public static final Navigation Contacts = new Navigation("Contacts", R.string.contacts, R.layout.contacts, Main);
-	public static final Navigation Requests = new Navigation("Requests", R.string.requests, R.layout.conversation_list, Main);
+	public static final Navigation Requests = new Navigation("Requests", R.string.requests, R.layout.conversation_list, Main){
+		@Override
+		public NavTitle getTitle(Context context, Identity identity, Peer peer) {
+			return new InboxTitle(identity.messaging, getDefaultTitle(context, identity, peer)){
+				@Override
+				public int unreadCount() {
+					return messaging.getUnreadRequests();
+				}
+			};
+		}
+	};
+
 	public static final Navigation Blocked = new Navigation("Blocked", R.string.blocked, R.layout.block_list, Main);
 	public static final Navigation PeerList = new Navigation("PeerList", R.string.peer_list, R.layout.peer_list, Main);
 	public static final Navigation PeerMap = new Navigation("PeerMap", R.string.peer_map, R.layout.peer_map, Main);

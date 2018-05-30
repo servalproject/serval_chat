@@ -36,11 +36,11 @@ public class RootAppbar extends CoordinatorLayout implements IRootContainer, INa
 
 	@Override
 	public void deactivate(ViewState state, boolean configChange, boolean visible) {
-		ILifecycle lifecycle = state.getLifecycle();
-		if (visible && lifecycle != null)
-			lifecycle.onHidden();
-		if (lifecycle != null)
-			lifecycle.onDetach(configChange);
+		for(ILifecycle l : state.getLifecycle()) {
+			if (visible)
+				l.onHidden();
+			l.onDetach(configChange);
+		}
 		rootLayout.removeView(state.view);
 	}
 
@@ -50,13 +50,12 @@ public class RootAppbar extends CoordinatorLayout implements IRootContainer, INa
 		ret.view.setLayoutParams(new LinearLayout.LayoutParams(
 				ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 		rootLayout.addView(ret.view);
-		ILifecycle lifecycle = ret.getLifecycle();
-		if (visible && lifecycle != null)
-			lifecycle.onVisible();
+		for(ILifecycle l : ret.getLifecycle())
+			l.onVisible();
 
 		activity.setSupportActionBar(toolbar);
-		CharSequence title = n.getTitle(activity, identity, peer);
-		toolbar.setTitle(title);
+		NavTitle title = n.getTitle(activity, identity, peer);
+		toolbar.setTitle(title.getTitle());
 		if (Build.VERSION.SDK_INT>=21) {
 			activity.setTaskDescription(new ActivityManager.TaskDescription(title.toString(), identity == null ? null : identity.getBitmap()));
 		}
