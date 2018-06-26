@@ -1,6 +1,6 @@
 package org.servalproject.mid;
 
-import org.servalproject.servaldna.AbstractJsonList;
+import org.servalproject.servaldna.HttpJsonSerialiser;
 import org.servalproject.servaldna.ServalDInterfaceException;
 import org.servalproject.servaldna.meshmb.MeshMBActivityMessage;
 
@@ -44,12 +44,12 @@ public class ActivityList extends AbstractFutureList<MeshMBActivityMessage, IOEx
 	}
 
 	@Override
-	protected AbstractJsonList<MeshMBActivityMessage, IOException> openPast() throws ServalDInterfaceException, IOException, IOException {
+	protected HttpJsonSerialiser<MeshMBActivityMessage, IOException> openPast() throws ServalDInterfaceException, IOException, IOException {
 		return serval.getResultClient().meshmbActivity(identity.subscriber);
 	}
 
 	@Override
-	protected AbstractJsonList<MeshMBActivityMessage, IOException> openFuture() throws ServalDInterfaceException, IOException, IOException {
+	protected HttpJsonSerialiser<MeshMBActivityMessage, IOException> openFuture() throws ServalDInterfaceException, IOException, IOException {
 		return serval.getResultClient().meshmbActivity(identity.subscriber, last == null ? "" : last.token);
 	}
 }

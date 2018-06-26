@@ -1,6 +1,6 @@
 package org.servalproject.mid;
 
-import org.servalproject.servaldna.AbstractJsonList;
+import org.servalproject.servaldna.HttpJsonSerialiser;
 import org.servalproject.servaldna.ServalDInterfaceException;
 import org.servalproject.servaldna.Subscriber;
 import org.servalproject.servaldna.meshmb.MeshMBCommon;
@@ -29,7 +29,7 @@ public class FeedList extends AbstractFutureList<RhizomeListBundle, IOException>
 	}
 
 	@Override
-	protected AbstractJsonList<RhizomeListBundle, IOException> openPast() throws ServalDInterfaceException, IOException {
+	protected HttpJsonSerialiser<RhizomeListBundle, IOException> openPast() throws ServalDInterfaceException, IOException {
 		RhizomeBundleList list = new RhizomeBundleList(serval.getResultClient());
 		list.setServiceFilter(MeshMBCommon.SERVICE);
 		if (search!=null)
@@ -39,7 +39,7 @@ public class FeedList extends AbstractFutureList<RhizomeListBundle, IOException>
 	}
 
 	@Override
-	protected AbstractJsonList<RhizomeListBundle, IOException> openFuture() throws ServalDInterfaceException, IOException {
+	protected HttpJsonSerialiser<RhizomeListBundle, IOException> openFuture() throws ServalDInterfaceException, IOException {
 		RhizomeBundleList list = new RhizomeBundleList(serval.getResultClient(), last == null? "" : last.token);
 		list.setServiceFilter(MeshMBCommon.SERVICE);
 		if (search!=null && !"".equals(search))

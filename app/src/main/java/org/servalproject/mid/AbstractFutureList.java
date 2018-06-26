@@ -1,6 +1,7 @@
 package org.servalproject.mid;
 
-import org.servalproject.servaldna.AbstractJsonList;
+import org.servalproject.json.JsonParser;
+import org.servalproject.servaldna.HttpJsonSerialiser;
 import org.servalproject.servaldna.ServalDInterfaceException;
 
 import java.io.IOException;
@@ -12,7 +13,7 @@ import java.io.IOException;
 public abstract class AbstractFutureList<T, E extends Exception>
 		extends AbstractGrowingList<T, E>{
 	private final ListObserverSet<T> observeFuture;
-	private AbstractJsonList<T, E> futureList;
+	private HttpJsonSerialiser<T, E> futureList;
 	private boolean polling = false;
 	protected T last;
 
@@ -41,7 +42,7 @@ public abstract class AbstractFutureList<T, E extends Exception>
 		}
 	}
 
-	protected abstract AbstractJsonList<T, E> openFuture() throws ServalDInterfaceException, E, IOException;
+	protected abstract HttpJsonSerialiser<T, E> openFuture() throws ServalDInterfaceException, E, IOException, JsonParser.JsonParseException;
 
 	@Override
 	protected void addingPastItem(T item) {
@@ -69,7 +70,7 @@ public abstract class AbstractFutureList<T, E extends Exception>
 		public void run() {
 			while (polling) {
 				try {
-					AbstractJsonList<T, E> list = futureList = openFuture();
+					HttpJsonSerialiser<T, E> list = futureList = openFuture();
 					if (list != null) {
 						T item;
 						while (polling && (item = list.next()) != null) {
@@ -94,7 +95,7 @@ public abstract class AbstractFutureList<T, E extends Exception>
 	};
 
 	private void closeFuture(){
-		AbstractJsonList<T, E> list = futureList;
+		HttpJsonSerialiser<T, E> list = futureList;
 		if (list != null) {
 			try {
 				list.close();

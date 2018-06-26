@@ -72,7 +72,6 @@ public class SampleData {
 			}
 
 		}catch (ServalDInterfaceException |
-				MeshMSException |
 				IOException e){
 			throw new IllegalStateException(e);
 		}

@@ -1,6 +1,6 @@
 package org.servalproject.mid;
 
-import org.servalproject.servaldna.AbstractJsonList;
+import org.servalproject.servaldna.HttpJsonSerialiser;
 import org.servalproject.servaldna.ServalDInterfaceException;
 import org.servalproject.servaldna.Subscriber;
 import org.servalproject.servaldna.meshms.MeshMSConversation;
@@ -12,7 +12,7 @@ import java.io.IOException;
 /**
  * Created by jeremy on 11/07/16.
  */
-public class MessageList extends AbstractFutureList<MeshMSMessage, MeshMSException> {
+public class MessageList extends AbstractFutureList<MeshMSMessage, ServalDInterfaceException> {
 	private final Messaging messaging;
 	public final Subscriber self;
 	public final Subscriber peer;
@@ -32,12 +32,12 @@ public class MessageList extends AbstractFutureList<MeshMSMessage, MeshMSExcepti
 	}
 
 	@Override
-	protected AbstractJsonList<MeshMSMessage, MeshMSException> openPast() throws ServalDInterfaceException, MeshMSException, IOException {
+	protected HttpJsonSerialiser<MeshMSMessage, ServalDInterfaceException> openPast() throws ServalDInterfaceException, IOException {
 		return serval.getResultClient().meshmsListMessages(self.sid, peer.sid);
 	}
 
 	@Override
-	protected AbstractJsonList<MeshMSMessage, MeshMSException> openFuture() throws ServalDInterfaceException, MeshMSException, IOException {
+	protected HttpJsonSerialiser<MeshMSMessage, ServalDInterfaceException> openFuture() throws ServalDInterfaceException, IOException {
 		return serval.getResultClient().meshmsListMessagesSince(self.sid, peer.sid, last==null?"":last.token);
 	}
 

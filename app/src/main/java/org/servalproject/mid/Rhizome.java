@@ -7,6 +7,7 @@ import android.content.IntentFilter;
 import android.os.Environment;
 import android.util.Log;
 
+import org.servalproject.json.JsonParser;
 import org.servalproject.servaldna.ServalDFailureException;
 import org.servalproject.servaldna.ServalDInterfaceException;
 import org.servalproject.servaldna.ServalDUnexpectedHttpStatus;
@@ -106,6 +107,7 @@ public class Rhizome extends BroadcastReceiver {
 					throw new IllegalStateException(e);
 			} catch (InterruptedException |
 					ServalDInterfaceException |
+					JsonParser.JsonParseException |
 					IOException e) {
 				throw new IllegalStateException(e);
 			} finally {

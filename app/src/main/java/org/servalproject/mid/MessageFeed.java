@@ -1,8 +1,8 @@
 package org.servalproject.mid;
 
-import org.servalproject.servaldna.AbstractJsonList;
+import org.servalproject.json.JsonParser;
+import org.servalproject.servaldna.HttpJsonSerialiser;
 import org.servalproject.servaldna.ServalDInterfaceException;
-import org.servalproject.servaldna.SigningKey;
 import org.servalproject.servaldna.Subscriber;
 import org.servalproject.servaldna.meshmb.MeshMBCommon;
 import org.servalproject.servaldna.meshmb.MessagePlyList;
@@ -56,7 +56,7 @@ public class MessageFeed extends AbstractFutureList<PlyMessage, IOException> {
 		super.start();
 	}
 
-	private void findKey() throws IOException, ServalDInterfaceException {
+	private void findKey() throws IOException, ServalDInterfaceException, JsonParser.JsonParseException {
 		if (id!=null)
 			return;
 		if (peer == null)
@@ -79,13 +79,13 @@ public class MessageFeed extends AbstractFutureList<PlyMessage, IOException> {
 				id = new Subscriber(peerId.sid, bundle.manifest.id, true);
 				peer.updateSubscriber(id);
 			}
-		}finally {
+		} finally {
 			list.close();
 		}
 	}
 
 	@Override
-	protected AbstractJsonList<PlyMessage, IOException> openPast() throws ServalDInterfaceException, IOException {
+	protected HttpJsonSerialiser<PlyMessage, IOException> openPast() throws ServalDInterfaceException, IOException, JsonParser.JsonParseException {
 		findKey();
 		if (id == null)
 			return null;
@@ -97,7 +97,7 @@ public class MessageFeed extends AbstractFutureList<PlyMessage, IOException> {
 	}
 
 	@Override
-	protected AbstractJsonList<PlyMessage, IOException> openFuture() throws ServalDInterfaceException, IOException {
+	protected HttpJsonSerialiser<PlyMessage, IOException> openFuture() throws ServalDInterfaceException, IOException, JsonParser.JsonParseException {
 		findKey();
 		if (id == null)
 			return null;

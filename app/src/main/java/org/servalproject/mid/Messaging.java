@@ -2,6 +2,7 @@ package org.servalproject.mid;
 
 import android.util.Log;
 
+import org.servalproject.json.JsonParser;
 import org.servalproject.mid.networking.AbstractListObserver;
 import org.servalproject.servaldna.ServalDInterfaceException;
 import org.servalproject.servaldna.SigningKey;
@@ -108,7 +109,7 @@ public class Messaging {
 		serval.runOnThreadPool(refreshing);
 	}
 
-	private void loadSubscriptions() throws IOException, ServalDInterfaceException {
+	private void loadSubscriptions() throws IOException, ServalDInterfaceException, JsonParser.JsonParseException {
 		MeshMBSubscriptionList subscriptions = serval.getResultClient().meshmbSubscriptions(identity.subscriber);
 		MeshMBSubscription subscription;
 		while((subscription = subscriptions.next())!=null){
@@ -221,7 +222,7 @@ public class Messaging {
 
 				try {
 					MeshMSConversation conversation;
-					while ((conversation = list.nextConversation()) != null) {
+					while ((conversation = list.next()) != null) {
 						if (cancel)
 							return;
 						if (!conversation.isRead) {
@@ -258,7 +259,7 @@ public class Messaging {
 				observers.onUpdate();
 				observeConversations.onReset();
 			} catch (ServalDInterfaceException |
-					MeshMSException |
+					JsonParser.JsonParseException |
 					IOException e) {
 				throw new IllegalStateException(e);
 			} finally {

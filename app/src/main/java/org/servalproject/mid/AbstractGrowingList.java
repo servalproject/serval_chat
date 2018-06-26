@@ -1,6 +1,7 @@
 package org.servalproject.mid;
 
-import org.servalproject.servaldna.AbstractJsonList;
+import org.servalproject.json.JsonParser;
+import org.servalproject.servaldna.HttpJsonSerialiser;
 import org.servalproject.servaldna.ServalDInterfaceException;
 
 import java.io.IOException;
@@ -13,25 +14,27 @@ public abstract class AbstractGrowingList<T, E extends Exception>
 	protected final Serval serval;
 	protected boolean hasMore = true;
 	private boolean closed = false;
-	private AbstractJsonList<T, E> pastList;
+	private HttpJsonSerialiser<T, E> pastList;
 
 	protected AbstractGrowingList(Serval serval) {
 		this.serval = serval;
 	}
 
-	protected abstract AbstractJsonList<T, E> openPast() throws ServalDInterfaceException, E, IOException;
+	protected abstract HttpJsonSerialiser<T, E> openPast() throws ServalDInterfaceException, E, IOException, JsonParser.JsonParseException;
 
 	protected void addingPastItem(T item) {
 	}
 
 	@Override
-	public T next() throws ServalDInterfaceException, E, IOException {
+	public T next() throws ServalDInterfaceException, E, IOException, JsonParser.JsonParseException {
 		if (!hasMore)
 			return null;
 		if (pastList == null)
 			pastList = openPast();
 
-		T item = (pastList == null) ? null : pastList.next();
+		T item = null;
+		if (pastList != null)
+			item = pastList.next();
 		if (item == null) {
 			hasMore = false;
 			if (pastList != null)

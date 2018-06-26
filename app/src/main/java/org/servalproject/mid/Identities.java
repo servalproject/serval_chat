@@ -1,5 +1,6 @@
 package org.servalproject.mid;
 
+import org.servalproject.json.JsonParser;
 import org.servalproject.servaldna.ServalDInterfaceException;
 import org.servalproject.servaldna.SigningKey;
 import org.servalproject.servaldna.Subscriber;
@@ -82,12 +83,13 @@ public class Identities {
 				try {
 					KeyringIdentityList list = serval.getResultClient().keyringListIdentities(pin);
 					KeyringIdentity id = null;
-					while ((id = list.nextIdentity()) != null)
+					while ((id = list.next()) != null)
 						addId(id);
 					if (pin == null)
 						loaded = true;
 					listObservers.onReset();
 				} catch (ServalDInterfaceException |
+						JsonParser.JsonParseException |
 						IOException e) {
 					throw new IllegalStateException(e);
 				}
