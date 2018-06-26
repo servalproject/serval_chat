@@ -46,8 +46,10 @@ public class WifiAware {
 	private int MTU;
 
 	public static WifiAware getWifiAware(Serval serval, ChannelSelector selector, int loopbackMdpPort) {
-		if (!serval.context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WIFI_AWARE))
+		if (!serval.context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WIFI_AWARE)) {
+			Log.v(TAG, "Wifi aware feature not found");
 			return null;
+		}
 
 		try {
 			return new WifiAware(serval, selector, loopbackMdpPort);
