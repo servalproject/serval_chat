@@ -1,6 +1,7 @@
 package org.servalproject.mid.networking;
 
 import android.net.wifi.WifiConfiguration;
+import android.os.Build;
 import android.util.Log;
 
 import org.servalproject.mid.ListObserverSet;
@@ -23,6 +24,7 @@ public class Networks implements Observer<NetworkInfo> {
 	private final Serval serval;
 	public final WifiClient wifiClient;
 	public final Hotspot wifiHotspot;
+	public WifiAware wifiAware;
 	public final ListObserverSet<NetworkInfo> observers;
 	final FlightModeObserver flightModeObserver;
 
@@ -57,6 +59,9 @@ public class Networks implements Observer<NetworkInfo> {
 			blueTooth.networkInfo.observers.addBackground(this);
 		}
 		networks.add(wifiClient);
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+			this.wifiAware = WifiAware.getWifiAware(serval, serval.selector, serval.server.getMdpPort());
+		}
 		if (wifiHotspot!=null)
 			networks.add(wifiHotspot);
 		flightModeObserver.register();

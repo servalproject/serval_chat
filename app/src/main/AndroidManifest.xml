@@ -11,6 +11,8 @@
     <!-- Built in wifi control -->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <!-- For Wifi-Aware -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <!-- Bluetooth transport -->
     <uses-permission android:name="android.permission.BLUETOOTH" />
