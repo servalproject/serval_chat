@@ -81,7 +81,8 @@ public abstract class AbstractFutureList<T, E extends Exception>
 					}
 					if (futureList == list)
 						futureList = null;
-				} catch (IOException e) {
+				} catch (IOException |
+						JsonParser.JsonParseException e) {
 					// ignore if we caused this deliberately in another thread.
 					if (polling)
 						throw new IllegalStateException(e);
