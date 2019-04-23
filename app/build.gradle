@@ -84,7 +84,7 @@ android {
 
         externalNativeBuild {
             ndkBuild{
-                abiFilters = ["armeabi-v7a", "x86"]
+                abiFilters = ["armeabi-v7a", "arm64-v8a", "x86", "x86_64"]
                 arguments += "-j${Runtime.runtime.availableProcessors()}".toString()
             }
         }
@@ -139,7 +139,9 @@ android {
 
     [
         "armv7-a":"armv7-a",
-        "x86":"i686"
+        "x86":"i686",
+        "armv8-a":"armv8-a",
+        "x86_64":"westmere"
     ].each { abi,target ->
         task "libsodium${abi}" (type: Exec) {
             // this should only run when the libsodium submodule changes
