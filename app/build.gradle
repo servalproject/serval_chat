@@ -52,7 +52,7 @@ android {
 
     ext{
         appName = "ServalChat"
-        commitCount = "git rev-list --count HEAD".execute().text.toInteger();
+        commitCount = "git rev-list --count HEAD".execute().text.toInteger() + 3000;
         gitDescribe = "git describe --always --dirty --tags".execute().text.trim();
         commitSha = "git rev-parse HEAD".execute().text.trim();
         libSodiumStatus = "git describe --always --dirty --tags".execute(null, file('src/main/jni/libsodium')).text.trim();
@@ -73,7 +73,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "org.servalproject.servalchat"
+        applicationId "org.servalproject"
         minSdkVersion 14
         targetSdkVersion 27
         versionCode commitCount
