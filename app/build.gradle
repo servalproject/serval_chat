@@ -2,6 +2,7 @@ import groovy.swing.SwingBuilder;
 
 apply plugin: 'com.android.application'
 
+System.setProperty("java.awt.headless", "false");
 // based on https://www.timroes.de/2014/01/19/using-password-prompts-with-gradle-build-files/
 def readPassword(String fmt) {
     def ret = ''

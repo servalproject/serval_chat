@@ -35,9 +35,21 @@ If you open the project in Android Studio these locations will be writen to loca
     ndk.dir={PATH}/Sdk/ndk-bundle
     sdk.dir={PATH}/Sdk
 
+Libsodium may not build itself for the required architectures automatically due to no changes in the repo, fix it by running the 4 following scripts from /app/src/main/jni/libsodium/;
+
+    $ /app/src/main/jni/libsodium/dist-build/android-armv7-a.sh
+    $ /app/src/main/jni/libsodium/dist-build/android-armv8-a.sh
+    $ /app/src/main/jni/libsodium/dist-build/android-x86.sh
+    $ /app/src/main/jni/libsodium/dist-build/android-x86_64.sh
+
 Building a debug APK from the command line should then be as simple as the following;
 
     $ ./gradlew assembleDebug
+
+Building a release APK (signed) from the command line (A popup will appear during the build to enter the keystore password and the key password);
+
+    $ ./gradlew assembleRelease -Prelease.key.store="PATH TO KEYSTORE FILE" -Prelease.key.alias="KEY ALIAS"
+
 
 Development is primarily performed on a linux OS. While it should be possible to compile the native code components on a windows system, 
 no attempt has yet been made to achieve this, and limited support will be provided.
