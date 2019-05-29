@@ -36,7 +36,7 @@ public class Serval {
 		this.apkFile = new File(context.getPackageCodePath());
 		settings = PreferenceManager.getDefaultSharedPreferences(context);
 		File appFolder = context.getFilesDir().getParentFile();
-		instancePath = new File(appFolder, "instance");
+		instancePath = new File(appFolder, "var/serval-node");
 		uiHandler = new CallbackHandler(context.getMainLooper());
 
 		// default interface types, collected from various old phones
