@@ -61,20 +61,24 @@ When trying to debug a release build of the app, if the phone isn't rooted we ca
 Here is a procedure to extract the data from the phone, to look at the state of the internal storage located at /data/data/org.servalproject/ or data/user/0/org.servalproject/ depending on your phone.
 
 First connect the phone and make sure it is available via adb;
+
     $ adb devices
     $ List of devices attached
     $ XXXXXXXXXXXXXX	device
 
 Then we use the adb backup function to extract a snapshot of the data, in our current working directory;
+
     $ adb backup -noapk org.servalproject
 
 A prompt to confirm the backup is displayed on the phone, don't put a password and click Save.
 
 Then we need to convert this compressed file to a tar archive and extract it in the current directory, using this method;
+
     $ dd if=backup.ab bs=24 skip=1|openssl zlib -d > archive.tar
     $ tar xvf archive.tar
 
-Finally we can cd into the directory (/apps/org/servalproject/) that will match the one we had (or have) on the phone when the backup was made.
+Finally we can cd into the directory (/apps/org/servalproject/) that will match the one we had (or have) on the phone when the backup was made;
+
     $ cd ./apps/org.servalproject/
 
 
