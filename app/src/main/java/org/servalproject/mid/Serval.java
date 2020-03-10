@@ -135,8 +135,6 @@ public class Serval {
 				config.set("log.android.level", "DEBUG");
 			} else {
 				config.set("log.android.level", "WARN");
-				config.set("log.android.dump_config", "0");
-				config.set("log.file.dump_config", "0");
 			}
 
 			config.sync();
