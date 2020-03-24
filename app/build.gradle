@@ -104,9 +104,9 @@ android {
                 storeFile = null;
             // leave blank to force prompting the user
             // but not null so that android thinks it is already configured
-            storePassword = ""
+            storePassword = project.findProperty("release.store.password") ?: ""
             keyAlias = project.findProperty("release.key.alias")
-            keyPassword = ""
+            keyPassword = project.findProperty("release.key.password") ?: ""
             v2SigningEnabled = false
         }
     }
@@ -182,7 +182,7 @@ def keyring = project.findProperty("serval.keyring")
 def keyringFile = keyring ? file(keyring) : null
 if (keyringFile && !keyringFile.exists())
     keyringFile = null;
-def entryPin = null;
+def entryPin = project.findProperty("serval.entryPin")
 
 android.applicationVariants.all { variant ->
 
@@ -223,7 +223,7 @@ android.applicationVariants.all { variant ->
                         }
                     }
                     // run prompt tasks first
-                    preBuild.mustRunAfter "prompt${configName}Pwd"
+                    tasks["preBuild"].mustRunAfter "prompt${configName}Pwd"
                 }
                 tasks["validateSigning${variantName}"].dependsOn "prompt${configName}Pwd"
             }
@@ -237,7 +237,7 @@ android.applicationVariants.all { variant ->
                     }
                 }
                 // run prompt tasks first
-                preBuild.mustRunAfter "prompt${author}Pin"
+                tasks["preBuild"].mustRunAfter "prompt${author}Pin"
             }
             tasks["validateSigning${variantName}"].dependsOn "prompt${author}Pin"
         }
@@ -281,8 +281,7 @@ android.applicationVariants.all { variant ->
                     }
                 }
                 tasks["$taskName"].dependsOn "package$variantName"
-
-                output.assemble.dependsOn "$taskName"
+                tasks["assemble$variantName"].dependsOn "$taskName"
             }
         }
     }
