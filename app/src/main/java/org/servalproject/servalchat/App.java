@@ -106,7 +106,7 @@ public class App extends Application {
 		SelfUpdater.init(serval, this);
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-			CHANNEL_ID = NotificationChannel.DEFAULT_CHANNEL_ID;
+			CHANNEL_ID = "notifications";
 			NotificationManager nm = getSystemService(NotificationManager.class);
 			nm.createNotificationChannel(
 					new NotificationChannel(
