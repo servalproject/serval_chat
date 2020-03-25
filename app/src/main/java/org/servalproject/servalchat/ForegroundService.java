@@ -29,7 +29,7 @@ public class ForegroundService extends Service {
 			PendingIntent pending = PendingIntent.getActivity(this, 0, navIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
 			NotificationCompat.Builder builder =
-					new NotificationCompat.Builder(this)
+					new NotificationCompat.Builder(this, App.CHANNEL_ID)
 							.setSmallIcon(R.mipmap.serval_head)
 							.setContentTitle(getString(R.string.foreground_title))
 							.setContentText(getString(R.string.foreground_text))

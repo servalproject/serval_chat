@@ -2,11 +2,13 @@ package org.servalproject.servalchat;
 
 import android.annotation.SuppressLint;
 import android.app.Application;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.Settings;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
@@ -65,7 +67,7 @@ public class App extends Application {
 			PendingIntent pending = PendingIntent.getActivity(App.this, 0, getErrorIntent(e), PendingIntent.FLAG_ONE_SHOT);
 
 			NotificationCompat.Builder builder =
-					new NotificationCompat.Builder(App.this)
+					new NotificationCompat.Builder(App.this, App.CHANNEL_ID)
 							.setAutoCancel(true)
 							.setSmallIcon(R.mipmap.serval_head)
 							.setContentTitle(App.this.getString(R.string.background_error))
@@ -76,6 +78,8 @@ public class App extends Application {
 			defaultHandler.uncaughtException(t, e);
 		}
 	};
+
+	public static String CHANNEL_ID = null;
 
 	@Override
 	public void onCreate() {
@@ -100,5 +104,15 @@ public class App extends Application {
 		if (testing && "alpha".equals(BuildConfig.ReleaseType))
 			SampleData.init(serval);
 		SelfUpdater.init(serval, this);
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+			CHANNEL_ID = NotificationChannel.DEFAULT_CHANNEL_ID;
+			NotificationManager nm = getSystemService(NotificationManager.class);
+			nm.createNotificationChannel(
+					new NotificationChannel(
+						CHANNEL_ID,
+						getString(R.string.app_name),
+						NotificationManager.IMPORTANCE_DEFAULT));
+		}
 	}
 }

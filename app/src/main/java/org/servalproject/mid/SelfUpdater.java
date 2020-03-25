@@ -11,6 +11,7 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import org.servalproject.mid.networking.AbstractListObserver;
+import org.servalproject.servalchat.App;
 import org.servalproject.servalchat.BuildConfig;
 import org.servalproject.servalchat.R;
 import org.servalproject.servaldna.AbstractId;
@@ -180,7 +181,7 @@ public class SelfUpdater {
 				PendingIntent.FLAG_ONE_SHOT);
 
 		NotificationCompat.Builder builder =
-				new NotificationCompat.Builder(context)
+				new NotificationCompat.Builder(context, App.CHANNEL_ID)
 						.setAutoCancel(true)
 						.setSmallIcon(R.mipmap.serval_head)
 						.setContentTitle(context.getString(R.string.new_version_title))

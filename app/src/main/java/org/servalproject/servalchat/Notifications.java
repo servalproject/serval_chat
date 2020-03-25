@@ -112,7 +112,7 @@ public class Notifications {
 			PendingIntent pending = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
 			NotificationCompat.Builder builder =
-					new NotificationCompat.Builder(context)
+					new NotificationCompat.Builder(context, App.CHANNEL_ID)
 							.setAutoCancel(true)
 							.setSmallIcon(R.mipmap.serval_head)
 							.setDefaults(Notification.DEFAULT_ALL)
