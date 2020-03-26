@@ -118,18 +118,24 @@ public class WifiAware {
 		}
 
 		@Override
-		public void onServiceDiscovered(PeerHandle peerHandle, byte[] serviceSpecificInfo, List<byte[]> matchFilter) {
+		public void onServiceDiscovered(final PeerHandle peerHandle, final byte[] serviceSpecificInfo, List<byte[]> matchFilter) {
 			super.onServiceDiscovered(peerHandle, serviceSpecificInfo, matchFilter);
 			Log.v(TAG, "Peer service discovered!");
-			try {
-				if (serviceSpecificInfo == null || serviceSpecificInfo.length ==0) {
-					externalInterface.discovered(peerAddr(peerHandle));
-				}else {
-					externalInterface.receivedPacket(peerAddr(peerHandle), serviceSpecificInfo);
+			serval.runOnThreadPool(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						byte[] peer = peerAddr(peerHandle);
+						if (serviceSpecificInfo == null || serviceSpecificInfo.length ==0) {
+							externalInterface.discovered(peer);
+						}else {
+							externalInterface.receivedPacket(peer, serviceSpecificInfo);
+						}
+					} catch (IOException e) {
+						throw new IllegalStateException(e);
+					}
 				}
-			} catch (IOException e) {
-				throw new IllegalStateException(e);
-			}
+			});
 		}
 
 		@Override
@@ -212,6 +218,41 @@ public class WifiAware {
 		}
 	}
 
+	private Runnable down = new Runnable() {
+		@Override
+		public void run() {
+			try {
+				externalInterface.down();
+			} catch (IOException e) {
+				throw new IllegalStateException(e);
+			}
+		}
+	};
+
+	private Runnable up = new Runnable() {
+		@Override
+		public void run() {
+			try {
+				externalInterface.up(
+						"socket_type=EXTERNAL\n" +
+								"match=wifiaware\n" +
+								"prefer_unicast=off\n" +
+								"idle_tick_ms=120000\n"+
+								"broadcast.mtu="+MTU+"\n" +
+								"broadcast.tick_ms=10000\n" +
+								"broadcast.packet_interval=500000\n" +
+								"broadcast.reachable_timeout_ms=30000\n" +
+								"unicast.mtu="+MTU+"\n" +
+								"unicast.tick_ms=10000\n" +
+								"unicast.packet_interval=500000\n" +
+								"unicast.reachable_timeout_ms=10000\n"
+				);
+			} catch (IOException e) {
+				throw new IllegalStateException(e);
+			}
+		}
+	};
+
 	private void setPublishSession(PublishDiscoverySession s){
 		if (publishSession == s)
 			return;
@@ -224,28 +265,7 @@ public class WifiAware {
 		if (s!=null)
 			Log.v(TAG, "Publish session created");
 		if (changed){
-			try {
-				if (s==null){
-					externalInterface.down();
-				}else{
-					externalInterface.up(
-							"socket_type=EXTERNAL\n" +
-							"match=wifiaware\n" +
-							"prefer_unicast=off\n" +
-							"idle_tick_ms=120000\n"+
-							"broadcast.mtu="+MTU+"\n" +
-							"broadcast.tick_ms=10000\n" +
-							"broadcast.packet_interval=500000\n" +
-							"broadcast.reachable_timeout_ms=30000\n" +
-							"unicast.mtu="+MTU+"\n" +
-							"unicast.tick_ms=10000\n" +
-							"unicast.packet_interval=500000\n" +
-							"unicast.reachable_timeout_ms=10000\n"
-					);
-				}
-			} catch (IOException e) {
-				throw new IllegalStateException(e);
-			}
+			serval.runOnThreadPool((s == null) ? down : up);
 		}
 	}
 
