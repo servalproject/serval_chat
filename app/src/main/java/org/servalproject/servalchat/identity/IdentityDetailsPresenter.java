@@ -96,7 +96,7 @@ public class IdentityDetailsPresenter extends Presenter<IdentityDetails> {
 					} else {
 						view.activity.showError(t);
 					}
-				} else {
+				} else if (view != null && view.activity != null){
 					if (identity == null)
 						view.activity.go(Navigation.MyFeed, result, null, null, true);
 					else
