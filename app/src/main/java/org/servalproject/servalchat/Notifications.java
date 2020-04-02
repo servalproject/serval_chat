@@ -5,6 +5,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 
@@ -60,7 +61,10 @@ public class Notifications {
 					return;
 				Intent i = new Intent(context, ForegroundService.class);
 				i.putExtra("foreground", shouldRun);
-				context.startService(i);
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+					context.startForegroundService(i);
+				else
+					context.startService(i);
 				serviceStarted = shouldRun;
 			}
 		});
